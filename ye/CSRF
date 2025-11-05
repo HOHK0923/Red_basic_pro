@@ -11,5 +11,3 @@ cat << 'EOF' > csrf.html
 </body>
 </html>
 EOF
-
-
