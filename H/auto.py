@@ -1959,7 +1959,7 @@ $ {cmd_info['command']}
 |------|-------|----------|---------|
 """
         for event in self.attack_timeline[:20]:  # First 20 events
-            md_content += f"| {event['timestamp']} | {event['event_type']} | {event['severity']} | {event['description'][:50]}... |\n"
+            md_content += f"| {event['timestamp']} | {event['type']} | {event['severity']} | {event['description'][:50]}... |\n"
 
         # Recommendations
         md_content += f"""
