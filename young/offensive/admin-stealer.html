@@ -88,16 +88,26 @@
                     type: 'BLIND_XSS',
                     data: {
                         cookies: 'admin_session=abc123def456; role=administrator; csrf_token=xyz789',
+<<<<<<< HEAD
                         url: 'http://52.78.221.104/admin/dashboard.php',
+=======
+                        url: 'http://15.164.95.252/admin/dashboard.php',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                         title: 'Admin Dashboard - Vulnerable SNS',
                         localStorage: {
                             'admin_token': 'secret_admin_token_123',
                             'last_login': '2024-01-15T10:30:00Z'
                         },
                         adminLinks: [
+<<<<<<< HEAD
                             'http://52.78.221.104/admin/users.php',
                             'http://52.78.221.104/admin/settings.php',
                             'http://52.78.221.104/admin/logs.php'
+=======
+                            'http://15.164.95.252/admin/users.php',
+                            'http://15.164.95.252/admin/settings.php',
+                            'http://15.164.95.252/admin/logs.php'
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                         ]
                     }
                 };
