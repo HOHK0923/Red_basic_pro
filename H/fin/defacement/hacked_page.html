@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HACKED BY ANONYMOUS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000000;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .skull {
+            font-size: clamp(20px, 10vw, 60px);
+            line-height: 1.2;
+            white-space: pre;
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000;
+            animation: pulse 2s infinite, glitch 5s infinite;
+            margin-bottom: 30px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 0 0 10px #ff0000; }
+            25% { text-shadow: -2px 0 10px #ff0000, 2px 0 10px #00ff00; }
+            50% { text-shadow: 2px 0 10px #ff0000, -2px 0 10px #0000ff; }
+            75% { text-shadow: 0 2px 10px #ff0000, 0 -2px 10px #00ff00; }
+            100% { text-shadow: 0 0 10px #ff0000; }
+        }
+
+        h1 {
+            font-size: clamp(30px, 8vw, 80px);
+            color: #ff0000;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+            animation: blink 1s infinite, slideIn 1s ease-out;
+            margin-bottom: 20px;
+        }
+
+        @keyframes blink {
+            0%, 49%, 100% { opacity: 1; }
+            50%, 99% { opacity: 0.5; }
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .message {
+            font-size: clamp(14px, 3vw, 24px);
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            margin: 20px 0;
+            animation: fadeIn 2s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .warning {
+            font-size: clamp(12px, 2.5vw, 20px);
+            color: #ffff00;
+            text-shadow: 0 0 10px #ffff00;
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #ffff00;
+            display: inline-block;
+            animation: shake 3s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .signature {
+            font-size: clamp(16px, 4vw, 32px);
+            color: #ff00ff;
+            text-shadow: 0 0 15px #ff00ff;
+            margin-top: 40px;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 15px #ff00ff; }
+            50% { text-shadow: 0 0 30px #ff00ff, 0 0 50px #ff00ff; }
+        }
+
+        .timestamp {
+            font-size: clamp(10px, 2vw, 16px);
+            color: #00ffff;
+            margin-top: 20px;
+        }
+
+        .scan-line {
+            position: fixed;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(transparent, #00ff00, transparent);
+            animation: scan 4s linear infinite;
+            z-index: 5;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            100% { top: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix" id="matrix"></canvas>
+    <div class="scan-line"></div>
+
+    <div class="container">
+        <pre class="skull">
+    ░░░░░░░░░▄▄▄▄▄▄▄▄▄▄▄░░░░░░░░░
+    ░░░░░░▄▄█▀▀░░░░░░░▀▀█▄▄░░░░░
+    ░░░░▄█▀░░░░░░░░░░░░░░░▀█▄░░░
+    ░░▄█▀░░░░░░░░░░░░░░░░░░░▀█▄░
+    ░█▀░░░░░░░░░░░░░░░░░░░░░░░▀█
+    █▀░░░░░░░░░░░░░░░░░░░░░░░░░▀█
+    █░░░░░░▄▄▄░░░░░░░░░░▄▄▄░░░░░█
+    █░░░░░█░░░█░░░░░░░░█░░░█░░░░█
+    █░░░░░░▀▀▀░░░░█░░░░░▀▀▀░░░░░█
+    █░░░░░░░░░░░░███░░░░░░░░░░░░█
+    █░░░░░░░░░░▄█░█░█▄░░░░░░░░░░█
+    █░░░░░░░░░█░░░░░░░█░░░░░░░░░█
+    █░░░░░░░░░░▀▄▄▄▄▄▀░░░░░░░░░░█
+    ░█░░░░░░░░░░░░░░░░░░░░░░░░░█░
+    ░░█▄░░░░░░░░░░░░░░░░░░░░░▄█░░
+    ░░░░▀█▄░░░░░░░░░░░░░░░▄█▀░░░░
+    ░░░░░░░▀▀█▄▄▄▄▄▄▄▄▄▄█▀▀░░░░░░
+        </pre>
+
+        <h1>⚠️ SYSTEM COMPROMISED ⚠️</h1>
+
+        <div class="message">
+            YOUR SECURITY HAS BEEN BREACHED<br>
+            ALL YOUR DATA BELONGS TO US<br>
+            WE ARE WATCHING YOU
+        </div>
+
+        <div class="warning">
+            ⚡ WARNING: UNAUTHORIZED ACCESS DETECTED ⚡<br>
+            VULNERABILITY EXPLOITED: CVE-2025-XXXXXX<br>
+            PRIVILEGE ESCALATION: SUCCESSFUL<br>
+            ROOT ACCESS: GRANTED<br>
+            BACKDOOR: INSTALLED
+        </div>
+
+        <div class="message">
+            This is a demonstration of a security breach.<br>
+            Your system vulnerabilities include:<br>
+            • Weak Authentication<br>
+            • SQL Injection<br>
+            • Cross-Site Scripting (XSS)<br>
+            • Local File Inclusion (LFI)<br>
+            • Privilege Escalation via SUID<br>
+            <br>
+            FIX YOUR SECURITY NOW!
+        </div>
+
+        <div class="signature">
+            [ HACKED BY: Red Team Security Testing ]<br>
+            [ Grey Box Penetration Test - 2025 ]
+        </div>
+
+        <div class="timestamp">
+            Compromised on: <span id="timestamp"></span><br>
+            Server: 52.78.221.104<br>
+            Method: Web Shell → SUID Exploitation → Root Access
+        </div>
+    </div>
+
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>?/";
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.random() * canvas.height;
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff00';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrix[Math.floor(Math.random() * matrix.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 33);
+
+        // Timestamp
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>

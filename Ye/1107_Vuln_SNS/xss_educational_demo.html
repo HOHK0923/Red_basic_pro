@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <title>🎓 XSS Educational Demo</title>
+        <style>
+            body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+            .demo-section { background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; }
+            .payload { background: #e9ecef; padding: 10px; margin: 10px 0; border-left: 4px solid #007cba; font-family: monospace; }
+            .btn { background: #007cba; color: white; padding: 10px 20px; border: none; cursor: pointer; margin: 5px; border-radius: 4px; }
+            .btn:hover { background: #0056b3; }
+            .success { color: #28a745; font-weight: bold; }
+            .danger { color: #dc3545; font-weight: bold; }
+            .info { color: #17a2b8; }
+        </style>
+    </head>
+    <body>
+        <h1>🎓 XSS (Cross-Site Scripting) Educational Demo</h1>
+
+        <div class="demo-section">
+            <h2>📚 What is XSS?</h2>
+            <p>XSS (Cross-Site Scripting)는 웹 애플리케이션에서 사용자 입력을 제대로 검증하지 않아 
+            악성 스크립트가 실행되는 보안 취약점입니다.</p>
+        </div>
+
+        <div class="demo-section">
+            <h2>🧪 Live Demo</h2>
+            <p>아래 버튼을 클릭하면 실제 XSS 공격이 어떻게 작동하는지 볼 수 있습니다:</p>
+
+            <button class="btn" onclick="demonstrateXSS()">🚨 XSS Demo: '대머리 빡빡이' Alert</button>
+            <button class="btn" onclick="showPageSource()">📄 Show Page Source</button>
+            <button class="btn" onclick="demonstrateAdvanced()">🔥 Advanced XSS Demo</button>
+        </div>
+
+        <div class="demo-section">
+            <h2>📋 Common XSS Payloads</h2>
+            <p>다음은 일반적인 XSS 페이로드들입니다 (교육 목적):</p>
+
+            <div class="payload">
+                &lt;script&gt;alert('대머리 빡빡이')&lt;/script&gt;
+                <span class="info">- 기본적인 스크립트 태그</span>
+            </div>
+
+            <div class="payload">
+                &lt;img src=x onerror="alert('대머리 빡빡이')"&gt;
+                <span class="info">- 이미지 오류 이벤트 핸들러</span>
+            </div>
+
+            <div class="payload">
+                &lt;svg onload="alert('대머리 빡빡이')"&gt;
+                <span class="info">- SVG 로드 이벤트</span>
+            </div>
+
+            <div class="payload">
+                &lt;input onfocus=alert('대머리 빡빡이') autofocus&gt;
+                <span class="info">- 입력 필드 포커스 이벤트</span>
+            </div>
+
+            <div class="payload">
+                javascript:alert('대머리 빡빡이')
+                <span class="info">- JavaScript 스키마</span>
+            </div>
+        </div>
+
+        <div class="demo-section">
+            <h2>🛡️ Protection Methods</h2>
+            <ul>
+                <li><strong>Input Validation:</strong> 사용자 입력 검증 및 필터링</li>
+                <li><strong>Output Encoding:</strong> 출력시 HTML 엔코딩</li>
+                <li><strong>CSP (Content Security Policy):</strong> 스크립트 실행 제한</li>
+                <li><strong>HTTPOnly Cookies:</strong> 쿠키 접근 제한</li>
+                <li><strong>X-XSS-Protection:</strong> 브라우저 XSS 필터 활성화</li>
+            </ul>
+        </div>
+
+        <div class="demo-section">
+            <h2>🎯 Test Results from http://3.34.181.145</h2>
+            <p class="success">✅ 테스트한 서버는 XSS 공격을 잘 차단하고 있습니다!</p>
+            <p>이는 <strong class="success">좋은 보안 구현</strong>을 의미합니다.</p>
+
+            <div id="test-results">
+                <h4>시도된 페이로드들:</h4>
+                <ul>
+                    <li>기본 script 태그: <span class="danger">차단됨</span></li>
+                    <li>이벤트 핸들러: <span class="danger">차단됨</span></li>
+                    <li>SVG 기반: <span class="danger">차단됨</span></li>
+                    <li>우회 시도: <span class="danger">차단됨</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="demo-output" style="margin-top: 20px; padding: 20px; background: #fff3cd; border-radius: 8px; display: none;">
+            <h3>🔍 Demo Output</h3>
+            <div id="output-content"></div>
+        </div>
+
+        <script>
+            function demonstrateXSS() {
+                // 안전한 데모 - 실제 공격이 아닌 교육용
+                alert('대머리 빡빡이');
+
+                document.getElementById('demo-output').style.display = 'block';
+                document.getElementById('output-content').innerHTML = `
+                    <p><strong>XSS Alert 실행 완료!</strong></p>
+                    <p>실제 공격에서는 이런 팝업이 나타나며, 더 악의적인 스크립트가 실행될 수 있습니다.</p>
+                    <p class="info">이것은 교육 목적의 안전한 데모입니다.</p>
+                `;
+            }
+
+            function showPageSource() {
+                const sourceWindow = window.open('', '_blank');
+                sourceWindow.document.write('<pre>' + 
+                    document.documentElement.outerHTML
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;') + 
+                    '</pre>');
+            }
+
+            function demonstrateAdvanced() {
+                const demoDiv = document.createElement('div');
+                demoDiv.innerHTML = '<p style="color: red; font-weight: bold;">🚨 Advanced XSS Demo: DOM Manipulation</p>';
+                demoDiv.innerHTML += '<p>쿠키: ' + document.cookie + '</p>';
+                demoDiv.innerHTML += '<p>현재 URL: ' + window.location.href + '</p>';
+                demoDiv.innerHTML += '<p>User Agent: ' + navigator.userAgent + '</p>';
+
+                document.getElementById('output-content').appendChild(demoDiv);
+                document.getElementById('demo-output').style.display = 'block';
+
+                alert('대머리 빡빡이 - Advanced Demo Complete!');
+            }
+        </script>
+
+        <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #666;">
+            <p>🎓 Educational XSS Demo - Security Research Tool v1.0</p>
+            <p>⚠️ 이 도구는 교육 목적으로만 사용되어야 합니다.</p>
+        </footer>
+    </body>
+    </html>

