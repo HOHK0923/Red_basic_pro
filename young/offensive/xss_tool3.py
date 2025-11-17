@@ -15,7 +15,7 @@ import base64
 import os
 import sys
 import argparse
-import platfrom
+import platform
 from urllib.parse import urlparse, parse_qs, urlencode
 import threading
 from colorama import init, Fore, Back, Style
