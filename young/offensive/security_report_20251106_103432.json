@@ -1,0 +1,78 @@
+{
+  "metadata": {
+    "target": "http://15.164.95.252",
+    "attacker_server": "http://13.158.67.78:5000",
+    "start_time": "2025-11-06 10:34:26",
+    "end_time": "2025-11-06 10:34:32",
+    "duration_seconds": 6,
+    "attacker_user_id": "1",
+    "tool_version": "1.0"
+  },
+  "summary": {
+    "total_vulnerabilities": 0,
+    "critical_count": 0,
+    "high_count": 0,
+    "vulnerability_breakdown": {
+      "sql_injection": 0,
+      "file_upload": 0,
+      "lfi": 0,
+      "xss": 0,
+      "csrf": 0
+    }
+  },
+  "vulnerabilities": {
+    "sql_injection": [],
+    "xss": [],
+    "csrf": [],
+    "lfi": [],
+    "file_upload": []
+  },
+  "attack_timeline": [
+    {
+      "timestamp": "2025-11-06 10:34:26",
+      "type": "SCAN_START",
+      "description": "Advanced security assessment started on http://15.164.95.252",
+      "severity": "INFO",
+      "details": {}
+    },
+    {
+      "timestamp": "2025-11-06 10:34:26",
+      "type": "WEAK_CREDENTIALS",
+      "description": "Logged in with default credentials: admin/admin123",
+      "severity": "HIGH",
+      "details": {
+        "username": "admin",
+        "password": "admin123"
+      }
+    },
+    {
+      "timestamp": "2025-11-06 10:34:32",
+      "type": "SETUP",
+      "description": "Generated advanced CSRF attack page with multiple bypass techniques",
+      "severity": "INFO",
+      "details": {
+        "filename": "advanced-fake-gift.html",
+        "techniques": [
+          "token_extraction",
+          "clickjacking",
+          "form_csrf",
+          "xhr_csrf",
+          "get_csrf",
+          "websocket_csrf"
+        ],
+        "attacker_id": "1"
+      }
+    },
+    {
+      "timestamp": "2025-11-06 10:34:32",
+      "type": "SCAN_COMPLETE",
+      "description": "Advanced assessment completed. 0 vulnerabilities found",
+      "severity": "INFO",
+      "details": {}
+    }
+  ],
+  "artifacts": {
+    "uploaded_webshell": null,
+    "fake_gift_page": "advanced-fake-gift.html"
+  }
+}
