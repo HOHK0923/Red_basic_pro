@@ -58,6 +58,67 @@ CLEAN_PROJECT/
 
 ## 🎯 공격 체인 흐름
 
+### 사전 준비: 스크립트 전송
+
+**목적**: 로컬에서 작성한 스크립트를 타겟 서버로 전송
+
+**방법 1: SCP를 사용한 파일 전송**
+
+```bash
+# 단일 파일 전송
+scp SILENT_DOWNLOAD.sh ec2-user@TARGET_IP:/home/ec2-user/
+
+# 여러 파일 동시 전송
+scp SILENT_DOWNLOAD.sh TOGGLE_SILENT.sh ec2-user@TARGET_IP:/home/ec2-user/
+
+# 디렉토리 전체 전송
+scp -r 02_Site_Defacement/ ec2-user@TARGET_IP:/home/ec2-user/
+
+# PEM 키를 사용한 전송 (AWS EC2)
+scp -i ~/.ssh/your-key.pem SILENT_DOWNLOAD.sh ec2-user@TARGET_IP:/home/ec2-user/
+```
+
+**방법 2: SCP 실행 예시 (대상 서버 주소 입력)**
+
+```bash
+# 1. 대상 서버 주소 설정
+TARGET_SERVER="3.35.22.248"  # 또는 도메인 (예: example.com)
+SSH_KEY="~/.ssh/your-key.pem"
+SSH_USER="ec2-user"
+
+# 2. Site Defacement 스크립트 전송
+cd /Users/hwangjunha/Desktop/Red_basic_local/H/CLEAN_PROJECT/02_Site_Defacement/
+scp -i $SSH_KEY SILENT_DOWNLOAD.sh TOGGLE_SILENT.sh $SSH_USER@$TARGET_SERVER:/home/$SSH_USER/
+
+# 3. 서버에 접속하여 실행 권한 부여
+ssh -i $SSH_KEY $SSH_USER@$TARGET_SERVER
+chmod +x SILENT_DOWNLOAD.sh TOGGLE_SILENT.sh
+
+# 4. 스크립트 실행
+sudo ./SILENT_DOWNLOAD.sh
+# 프롬프트: 🎯 대상 서버 주소 (IP 또는 도메인): 3.35.22.248
+```
+
+**방법 3: 원격 서버에서 직접 작성**
+
+```bash
+# SSH로 접속
+ssh -i ~/.ssh/your-key.pem ec2-user@TARGET_IP
+
+# vim/nano로 직접 작성
+sudo vim /home/ec2-user/SILENT_DOWNLOAD.sh
+
+# 실행 권한 부여
+chmod +x SILENT_DOWNLOAD.sh
+```
+
+**주의사항**:
+- 스크립트 실행 시 대상 서버 주소를 **동적으로 입력**받도록 개선됨
+- 매일 바뀌는 IP나 도메인에 대응 가능
+- 전송 전 서버 SSH 접근 권한 확인 필요
+
+---
+
 ### Phase 0: 타겟 서버에 취약점 생성
 
 **스크립트**: `01_AWS_IMDS_Attack/119_setup_aws_vuln.sh`

