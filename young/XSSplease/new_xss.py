@@ -237,14 +237,14 @@ class XSSScanner:
         <head>
             <title>XSS Vulnerability Report</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 20px; }
-                .header { background-color: #f0f0f0; padding: 20px; border-radius: 5px; }
-                .vulnerability { background-color: #ffe6e6; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 5px solid #ff0000; }
-                .info { background-color: #e6f3ff; padding: 10px; margin: 10px 0; border-radius: 5px; }
-                table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                th { background-color: #4CAF50; color: white; }
-                .payload { font-family: monospace; background-color: #f5f5f5; padding: 2px 4px; }
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                .header {{ background-color: #f0f0f0; padding: 20px; border-radius: 5px; }}
+                .vulnerability {{ background-color: #ffe6e6; padding: 15px; margin: 10px 0; border-radius: 5px; border-left: 5px solid #ff0000; }}
+                .info {{ background-color: #e6f3ff; padding: 10px; margin: 10px 0; border-radius: 5px; }}
+                table {{ border-collapse: collapse; width: 100%; margin-top: 20px; }}
+                th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
+                th {{ background-color: #4CAF50; color: white; }}
+                .payload {{ font-family: monospace; background-color: #f5f5f5; padding: 2px 4px; }}
             </style>
         </head>
         <body>
