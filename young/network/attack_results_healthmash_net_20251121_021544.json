@@ -1,0 +1,27 @@
+{
+    "attack_time": "2025-11-21T02:15:44.641031",
+    "target": {
+        "url": "http://healthmash.net",
+        "domain": "healthmash.net",
+        "ip": "54.180.32.176",
+        "port": 80,
+        "scheme": "http",
+        "path": "/"
+    },
+    "captured_data": {
+        "credentials": [],
+        "cookies": [],
+        "sessions": [],
+        "target_websites": [
+            {
+                "url": "http://healthmash.net",
+                "domain": "healthmash.net",
+                "ip": "54.180.32.176",
+                "port": 80,
+                "scheme": "http",
+                "path": "/"
+            }
+        ],
+        "hijack_tests": []
+    }
+}
