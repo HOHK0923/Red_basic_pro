@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>IDOR Exploit Report - http://healthmash.net</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        h1 { color: #d32f2f; }
+        .user { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .user-id { font-weight: bold; color: #1976d2; }
+        .email { color: #388e3c; }
+        .session { background: #fff3cd; padding: 5px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>🎯 IDOR Exploit Report</h1>
+    <p><strong>Target:</strong> http://healthmash.net</p>
+    <p><strong>Vulnerability:</strong> /profile.php?user_id=X</p>
+    <p><strong>Total Users:</strong> 50</p>
+    <hr>
+
+    <div class="user">
+        <span class="user-id">User 1</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=1" target="_blank">http://healthmash.net/profile.php?user_id=1</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 2</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=2" target="_blank">http://healthmash.net/profile.php?user_id=2</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 3</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=3" target="_blank">http://healthmash.net/profile.php?user_id=3</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 4</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=4" target="_blank">http://healthmash.net/profile.php?user_id=4</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 5</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=5" target="_blank">http://healthmash.net/profile.php?user_id=5</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 6</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=6" target="_blank">http://healthmash.net/profile.php?user_id=6</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 7</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=7" target="_blank">http://healthmash.net/profile.php?user_id=7</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 8</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=8" target="_blank">http://healthmash.net/profile.php?user_id=8</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 9</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=9" target="_blank">http://healthmash.net/profile.php?user_id=9</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 10</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=10" target="_blank">http://healthmash.net/profile.php?user_id=10</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 11</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=11" target="_blank">http://healthmash.net/profile.php?user_id=11</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 12</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=12" target="_blank">http://healthmash.net/profile.php?user_id=12</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 13</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=13" target="_blank">http://healthmash.net/profile.php?user_id=13</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 14</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=14" target="_blank">http://healthmash.net/profile.php?user_id=14</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 15</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=15" target="_blank">http://healthmash.net/profile.php?user_id=15</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 16</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=16" target="_blank">http://healthmash.net/profile.php?user_id=16</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 17</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=17" target="_blank">http://healthmash.net/profile.php?user_id=17</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 18</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=18" target="_blank">http://healthmash.net/profile.php?user_id=18</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 19</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=19" target="_blank">http://healthmash.net/profile.php?user_id=19</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 20</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=20" target="_blank">http://healthmash.net/profile.php?user_id=20</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 21</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=21" target="_blank">http://healthmash.net/profile.php?user_id=21</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 22</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=22" target="_blank">http://healthmash.net/profile.php?user_id=22</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 23</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=23" target="_blank">http://healthmash.net/profile.php?user_id=23</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 24</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=24" target="_blank">http://healthmash.net/profile.php?user_id=24</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 25</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=25" target="_blank">http://healthmash.net/profile.php?user_id=25</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 26</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=26" target="_blank">http://healthmash.net/profile.php?user_id=26</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 27</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=27" target="_blank">http://healthmash.net/profile.php?user_id=27</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 28</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=28" target="_blank">http://healthmash.net/profile.php?user_id=28</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 29</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=29" target="_blank">http://healthmash.net/profile.php?user_id=29</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 30</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=30" target="_blank">http://healthmash.net/profile.php?user_id=30</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 31</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=31" target="_blank">http://healthmash.net/profile.php?user_id=31</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 32</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=32" target="_blank">http://healthmash.net/profile.php?user_id=32</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 33</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=33" target="_blank">http://healthmash.net/profile.php?user_id=33</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 34</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=34" target="_blank">http://healthmash.net/profile.php?user_id=34</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 35</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=35" target="_blank">http://healthmash.net/profile.php?user_id=35</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 36</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=36" target="_blank">http://healthmash.net/profile.php?user_id=36</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 37</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=37" target="_blank">http://healthmash.net/profile.php?user_id=37</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 38</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=38" target="_blank">http://healthmash.net/profile.php?user_id=38</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 39</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=39" target="_blank">http://healthmash.net/profile.php?user_id=39</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 40</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=40" target="_blank">http://healthmash.net/profile.php?user_id=40</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 41</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=41" target="_blank">http://healthmash.net/profile.php?user_id=41</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 42</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=42" target="_blank">http://healthmash.net/profile.php?user_id=42</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 43</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=43" target="_blank">http://healthmash.net/profile.php?user_id=43</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 44</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=44" target="_blank">http://healthmash.net/profile.php?user_id=44</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 45</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=45" target="_blank">http://healthmash.net/profile.php?user_id=45</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 46</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=46" target="_blank">http://healthmash.net/profile.php?user_id=46</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 47</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=47" target="_blank">http://healthmash.net/profile.php?user_id=47</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 48</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=48" target="_blank">http://healthmash.net/profile.php?user_id=48</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 49</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=49" target="_blank">http://healthmash.net/profile.php?user_id=49</a></small>
+    </div>
+
+    <div class="user">
+        <span class="user-id">User 50</span><br>
+        <span class="email">📧 alice@example.com</span><br>
+        👤 Username: (변경 불가)<br>
+        📝 Name: 프로필 설정<br>
+        <small>URL: <a href="http://healthmash.net/profile.php?user_id=50" target="_blank">http://healthmash.net/profile.php?user_id=50</a></small>
+    </div>
+
+</body>
+</html>

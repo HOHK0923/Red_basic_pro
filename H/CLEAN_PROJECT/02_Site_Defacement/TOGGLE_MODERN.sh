@@ -4,7 +4,7 @@
 # 정상 ↔ 해킹 (완전 자동 다운로드)
 ###############################################################################
 
-WWW="/var/www/html/www"
+WWW="/var/www/html/public"
 BACKUP="/tmp/index_REAL.php"
 
 # 서버에서 직접 실행하므로 IP 자동 감지
@@ -27,7 +27,7 @@ echo "✅ 대상 서버: $TARGET_SERVER (자동 감지)"
 echo ""
 
 # 현재 상태 확인
-if grep -q "SYSTEM COMPROMISED" "$WWW/index.php" 2>/dev/null; then
+if grep -q "BLACKLOCK RANSOMWARE" "$WWW/index.php" 2>/dev/null; then
     # 해킹 → 정상
     echo "🔄 정상 사이트로 복구 중..."
     if [ -f "$BACKUP" ]; then
